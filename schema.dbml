@@ -1,0 +1,256 @@
+Enum amino_acid_enum {
+  A [note: 'A/Ala, Alanine']
+  C [note: 'C/Cys, Cysteine']
+  D [note: 'D/Asp, Aspartic acid']
+  E [note: 'E/Glu, Glutamic acid']
+  F [note: 'F/Phe, Phenylalanine']
+  G [note: 'G/Gly, Glutamine']
+  H [note: 'H/His, Histidine']
+  I [note: 'I/Ile, Isoleucine']
+  K [note: 'K/Lys, Lysine']
+  L [note: 'L/Leu, Leucine']
+  M [note: 'M/Met, Methionine']
+  N [note: 'N/Asn, Asparagine']
+  P [note: 'P/Pro, Proline']
+  Q [note: 'Q/Gln, Glutamine']
+  R [note: 'R/Arg, Arginine']
+  S [note: 'S/Ser, Serine']
+  T [note: 'T/Thr, Threonine']
+  V [note: 'V/Val, Valine']
+  W [note: 'W/Trp, Tryptophan']
+  Y [note: 'Y/Tyr, Tyrosine']
+  X [note: 'Out-frame deletion']
+  stop [note: 'Stop codon']
+  del [note: 'Deletion']
+  ins [note: 'Insertion']
+}
+
+Enum numeric_cmp_enum {
+  "=" [note: 'Equal']
+  ">" [note: 'More than']
+  "<" [note: 'Less than']
+  "~" [note: 'About']
+}
+
+Table references as R {
+  ref_name varchar [
+    pk,
+    note: 'Manually assigned name (RefID, RefName) for this reference, usually formed by the surname of first author, two digits year and an optional serial letter for distinguishing studies published in the same year'
+  ]
+  doi varchar [
+    unique,
+    note: 'Digital Object Identifier (DOI) of a reference'
+  ]
+  url varchar [
+    unique,
+    note: 'Web address of a reference; can be specified when DOI is not available'
+  ]
+  first_author varchar [
+    not null,
+    note: 'First author name. Should formed by the surname, a comma and the initial of given names (no dots)'
+  ]
+  year int [
+    not null,
+    note: 'Year of when this reference was published'
+  ]
+  date_added date [not null]
+}
+
+Table treatments as Rx {
+  ref_name varchar [ref: > R.ref_name]
+  rx_name varchar [note: 'Name of the treatment']
+  
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+  //treatment_type varchar [
+  //  not null,
+  //  ref: > RxType.treatment_type,
+  //  note: 'Type of the treatment'
+  //]
+}
+
+//Table lu_treatment_types as RxType {
+//  treatment_type varchar [
+//    pk,
+//    note: 'Type of a treatment'
+//  ]
+//}
+
+Table rx_antibodies as RxMAb {
+  ref_name varchar
+  rx_name varchar
+  ab_name varchar [ref: > MAb.ab_name]
+  
+  indexes {
+    (ref_name, rx_name, ab_name) [pk]
+  }
+}
+
+Table rx_conv_plasma as RxCP {
+  ref_name varchar
+  rx_name varchar 
+  todo_more_cp_definition varchar
+  
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+}
+
+
+
+Table rx_immu_plasma as RxIP {
+  ref_name varchar
+  rx_name varchar
+  todo_more_ip_definition varchar
+  
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+}
+
+Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxCP.(ref_name, rx_name) - Rx.(ref_name, rx_name)
+Ref: RxIP.(ref_name, rx_name) - Rx.(ref_name, rx_name)
+
+Table antibodies as MAb {
+  ab_name varchar [
+    pk,
+    note: 'Name of the antibody'
+  ]
+  todo_more_mab_definition varchar
+  date_added date [not null]
+}
+
+Table antibody_synonyms as MAbSyn {
+  ab_name varchar [ref: > MAb.ab_name]
+  synonym varchar [pk]
+  
+  indexes {
+    ab_name
+  }
+}
+
+Table virus_strains as S {
+  
+  strain_name varchar [
+    pk,
+    note: 'Strain name'
+  ]
+  parent_strain_name varchar [
+    ref: > S.strain_name,
+    note: 'Parent strain name'
+  ]
+  site_directed boolean [
+    not null,
+    note: 'Is this strain created by site-directed mutagenesis?'
+  ]
+  gisaid_id int [
+    note: 'GISAID isolate accession ID without the common initial "EPI_ISL_"'
+  ]
+  genbank_accn varchar [
+    note: 'Genbank accession number'
+  ]
+  
+  indexes {
+    gisaid_id
+    genbank_accn
+  }
+}
+
+Table strain_mutations as M {
+
+  strain_name varchar [
+    ref: > S.strain_name,
+    note: 'Strain name'
+  ]
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  
+  indexes {
+    (strain_name, gene, position, amino_acid) [pk]
+  }
+
+}
+
+Enum resistance_level_enum {
+  "susceptible"
+  "partial-resistance"
+  "resistance"
+}
+
+Table susc_results as Susc {
+  ref_name varchar
+  rx_name varchar
+  strain_name varchar [ref: > S.strain_name]
+  ordinal_number int [
+    default: 1,
+    note: 'Ordinal number for the same ref/Rx/strain when multiple results are presented'
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+  fold_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  fold numeric(10,1) [
+    note: 'Fold change comparing to wild type'
+  ]
+  resistance_level resistance_level_enum [
+    note: 'Qualitative result when quantitative result (fold change) is not available'
+  ]
+  cumulative_count int [
+    default: 1,
+    note: 'Cumulative count of matching results (when multiple)'
+  ]
+  indexes {
+    (rx_name, strain_name, ref_name, ordinal_number) [pk]
+  }
+}
+
+Table invitro_selection_results as Vitro {
+  ref_name varchar
+  rx_name varchar
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+
+  indexes {
+    (ref_name, rx_name, gene, position, amino_acid) [pk]
+  }
+}
+
+Table invivo_selection_results as Vivo {
+  ref_name varchar
+  rx_name varchar
+  strain_name varchar [ref: > S.strain_name]
+  patient_id varchar
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+
+  indexes {
+    (ref_name, rx_name, strain_name, patient_id) [pk]
+  }
+}
+
+Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
