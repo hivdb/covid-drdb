@@ -241,13 +241,14 @@ Table invivo_selection_results as Vivo {
   ref_name varchar
   rx_name varchar
   strain_name varchar [ref: > S.strain_name]
-  patient_id varchar
+  patient varchar
+  sample varchar
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
 
   indexes {
-    (ref_name, rx_name, strain_name, patient_id) [pk]
+    (ref_name, rx_name, strain_name, patient, sample) [pk]
   }
 }
 
