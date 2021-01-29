@@ -1,3 +1,5 @@
+// https://dbdiagram.io/d/600896e480d742080a373304
+
 Enum amino_acid_enum {
   A [note: 'A/Ala, Alanine']
   C [note: 'C/Cys, Cysteine']
