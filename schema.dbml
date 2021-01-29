@@ -89,7 +89,8 @@ Table rx_antibodies as RxMAb {
 
 Table rx_conv_plasma as RxCP {
   ref_name varchar
-  rx_name varchar 
+  rx_name varchar
+  cumulative_group varchar [note: "Cumulative group for cumulating results"]
   todo_more_cp_definition varchar
   
   indexes {
@@ -102,6 +103,8 @@ Table rx_conv_plasma as RxCP {
 Table rx_immu_plasma as RxIP {
   ref_name varchar
   rx_name varchar
+  vaccine_name varchar // TODO: add vaccine table
+  cumulative_group varchar [note: "Cumulative group for cumulating results"]
   todo_more_ip_definition varchar
   
   indexes {
