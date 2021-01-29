@@ -214,6 +214,7 @@ Table susc_results as Susc {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
+  date_added date [not null]
   indexes {
     (rx_name, strain_name, ref_name, ordinal_number) [pk]
   }
@@ -234,6 +235,7 @@ Table invitro_selection_results as Vitro {
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
+  date_added date [not null]
 
   indexes {
     (ref_name, rx_name, gene, position, amino_acid) [pk]
@@ -249,6 +251,7 @@ Table invivo_selection_results as Vivo {
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
+  date_added date [not null]
 
   indexes {
     (ref_name, rx_name, strain_name, patient, sample) [pk]
