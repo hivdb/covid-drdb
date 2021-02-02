@@ -34,7 +34,7 @@ Enum numeric_cmp_enum {
   "~" [note: 'About']
 }
 
-Table references as R {
+Table articles as R {
   ref_name varchar [
     pk,
     note: 'Manually assigned name (RefID, RefName) for this reference, usually formed by the surname of first author, two digits year and an optional serial letter for distinguishing studies published in the same year'
@@ -56,6 +56,7 @@ Table references as R {
     note: 'Year of when this reference was published'
   ]
   date_added date [not null]
+  date_updated date
 }
 
 Table treatments as Rx {
@@ -93,7 +94,7 @@ Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
-  todo_more_cp_definition varchar
+  // todo_more_cp_definition varchar
   
   indexes {
     (ref_name, rx_name) [pk]
@@ -107,7 +108,7 @@ Table rx_immu_plasma as RxIP {
   rx_name varchar
   vaccine_name varchar // TODO: add vaccine table
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
-  todo_more_ip_definition varchar
+  // todo_more_ip_definition varchar
   
   indexes {
     (ref_name, rx_name) [pk]
@@ -115,15 +116,15 @@ Table rx_immu_plasma as RxIP {
 }
 
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxCP.(ref_name, rx_name) - Rx.(ref_name, rx_name)
-Ref: RxIP.(ref_name, rx_name) - Rx.(ref_name, rx_name)
+Ref: RxCP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxIP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table antibodies as MAb {
   ab_name varchar [
     pk,
     note: 'Name of the antibody'
   ]
-  todo_more_mab_definition varchar
+  // todo_more_mab_definition varchar
   date_added date [not null]
 }
 
