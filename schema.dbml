@@ -124,6 +124,8 @@ Table antibodies as MAb {
     pk,
     note: 'Name of the antibody'
   ]
+  pdb_id varchar
+  availability varchar
   // todo_more_mab_definition varchar
   date_added date [not null]
 }
