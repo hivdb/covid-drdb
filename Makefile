@@ -6,6 +6,7 @@ export-sqlite:
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
 
 devdb:
+	@./scripts/export-sqls.sh
 	$(eval volumes = $(shell docker inspect -f '{{ range .Mounts }}{{ .Name }}{{ end }}' chiro-devdb))
 	@mkdir -p local/sqls
 	@docker rm -f covid-drdb-devdb 2>/dev/null || true
