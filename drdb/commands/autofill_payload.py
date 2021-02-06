@@ -25,6 +25,8 @@ def autofill_suscs(tables_dir):
                 row['cumulative_count'] = 1
             if not row.get('resistance_level'):
                 row['resistance_level'] = None
+            if not row.get('assay'):
+                row['assay'] = None
         click.echo('Write to {}'.format(susc))
         dump_csv(
             susc,
@@ -39,6 +41,7 @@ def autofill_suscs(tables_dir):
                 'fold',
                 'resistance_level',
                 'cumulative_count',
+                'assay',
                 'date_added'
             ],
             BOM=True

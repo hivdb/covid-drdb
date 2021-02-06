@@ -219,6 +219,7 @@ Table susc_results as Susc {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
+  assay varchar
   date_added date [not null]
   indexes {
     (rx_name, strain_name, ref_name, ordinal_number) [pk]
