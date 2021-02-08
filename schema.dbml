@@ -101,8 +101,6 @@ Table rx_conv_plasma as RxCP {
   }
 }
 
-
-
 Table rx_immu_plasma as RxIP {
   ref_name varchar
   rx_name varchar
@@ -125,6 +123,7 @@ Table antibodies as MAb {
     note: 'Name of the antibody'
   ]
   pdb_id varchar
+  abbreviation_name varchar
   availability varchar
   // todo_more_mab_definition varchar
   date_added date [not null]

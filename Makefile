@@ -2,6 +2,7 @@ autofill:
 	pipenv run python -m drdb.entry autofill-payload payload/
 
 export-sqlite:
+	@rm local/covid-drdb-$(shell date +"%Y-%m-%d").db 2>/dev/null || true
 	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d").db --all
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
 
