@@ -30,6 +30,7 @@ echo "Written to $TARGET_DIR/01_schema.sql"
 copy_csv payload/tables/articles.csv articles > $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibodies.csv antibodies >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/antibody_targets.csv antibody_targets >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibody_synonyms.csv antibody_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/virus_strains.csv virus_strains >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/strain_mutations.csv strain_mutations >> $TARGET_DIR/02_data_tables.sql

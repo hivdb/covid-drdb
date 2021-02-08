@@ -129,6 +129,16 @@ Table antibodies as MAb {
   date_added date [not null]
 }
 
+Table antibody_targets as MAbT {
+  ab_name varchar [ref: > MAb.ab_name]
+  target varchar
+  source varchar
+  
+  indexes {
+    (ab_name, target, source)
+  }
+}
+
 Table antibody_synonyms as MAbSyn {
   ab_name varchar [ref: > MAb.ab_name]
   synonym varchar [pk]
