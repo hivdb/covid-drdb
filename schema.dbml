@@ -62,7 +62,7 @@ Table articles as R {
 Table treatments as Rx {
   ref_name varchar [ref: > R.ref_name]
   rx_name varchar [note: 'Name of the treatment']
-  
+
   indexes {
     (ref_name, rx_name) [pk]
   }
@@ -84,7 +84,7 @@ Table rx_antibodies as RxMAb {
   ref_name varchar
   rx_name varchar
   ab_name varchar [ref: > MAb.ab_name]
-  
+
   indexes {
     (ref_name, rx_name, ab_name) [pk]
   }
@@ -95,7 +95,7 @@ Table rx_conv_plasma as RxCP {
   rx_name varchar
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_cp_definition varchar
-  
+
   indexes {
     (ref_name, rx_name) [pk]
   }
@@ -107,7 +107,7 @@ Table rx_immu_plasma as RxIP {
   vaccine_name varchar // TODO: add vaccine table
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_ip_definition varchar
-  
+
   indexes {
     (ref_name, rx_name) [pk]
   }
@@ -132,24 +132,25 @@ Table antibodies as MAb {
 Table antibody_targets as MAbT {
   ab_name varchar [ref: > MAb.ab_name]
   target varchar
+  class varchar
   source varchar
-  
+
   indexes {
-    (ab_name, target, source)
+    (ab_name, target, class, source)
   }
 }
 
 Table antibody_synonyms as MAbSyn {
   ab_name varchar [ref: > MAb.ab_name]
   synonym varchar [pk]
-  
+
   indexes {
     ab_name
   }
 }
 
 Table virus_strains as S {
-  
+
   strain_name varchar [
     pk,
     note: 'Strain name'
@@ -168,7 +169,7 @@ Table virus_strains as S {
   genbank_accn varchar [
     note: 'Genbank accession number'
   ]
-  
+
   indexes {
     gisaid_id
     genbank_accn
@@ -190,7 +191,7 @@ Table strain_mutations as M {
   amino_acid amino_acid_enum [
     note: 'Amino acid of this mutation'
   ]
-  
+
   indexes {
     (strain_name, gene, position, amino_acid) [pk]
   }
