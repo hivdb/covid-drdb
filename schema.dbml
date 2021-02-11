@@ -60,7 +60,7 @@ Table articles as R {
 }
 
 Table article_notes as AN {
-  ref_name varchar [ref: > MAb.ab_name]
+  ref_name varchar [ref: > R.ref_name]
   note varchar
 }
 
