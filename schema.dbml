@@ -59,6 +59,11 @@ Table articles as R {
   date_updated date
 }
 
+Table article_notes as AN {
+  ref_name varchar [ref: > MAb.ab_name]
+  note varchar
+}
+
 Table treatments as Rx {
   ref_name varchar [ref: > R.ref_name]
   rx_name varchar [note: 'Name of the treatment']
