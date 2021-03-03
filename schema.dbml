@@ -206,7 +206,7 @@ Table strain_mutations as M {
 Enum resistance_level_enum {
   "susceptible"
   "partial-resistance"
-  "resistance"
+  "resistant"
 }
 
 Table susc_results as Susc {
