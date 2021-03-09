@@ -212,7 +212,7 @@ Enum resistance_level_enum {
 
 Enum ineffective_enum {
   "control"
-  "test"
+  "experimental"
   "both"
 }
 
@@ -239,7 +239,7 @@ Table susc_results as Susc {
     note: 'Qualitative result when quantitative result (fold change) is not available'
   ]
   ineffective ineffective_enum [
-    note: 'Rx has no effect on control strain or test strain'
+    note: 'Rx has no effect on control strain or experimental strain'
   ]
   cumulative_count int [
     default: 1,
