@@ -98,6 +98,7 @@ Table rx_antibodies as RxMAb {
 Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
+  variant varchar
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_cp_definition varchar
 
@@ -209,9 +210,16 @@ Enum resistance_level_enum {
   "resistant"
 }
 
+Enum ineffective_enum {
+  "control"
+  "test"
+  "both"
+}
+
 Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
+  control_strain_name varchar [ref: > S.strain_name]
   strain_name varchar [ref: > S.strain_name]
   ordinal_number int [
     default: 1,
@@ -230,6 +238,9 @@ Table susc_results as Susc {
   resistance_level resistance_level_enum [
     note: 'Qualitative result when quantitative result (fold change) is not available'
   ]
+  ineffective ineffective_enum [
+    note: 'Rx has no effect on control strain or test strain'
+  ]
   cumulative_count int [
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
@@ -237,7 +248,7 @@ Table susc_results as Susc {
   assay varchar
   date_added date [not null]
   indexes {
-    (rx_name, strain_name, ref_name, ordinal_number) [pk]
+    (rx_name, control_strain_name, strain_name, ref_name, ordinal_number) [pk]
   }
 }
 
