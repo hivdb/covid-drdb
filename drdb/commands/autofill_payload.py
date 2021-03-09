@@ -27,6 +27,10 @@ def autofill_suscs(tables_dir):
                 row['resistance_level'] = None
             if not row.get('assay'):
                 row['assay'] = None
+            if not row.get('control_strain_name'):
+                row['control_strain_name'] = 'Control'
+            if not row.get('ineffective'):
+                row['ineffective'] = None
         click.echo('Write to {}'.format(susc))
         dump_csv(
             susc,
@@ -34,12 +38,14 @@ def autofill_suscs(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
+                'control_strain_name',
                 'strain_name',
                 'ordinal_number',
                 'section',
                 'fold_cmp',
                 'fold',
                 'resistance_level',
+                'ineffective',
                 'cumulative_count',
                 'assay',
                 'date_added'
@@ -115,6 +121,30 @@ def autofill_rx(tables_dir):
     )
 
 
+def autofill_rx_conv_plasma(tables_dir):
+    rxcps = tables_dir / 'rx_conv_plasma'
+    for rxcp in rxcps.iterdir():
+        if rxcp.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(rxcp))
+            continue
+        rows = load_csv(rxcp)
+        for row in rows:
+            if not row.get('variant'):
+                row['variant'] = 'Generic'
+        click.echo('Write to {}'.format(rxcp))
+        dump_csv(
+            rxcp,
+            records=rows,
+            headers=[
+                'ref_name',
+                'rx_name',
+                'variant',
+                'cumulative_group',
+            ],
+            BOM=True
+        )
+
+
 @cli.command()
 @click.argument(
     'payload_dir',
@@ -131,3 +161,7 @@ def autofill_payload(payload_dir):
     autofill_suscs(tables_dir)
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
+    autofill_rx_conv_plasma(tables_dir)
+
+    tables_dir = payload_dir / 'excluded'
+    autofill_suscs(tables_dir)
