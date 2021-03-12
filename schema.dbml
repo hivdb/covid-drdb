@@ -175,6 +175,10 @@ Table virus_strains as S {
   genbank_accn varchar [
     note: 'Genbank accession number'
   ]
+  expandable boolean [
+    not null,
+    note: 'Expand spike mutations or not'
+  ]
 
   indexes {
     gisaid_id
