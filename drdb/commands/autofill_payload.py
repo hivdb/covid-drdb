@@ -106,11 +106,12 @@ def autofill_rx(tables_dir):
     rxmabs = load_multiple_csvs(tables_dir / 'rx_antibodies')
     rxcps = load_multiple_csvs(tables_dir / 'rx_conv_plasma')
     rxips = load_multiple_csvs(tables_dir / 'rx_immu_plasma')
+    invitro = load_multiple_csvs(tables_dir / 'invitro_selection_results')
     naive_rx = load_csv(tables_dir / 'naive-rx.csv')
     treatments = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxcps + rxips + naive_rx
+        for rx in rxmabs + rxcps + rxips + naive_rx + invitro
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
