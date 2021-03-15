@@ -131,7 +131,7 @@ def autofill_rx_conv_plasma(tables_dir):
         rows = load_csv(rxcp)
         for row in rows:
             if not row.get('variant'):
-                row['variant'] = 'Generic'
+                row['variant'] = 'Unknown'
         click.echo('Write to {}'.format(rxcp))
         dump_csv(
             rxcp,
