@@ -155,19 +155,19 @@ Table antibody_synonyms as MAbSyn {
   }
 }
 
-Table virus_strains as S {
+Table virus_variants as S {
 
-  strain_name varchar [
+  variant_name varchar [
     pk,
-    note: 'Strain name'
+    note: 'Variant name'
   ]
-  parent_strain_name varchar [
-    ref: > S.strain_name,
-    note: 'Parent strain name'
+  parent_variant_name varchar [
+    ref: > S.variant_name,
+    note: 'Parent variant name'
   ]
   site_directed boolean [
     not null,
-    note: 'Is this strain created by site-directed mutagenesis?'
+    note: 'Is this variant created by site-directed mutagenesis?'
   ]
   gisaid_id int [
     note: 'GISAID isolate accession ID without the common initial "EPI_ISL_"'
@@ -186,11 +186,11 @@ Table virus_strains as S {
   }
 }
 
-Table strain_mutations as M {
+Table variant_mutations as M {
 
-  strain_name varchar [
-    ref: > S.strain_name,
-    note: 'Strain name'
+  variant_name varchar [
+    ref: > S.variant_name,
+    note: 'Variant name'
   ]
   gene varchar [
     note: 'Mutation gene'
@@ -203,7 +203,7 @@ Table strain_mutations as M {
   ]
 
   indexes {
-    (strain_name, gene, position, amino_acid) [pk]
+    (variant_name, gene, position, amino_acid) [pk]
   }
 
 }
@@ -223,11 +223,11 @@ Enum ineffective_enum {
 Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
-  control_strain_name varchar [ref: > S.strain_name]
-  strain_name varchar [ref: > S.strain_name]
+  control_variant_name varchar [ref: > S.variant_name]
+  variant_name varchar [ref: > S.variant_name]
   ordinal_number int [
     default: 1,
-    note: 'Ordinal number for the same ref/Rx/strain when multiple results are presented'
+    note: 'Ordinal number for the same ref/Rx/variant when multiple results are presented'
   ]
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
@@ -243,7 +243,7 @@ Table susc_results as Susc {
     note: 'Qualitative result when quantitative result (fold change) is not available'
   ]
   ineffective ineffective_enum [
-    note: 'Rx has no effect on control strain or experimental strain'
+    note: 'Rx has no effect on control variant or experimental variant'
   ]
   cumulative_count int [
     default: 1,
@@ -252,7 +252,7 @@ Table susc_results as Susc {
   assay varchar
   date_added date [not null]
   indexes {
-    (rx_name, control_strain_name, strain_name, ref_name, ordinal_number) [pk]
+    (rx_name, control_variant_name, variant_name, ref_name, ordinal_number) [pk]
   }
 }
 
@@ -281,7 +281,7 @@ Table invitro_selection_results as Vitro {
 Table invivo_selection_results as Vivo {
   ref_name varchar
   rx_name varchar
-  strain_name varchar [ref: > S.strain_name]
+  variant_name varchar [ref: > S.variant_name]
   patient varchar
   sample varchar
   section varchar [
@@ -290,7 +290,7 @@ Table invivo_selection_results as Vivo {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, strain_name, patient, sample) [pk]
+    (ref_name, rx_name, variant_name, patient, sample) [pk]
   }
 }
 
