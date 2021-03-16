@@ -130,8 +130,8 @@ def autofill_rx_conv_plasma(tables_dir):
             continue
         rows = load_csv(rxcp)
         for row in rows:
-            if not row.get('variant'):
-                row['variant'] = 'Unknown'
+            if not row.get('infection'):
+                row['infection'] = 'Unknown'
         click.echo('Write to {}'.format(rxcp))
         dump_csv(
             rxcp,
@@ -139,7 +139,7 @@ def autofill_rx_conv_plasma(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
-                'variant',
+                'infection',
                 'cumulative_group',
             ],
             BOM=True

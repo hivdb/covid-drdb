@@ -98,7 +98,7 @@ Table rx_antibodies as RxMAb {
 Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
-  variant varchar
+  infection varchar
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_cp_definition varchar
 
