@@ -93,6 +93,10 @@ def autofill_invivos(tables_dir):
                 row['dosage'] = 'None'
             if not row['rx_name']:
                 row['rx_name'] = 'None'
+            if not row['position']:
+                row['position'] = None
+            if not row['amino_acid']:
+                row['amino_acid'] = None
 
         click.echo('Write to {}'.format(invivo))
         dump_csv(
@@ -104,7 +108,9 @@ def autofill_invivos(tables_dir):
                 'dosage',
                 'host',
                 'infection_name',
-                'variant_name',
+                'gene',
+                'position',
+                'amino_acid',
                 'patient',
                 'sampling',
                 'num_patients',

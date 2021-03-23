@@ -284,7 +284,15 @@ Table invivo_selection_results as Vivo {
   dosage varchar
   host varchar
   infection_name varchar [ref: > S.variant_name]
-  variant_name varchar [ref: > S.variant_name]
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
   patient varchar
   sampling varchar
   num_patients int
