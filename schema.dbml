@@ -281,16 +281,22 @@ Table invitro_selection_results as Vitro {
 Table invivo_selection_results as Vivo {
   ref_name varchar
   rx_name varchar
+  dosage varchar
+  host varchar
+  infection_name varchar [ref: > S.variant_name]
   variant_name varchar [ref: > S.variant_name]
   patient varchar
-  sample varchar
+  sampling varchar
+  num_patients int
+  num_patients_with_mut int
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
+  note varchar
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, variant_name, patient, sample) [pk]
+    (ref_name, rx_name, dosage, patient, sampling)
   }
 }
 

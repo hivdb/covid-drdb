@@ -85,6 +85,15 @@ def autofill_invivos(tables_dir):
             click.echo('Skip {}'.format(invivo))
             continue
         rows = load_csv(invivo)
+
+        for row in rows:
+            if not row['infection_name']:
+                row['infection_name'] = 'Unknown'
+            if not row['dosage']:
+                row['dosage'] = 'None'
+            if not row['rx_name']:
+                row['rx_name'] = 'None'
+
         click.echo('Write to {}'.format(invivo))
         dump_csv(
             invivo,
@@ -92,11 +101,17 @@ def autofill_invivos(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
+                'dosage',
+                'host',
+                'infection_name',
                 'variant_name',
                 'patient',
-                'sample',
+                'sampling',
+                'num_patients',
+                'num_patients_with_mut',
                 'section',
-                'date_added'
+                'note',
+                'date_added',
             ],
             BOM=True
         )
