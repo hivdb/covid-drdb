@@ -87,8 +87,6 @@ def autofill_invivos(tables_dir):
         rows = load_csv(invivo)
 
         for row in rows:
-            if not row['infection_name']:
-                row['infection_name'] = 'Unknown'
             if not row['dosage']:
                 row['dosage'] = 'None'
             if not row['rx_name']:
@@ -150,9 +148,6 @@ def autofill_rx_conv_plasma(tables_dir):
             click.echo('Skip {}'.format(rxcp))
             continue
         rows = load_csv(rxcp)
-        for row in rows:
-            if not row.get('infection'):
-                row['infection'] = 'Unknown'
         click.echo('Write to {}'.format(rxcp))
         dump_csv(
             rxcp,
