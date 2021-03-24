@@ -5,6 +5,9 @@ export-sqlite:
 	@rm local/covid-drdb-$(shell date +"%Y-%m-%d").db 2>/dev/null || true
 	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d").db --all
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
+	@rm local/covid-drdb-latest.db
+	@cd local;ln -s covid-drdb-$(shell date +"%Y-%m-%d").db covid-drdb-latest.db;cd ..
+	@echo "Link latest.db to local/covid-drdb-$(shell date +"%Y-%m-%d").db"
 
 devdb:
 	@./scripts/export-sqls.sh
