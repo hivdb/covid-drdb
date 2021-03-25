@@ -162,6 +162,54 @@ def autofill_rx_conv_plasma(tables_dir):
         )
 
 
+def autofill_dms(tables_dir):
+    ace2_binding = tables_dir / 'dms' / 'dms_ace2_binding.csv'
+    rows = load_csv(ace2_binding)
+
+    for row in rows:
+        if not row['ace2_binding']:
+            row['ace2_binding'] = None
+        if not row['expression']:
+            row['expression'] = None
+
+    click.echo('Write to {}'.format(ace2_binding))
+    dump_csv(
+        ace2_binding,
+        records=rows,
+        headers=[
+            'gene',
+            'position',
+            'amino_acid',
+            'ace2_binding',
+            'expression',
+            'ace2_contact',
+        ],
+        BOM=True,
+    )
+
+    escape_score = tables_dir / 'dms' / 'dms_escape_score.csv'
+    rows = load_csv(escape_score)
+
+    for row in rows:
+        if not row['escape_score']:
+            row['escape_score'] = None
+
+    click.echo('Write to {}'.format(escape_score))
+    dump_csv(
+        escape_score,
+        records=rows,
+        headers=[
+            'gene',
+            'position',
+            'amino_acid',
+            'rx_name',
+            'escape_score',
+        ],
+        BOM=True,
+    )
+
+
+
 @cli.command()
 @click.argument(
     'payload_dir',
@@ -179,6 +227,8 @@ def autofill_payload(payload_dir):
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_conv_plasma(tables_dir)
+
+    autofill_dms(tables_dir)
 
     tables_dir = payload_dir / 'excluded'
     autofill_suscs(tables_dir)

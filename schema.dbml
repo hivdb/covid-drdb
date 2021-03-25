@@ -311,3 +311,66 @@ Table invivo_selection_results as Vivo {
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+
+
+Table ref_amino_acid as RefAA {
+  gene varchar [
+    note: 'Gene'
+  ]
+  position int [
+    note: 'Position'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid'
+  ]
+
+  indexes {
+    (gene, position, amino_acid) [pk]
+  }
+}
+
+Table dms_ace2_binding as Binding {
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  ace2_binding numeric(10,2)
+  expression numeric(10,2)
+  ace2_contact boolean
+
+  indexes {
+    (gene, position, amino_acid) [pk]
+  }
+}
+
+Table dms_escape_score as EScore {
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  rx_name varchar
+  escape_score numeric(10,3)
+
+  indexes {
+    (gene, position, amino_acid, rx_name) [pk]
+  }
+}
+
+Table dms_rx as DmsRx {
+  rx_name varchar
+  ab_name varchar [ref: > MAb.ab_name]
+
+  indexes {
+    (rx_name, ab_name) [pk]
+  }
+}
