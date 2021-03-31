@@ -165,6 +165,9 @@ Table virus_variants as S {
     ref: > S.variant_name,
     note: 'Parent variant name'
   ]
+  display_name varchar [
+    note: 'Variant name for display'
+  ]
   site_directed boolean [
     not null,
     note: 'Is this variant created by site-directed mutagenesis?'
@@ -186,6 +189,67 @@ Table virus_variants as S {
   }
 }
 
+Table genes as G {
+  gene varchar [
+    pk,
+    note: 'Canonical gene name (compatible with Sierra-SARS2)'
+  ]
+  display_name varchar [
+    note: 'Display gene name'
+  ]
+}
+
+Table gene_synonyms as GS {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Gene name'
+  ]
+  synonym_name varchar [
+    note: 'Gene synonym name'
+  ]
+  
+  indexes {
+    (gene, synonym_name) [pk]
+  }
+}
+
+Table key_positions as KP {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation (or position start)'
+  ]
+  position_end int [
+    note: 'Optional key position range end (e.g. S:69-70del)'
+  ]
+
+  indexes {
+    (gene, position) [pk]
+  }
+}
+
+Table key_mutations as KM {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  position_end int [
+    note: 'Optional key position range end (e.g. S:69-70del)'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+
+  indexes {
+    (gene, position, amino_acid) [pk]
+  }
+}
+
 Table variant_mutations as M {
 
   variant_name varchar [
@@ -193,6 +257,7 @@ Table variant_mutations as M {
     note: 'Variant name'
   ]
   gene varchar [
+    ref: > G.gene,
     note: 'Mutation gene'
   ]
   position int [

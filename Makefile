@@ -5,9 +5,11 @@ export-sqlite:
 	@rm local/covid-drdb-$(shell date +"%Y-%m-%d").db 2>/dev/null || true
 	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d").db --all
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
-	@rm local/covid-drdb-latest.db
-	@cd local;ln -s covid-drdb-$(shell date +"%Y-%m-%d").db covid-drdb-latest.db;cd ..
-	@echo "Link latest.db to local/covid-drdb-$(shell date +"%Y-%m-%d").db"
+	@rm local/covid-drdb-latest.db 2>/dev/null || true
+	@ln -vs covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-latest.db
+	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d").db ../chiro-cms/downloads/covid-drdb/$(shell date +"%Y%m%d").db
+	@rm ../chiro-cms/downloads/covid-drdb/latest.db 2>/dev/null || true
+	@ln -vs $(shell date +"%Y%m%d").db ../chiro-cms/downloads/covid-drdb/latest.db
 
 devdb:
 	@./scripts/export-sqls.sh
