@@ -131,6 +131,12 @@ Table antibodies as MAb {
   pdb_id varchar
   abbreviation_name varchar
   availability varchar
+  priority int [
+    note: "Display priority; lower number first"
+  ]
+  visibility bool [
+    note: "Should this antibody be displayed or not"
+  ]
   // todo_more_mab_definition varchar
   date_added date [not null]
 }
