@@ -127,10 +127,11 @@ def autofill_rx(tables_dir):
     rxips = load_multiple_csvs(tables_dir / 'rx_immu_plasma')
     invitro = load_multiple_csvs(tables_dir / 'invitro_selection_results')
     naive_rx = load_csv(tables_dir / 'naive-rx.csv')
+    rxdms = load_csv(tables_dir / 'dms' / 'rx_dms.csv')
     treatments = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxcps + rxips + naive_rx + invitro
+        for rx in rxmabs + rxcps + rxips + naive_rx + invitro + rxdms
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
@@ -187,7 +188,7 @@ def autofill_dms(tables_dir):
         BOM=True,
     )
 
-    escape_score = tables_dir / 'dms' / 'dms_escape_score.csv'
+    escape_score = tables_dir / 'dms' / 'dms_escape_results.csv'
     rows = load_csv(escape_score)
 
     for row in rows:
@@ -199,10 +200,11 @@ def autofill_dms(tables_dir):
         escape_score,
         records=rows,
         headers=[
+            'ref_name',
+            'rx_name',
             'gene',
             'position',
             'amino_acid',
-            'rx_name',
             'escape_score',
         ],
         BOM=True,

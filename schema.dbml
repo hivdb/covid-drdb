@@ -119,7 +119,20 @@ Table rx_immu_plasma as RxIP {
   }
 }
 
+Table rx_dms as RxDMS {
+  ref_name varchar
+  rx_name varchar
+  ab_name varchar [ref: > MAb.ab_name]
+
+  indexes {
+    (ref_name, rx_name, ab_name) [pk]
+  }
+}
+
+
+
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxDMS.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxCP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxIP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
@@ -213,7 +226,7 @@ Table gene_synonyms as GS {
   synonym_name varchar [
     note: 'Gene synonym name'
   ]
-  
+
   indexes {
     (gene, synonym_name) [pk]
   }
@@ -386,7 +399,8 @@ Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {
   gene varchar [
-    note: 'Gene'
+    ref: > G.gene,
+    note: 'Mutation gene'
   ]
   position int [
     note: 'Position'
@@ -402,6 +416,7 @@ Table ref_amino_acid as RefAA {
 
 Table dms_ace2_binding as Binding {
   gene varchar [
+    ref: > G.gene,
     note: 'Mutation gene'
   ]
   position int [
@@ -419,7 +434,9 @@ Table dms_ace2_binding as Binding {
   }
 }
 
-Table dms_escape_score as EScore {
+Table dms_escape_results as DMSEscape {
+  ref_name varchar
+  rx_name varchar
   gene varchar [
     note: 'Mutation gene'
   ]
@@ -429,19 +446,11 @@ Table dms_escape_score as EScore {
   amino_acid amino_acid_enum [
     note: 'Amino acid of this mutation'
   ]
-  rx_name varchar
   escape_score numeric(10,3)
 
   indexes {
-    (gene, position, amino_acid, rx_name) [pk]
+    (ref_name, rx_name, gene, position, amino_acid) [pk]
   }
 }
 
-Table dms_rx as DmsRx {
-  rx_name varchar
-  ab_name varchar [ref: > MAb.ab_name]
-
-  indexes {
-    (rx_name, ab_name) [pk]
-  }
-}
+Ref: DMSEscape.(ref_name, rx_name) > Rx.(ref_name, rx_name)

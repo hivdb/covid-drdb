@@ -60,8 +60,8 @@ ls payload/tables/rx_immu_plasma | sort -h | while read filepath; do
 done
 
 copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/dms/dms_rx.csv dms_rx >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/dms/dms_escape_score.csv dms_escape_score >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/dms/rx_dms.csv rx_dms >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET_DIR/02_data_tables.sql
 
 
 echo "Written to $TARGET_DIR/02_data_tables.sql"
