@@ -232,23 +232,6 @@ Table gene_synonyms as GS {
   }
 }
 
-Table key_positions as KP {
-  gene varchar [
-    ref: > G.gene,
-    note: 'Mutation gene'
-  ]
-  position int [
-    note: 'Position of this mutation (or position start)'
-  ]
-  position_end int [
-    note: 'Optional key position range end (e.g. S:69-70del)'
-  ]
-
-  indexes {
-    (gene, position) [pk]
-  }
-}
-
 Table key_mutations as KM {
   gene varchar [
     ref: > G.gene,
