@@ -141,7 +141,6 @@ Table antibodies as MAb {
     pk,
     note: 'Name of the antibody'
   ]
-  pdb_id varchar
   abbreviation_name varchar
   availability varchar
   priority int [
@@ -156,6 +155,7 @@ Table antibodies as MAb {
 
 Table antibody_targets as MAbT {
   ab_name varchar [ref: > MAb.ab_name]
+  pdb_id varchar
   target varchar
   class varchar
   source varchar
