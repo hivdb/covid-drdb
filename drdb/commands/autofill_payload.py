@@ -157,6 +157,32 @@ def autofill_rx_conv_plasma(tables_dir):
                 'ref_name',
                 'rx_name',
                 'infection',
+                'timing',
+                'titer',
+                'severity',
+                'cumulative_group',
+            ],
+            BOM=True
+        )
+
+
+def autofill_rx_immu_plasma(tables_dir):
+    rxcps = tables_dir / 'rx_immu_plasma'
+    for rxcp in rxcps.iterdir():
+        if rxcp.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(rxcp))
+            continue
+        rows = load_csv(rxcp)
+        click.echo('Write to {}'.format(rxcp))
+        dump_csv(
+            rxcp,
+            records=rows,
+            headers=[
+                'ref_name',
+                'rx_name',
+                'vaccine_name',
+                'timing',
+                'dosage',
                 'cumulative_group',
             ],
             BOM=True
@@ -229,6 +255,7 @@ def autofill_payload(payload_dir):
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_conv_plasma(tables_dir)
+    autofill_rx_immu_plasma(tables_dir)
 
     autofill_dms(tables_dir)
 
