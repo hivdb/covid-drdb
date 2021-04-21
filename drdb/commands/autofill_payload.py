@@ -125,9 +125,22 @@ def autofill_rx(tables_dir):
     rxmabs = load_multiple_csvs(tables_dir / 'rx_antibodies')
     rxcps = load_multiple_csvs(tables_dir / 'rx_conv_plasma')
     rxips = load_multiple_csvs(tables_dir / 'rx_vacc_plasma')
-    invitro = load_multiple_csvs(tables_dir / 'invitro_selection_results')
-    naive_rx = load_csv(tables_dir / 'naive-rx.csv')
-    rxdms = load_csv(tables_dir / 'dms' / 'rx_dms.csv')
+
+    invitro = []
+    file_path = tables_dir / 'invitro_selection_results'
+    if file_path.exists():
+        invitro = load_multiple_csvs(file_path)
+
+    naive_rx = []
+    file_path = tables_dir / 'naive-rx.csv'
+    if file_path.exists():
+        naive_rx = load_csv(file_path)
+
+    rxdms = []
+    file_path = tables_dir / 'dms' / 'rx_dms.csv'
+    if file_path.exists():
+        rxdms = load_csv(file_path)
+
     treatments = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
@@ -256,8 +269,11 @@ def autofill_payload(payload_dir):
     autofill_invivos(tables_dir)
     autofill_rx_conv_plasma(tables_dir)
     autofill_rx_vacc_plasma(tables_dir)
-
     autofill_dms(tables_dir)
 
     tables_dir = payload_dir / 'excluded'
+    autofill_rx(tables_dir)
     autofill_suscs(tables_dir)
+    autofill_invivos(tables_dir)
+    autofill_rx_conv_plasma(tables_dir)
+    autofill_rx_vacc_plasma(tables_dir)

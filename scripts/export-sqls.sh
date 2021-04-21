@@ -58,6 +58,28 @@ ls payload/tables/rx_vacc_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_vacc_plasma/$filepath rx_vacc_plasma >> $TARGET_DIR/02_data_tables.sql
 done
 
+# ## Excluded results
+# copy_csv payload/excluded/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
+# ls payload/excluded/susc_results | sort -h | while read filepath; do
+#     copy_csv payload/excluded/susc_results/$filepath susc_results >> $TARGET_DIR/02_data_tables.sql
+# done
+# # ls payload/excluded/invitro_selection_results | sort -h | while read filepath; do
+# #     copy_csv payload/excluded/invitro_selection_results/$filepath invitro_selection_results >> $TARGET_DIR/02_data_tables.sql
+# # done
+# ls payload/excluded/invivo_selection_results | sort -h | while read filepath; do
+#     copy_csv payload/excluded/invivo_selection_results/$filepath invivo_selection_results >> $TARGET_DIR/02_data_tables.sql
+# done
+# ls payload/excluded/rx_antibodies | sort -h | while read filepath; do
+#     copy_csv payload/excluded/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
+# done
+# ls payload/excluded/rx_conv_plasma | sort -h | while read filepath; do
+#     copy_csv payload/excluded/rx_conv_plasma/$filepath rx_conv_plasma >> $TARGET_DIR/02_data_tables.sql
+# done
+# ls payload/excluded/rx_vacc_plasma | sort -h | while read filepath; do
+#     copy_csv payload/excluded/rx_vacc_plasma/$filepath rx_vacc_plasma >> $TARGET_DIR/02_data_tables.sql
+# done
+# ## End of Excluded results
+
 copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/dms/rx_dms.csv rx_dms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET_DIR/02_data_tables.sql
