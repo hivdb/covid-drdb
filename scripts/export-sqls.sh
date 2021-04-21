@@ -54,8 +54,8 @@ done
 ls payload/tables/rx_conv_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_conv_plasma/$filepath rx_conv_plasma >> $TARGET_DIR/02_data_tables.sql
 done
-ls payload/tables/rx_immu_plasma | sort -h | while read filepath; do
-    copy_csv payload/tables/rx_immu_plasma/$filepath rx_immu_plasma >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/rx_vacc_plasma | sort -h | while read filepath; do
+    copy_csv payload/tables/rx_vacc_plasma/$filepath rx_vacc_plasma >> $TARGET_DIR/02_data_tables.sql
 done
 
 copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR/02_data_tables.sql

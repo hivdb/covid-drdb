@@ -124,7 +124,7 @@ def autofill_invivos(tables_dir):
 def autofill_rx(tables_dir):
     rxmabs = load_multiple_csvs(tables_dir / 'rx_antibodies')
     rxcps = load_multiple_csvs(tables_dir / 'rx_conv_plasma')
-    rxips = load_multiple_csvs(tables_dir / 'rx_immu_plasma')
+    rxips = load_multiple_csvs(tables_dir / 'rx_vacc_plasma')
     invitro = load_multiple_csvs(tables_dir / 'invitro_selection_results')
     naive_rx = load_csv(tables_dir / 'naive-rx.csv')
     rxdms = load_csv(tables_dir / 'dms' / 'rx_dms.csv')
@@ -166,8 +166,8 @@ def autofill_rx_conv_plasma(tables_dir):
         )
 
 
-def autofill_rx_immu_plasma(tables_dir):
-    rxcps = tables_dir / 'rx_immu_plasma'
+def autofill_rx_vacc_plasma(tables_dir):
+    rxcps = tables_dir / 'rx_vacc_plasma'
     for rxcp in rxcps.iterdir():
         if rxcp.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(rxcp))
@@ -255,7 +255,7 @@ def autofill_payload(payload_dir):
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_conv_plasma(tables_dir)
-    autofill_rx_immu_plasma(tables_dir)
+    autofill_rx_vacc_plasma(tables_dir)
 
     autofill_dms(tables_dir)
 

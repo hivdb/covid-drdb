@@ -110,7 +110,7 @@ Table rx_conv_plasma as RxCP {
   }
 }
 
-Table rx_immu_plasma as RxIP {
+Table rx_vacc_plasma as RxIP {
   ref_name varchar
   rx_name varchar
   vaccine_name varchar // TODO: add vaccine table
