@@ -1,7 +1,7 @@
 import click
 from pathlib import Path
 from more_itertools import unique_everseen
-
+from operator import itemgetter
 from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv, load_multiple_csvs
 
@@ -250,6 +250,11 @@ def autofill_dms(tables_dir):
     )
 
 
+def sort_csv(file_path, *key_list):
+    records = load_csv(file_path)
+    records.sort(key=itemgetter(*key_list))
+    dump_csv(file_path, records)
+
 
 @cli.command()
 @click.argument(
@@ -270,6 +275,11 @@ def autofill_payload(payload_dir):
     autofill_rx_conv_plasma(tables_dir)
     autofill_rx_vacc_plasma(tables_dir)
     autofill_dms(tables_dir)
+
+    antibodies = tables_dir / 'antibodies.csv'
+    sort_csv(antibodies, 'ab_name')
+    antibody_targets = tables_dir /'antibody_targets.csv'
+    sort_csv(antibody_targets, 'ab_name')
 
     tables_dir = payload_dir / 'excluded'
     autofill_rx(tables_dir)
