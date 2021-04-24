@@ -95,13 +95,21 @@ Table rx_antibodies as RxMAb {
   }
 }
 
+Enum severity_enum {
+  "Asymptomatic"
+  "Mild"
+  "Moderate"
+  "Severe"
+  "Hospitalized"
+}
+
 Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
   infection varchar
-  timing varchar
+  timing numeric(4,1) [note: "time from symptom on set, Month"]
   titer varchar
-  severity varchar
+  severity severity_enum
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_cp_definition varchar
 
@@ -114,7 +122,7 @@ Table rx_vacc_plasma as RxIP {
   ref_name varchar
   rx_name varchar
   vaccine_name varchar // TODO: add vaccine table
-  timing varchar
+  timing numeric(4,1)  [note: "time after vaccination, Month"]
   dosage int
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_ip_definition varchar
@@ -158,6 +166,40 @@ Table antibodies as MAb {
   date_added date [not null]
 }
 
+Table antibody_articles as MabR {
+  ab_name varchar [ref: > MAb.ab_name]
+  ref_name varchar [ref: > R.ref_name]
+}
+
+Table antibody_synonyms as MAbSyn {
+  ab_name varchar [ref: > MAb.ab_name]
+  synonym varchar [pk]
+
+  indexes {
+    ab_name
+  }
+}
+
+Enum ab_type_enum {
+  "mAb"
+  "nanobody"
+}
+
+Table antibody_invitro as MabVitro {
+  ab_name varchar [ref: > MAb.ab_name]
+  ab_type ab_type_enum
+  ab_source varchar
+  ic50 varchar
+}
+
+Table antibody_seq as MabSeq {
+  ab_name varchar [ref: > MAb.ab_name]
+  ighv_gene varchar
+  shm numeric(3)
+  cdrh3_length numeric(3)
+  iglv_gene varchar
+}
+
 Table antibody_targets as MAbT {
   ab_name varchar [ref: > MAb.ab_name]
   pdb_id varchar
@@ -167,15 +209,6 @@ Table antibody_targets as MAbT {
 
   indexes {
     (ab_name, target, class, source)
-  }
-}
-
-Table antibody_synonyms as MAbSyn {
-  ab_name varchar [ref: > MAb.ab_name]
-  synonym varchar [pk]
-
-  indexes {
-    ab_name
   }
 }
 
