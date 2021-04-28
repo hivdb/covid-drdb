@@ -142,8 +142,6 @@ Table rx_dms as RxDMS {
   }
 }
 
-
-
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxDMS.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxCP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
@@ -167,8 +165,13 @@ Table antibodies as MAb {
 }
 
 Table antibody_articles as MabR {
-  ab_name varchar [ref: > MAb.ab_name]
   ref_name varchar [ref: > R.ref_name]
+  rx_name varchar
+  ab_name varchar [ref: > MAb.ab_name]
+
+  indexes {
+    (ref_name, rx_name, ab_name) [pk]
+  }
 }
 
 Table antibody_synonyms as MAbSyn {
