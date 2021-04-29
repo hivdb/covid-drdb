@@ -34,6 +34,7 @@ copy_csv payload/tables/treatments.csv treatments >> $TARGET_DIR/02_data_tables.
 
 copy_csv payload/tables/antibodies.csv antibodies >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibody_targets.csv antibody_targets >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/antibody_epitopes.csv antibody_epitopes >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibody_synonyms.csv antibody_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibody_articles.csv antibody_articles >> $TARGET_DIR/02_data_tables.sql
 

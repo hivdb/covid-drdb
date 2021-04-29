@@ -215,6 +215,13 @@ Table antibody_targets as MAbT {
   }
 }
 
+Table antibody_epitopes as MAbEpi {
+  ab_name varchar [ref: > MAb.ab_name]
+  position int [
+    note: 'Epitope position'
+  ]
+}
+
 Table virus_variants as S {
 
   variant_name varchar [
