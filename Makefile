@@ -8,10 +8,10 @@ export-sqlite:
 	@rm local/covid-drdb-latest.db 2>/dev/null || true
 	@ln -vs covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-latest.db
 
-export-sqlite-slim:
 	@rm local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db 2>/dev/null || true
-	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db --all
-	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db"
+	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
+	@./scripts/make-slim-version.sh local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
+	@echo "Copy local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db"
 	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db ../chiro-cms/downloads/covid-drdb/$(shell date +"%Y%m%d").db
 	@rm ../chiro-cms/downloads/covid-drdb/latest.db 2>/dev/null || true
 	@ln -vs $(shell date +"%Y%m%d").db ../chiro-cms/downloads/covid-drdb/latest.db
@@ -28,20 +28,6 @@ devdb:
 		-p 127.0.0.1:6543:5432 \
 		--volume=$(shell pwd)/local/sqls:/docker-entrypoint-initdb.d \
 		postgres:13.1
-
-devdb-slim:
-	@./scripts/export-sqls-slim.sh
-	$(eval volumes = $(shell docker inspect -f '{{ range .Mounts }}{{ .Name }}{{ end }}' chiro-devdb))
-	@mkdir -p local/sqls
-	@docker rm -f covid-drdb-devdb 2>/dev/null || true
-	@docker volume rm $(volumes) 2>/dev/null || true
-	@docker run \
-		-d --name=covid-drdb-devdb \
-		-e POSTGRES_HOST_AUTH_METHOD=trust \
-		-p 127.0.0.1:6543:5432 \
-		--volume=$(shell pwd)/local/sqls:/docker-entrypoint-initdb.d \
-		postgres:13.1
-
 
 log-devdb:
 	@docker logs -f covid-drdb-devdb
