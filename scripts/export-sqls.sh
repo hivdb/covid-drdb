@@ -5,6 +5,7 @@ set -e
 cd $(dirname $0)/..
 
 DBML2SQL=$(which dbml2sql)
+GSTAT=$(which gstat)
 TARGET_DIR="local/sqls"
 
 function copy_csv() {
@@ -89,5 +90,21 @@ copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR
 copy_csv payload/tables/dms/rx_dms.csv rx_dms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET_DIR/02_data_tables.sql
 
+pushd payload/
+if [ -z "$(git status -s .)" ]
+then
+    mtime=$(git log -1 --date unix . | \grep '^Date:' | \awk '{print $2}')
+else
+    if [ "$(uname)" = "Darwin" ]
+    then
+        mtime=$(stat -f %m .)
+    else
+        mtime=$(stat -c %Y .)
+    fi
+fi
+export TZ=0
+last_update=$(date -r ${mtime} +%FT%TZ)
+popd
+echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_update}');" >> $TARGET_DIR/02_data_tables.sql
 
 echo "Written to $TARGET_DIR/02_data_tables.sql"
