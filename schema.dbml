@@ -166,11 +166,11 @@ Table antibodies as MAb {
 
 Table antibody_articles as MabR {
   ref_name varchar [ref: > R.ref_name]
-  rx_name varchar
+  chiro_rx_name varchar
   ab_name varchar [ref: > MAb.ab_name]
 
   indexes {
-    (ref_name, rx_name, ab_name) [pk]
+    (ref_name, chiro_rx_name, ab_name) [pk]
   }
 }
 
