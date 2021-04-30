@@ -211,7 +211,7 @@ Table antibody_targets as MAbT {
   source varchar
 
   indexes {
-    (ab_name, target, class, source)
+    (ab_name, pdb_id, target, class, source)
   }
 }
 
