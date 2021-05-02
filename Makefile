@@ -18,7 +18,7 @@ export-sqlite:
 
 devdb:
 	@./scripts/export-sqls.sh
-	$(eval volumes = $(shell docker inspect -f '{{ range .Mounts }}{{ .Name }}{{ end }}' chiro-devdb))
+	$(eval volumes = $(shell docker inspect -f '{{ range .Mounts }}{{ .Name }}{{ end }}' covid-drdb-devdb))
 	@mkdir -p local/sqls
 	@docker rm -f covid-drdb-devdb 2>/dev/null || true
 	@docker volume rm $(volumes) 2>/dev/null || true
