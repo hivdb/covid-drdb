@@ -485,3 +485,8 @@ Table dms_escape_results as DMSEscape {
 }
 
 Ref: DMSEscape.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+
+Table last_update {
+  scope varchar [pk]
+  last_update timestamptz [not null]
+}
