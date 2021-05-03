@@ -7,14 +7,15 @@ export-sqlite:
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
 	@rm local/covid-drdb-latest.db 2>/dev/null || true
 	@ln -vs covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-latest.db
-
-	@rm local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db 2>/dev/null || true
-	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
-	@./scripts/make-slim-version.sh local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
-	@echo "Copy local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db"
-	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db ../chiro-cms/downloads/covid-drdb/$(shell date +"%Y%m%d").db
+	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d").db ../chiro-cms/downloads/covid-drdb/$(shell date +"%Y%m%d").db
 	@rm ../chiro-cms/downloads/covid-drdb/latest.db 2>/dev/null || true
 	@ln -vs $(shell date +"%Y%m%d").db ../chiro-cms/downloads/covid-drdb/latest.db
+
+	@cp local/covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
+	@./scripts/make-slim-version.sh local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db
+	@cp -v local/covid-drdb-$(shell date +"%Y-%m-%d")-slim.db ../chiro-cms/downloads/covid-drdb/$(shell date +"%Y%m%d")-slim.db
+	@rm ../chiro-cms/downloads/covid-drdb/latest-slim.db 2>/dev/null || true
+	@ln -vs $(shell date +"%Y%m%d")-slim.db ../chiro-cms/downloads/covid-drdb/latest-slim.db
 
 devdb:
 	@./scripts/export-sqls.sh
