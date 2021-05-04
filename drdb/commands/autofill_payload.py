@@ -31,6 +31,8 @@ def autofill_suscs(tables_dir):
                 row['control_variant_name'] = 'Control'
             if not row.get('ineffective'):
                 row['ineffective'] = None
+            if not row.get('inhibition_pcnt'):
+                row['inhibition_pcnt'] = 50
         click.echo('Write to {}'.format(susc))
         dump_csv(
             susc,
@@ -44,6 +46,7 @@ def autofill_suscs(tables_dir):
                 'section',
                 'fold_cmp',
                 'fold',
+                'inhibition_pcnt',
                 'resistance_level',
                 'ineffective',
                 'cumulative_count',
@@ -278,7 +281,7 @@ def autofill_payload(payload_dir):
 
     antibodies = tables_dir / 'antibodies.csv'
     sort_csv(antibodies, 'ab_name')
-    antibody_targets = tables_dir /'antibody_targets.csv'
+    antibody_targets = tables_dir / 'antibody_targets.csv'
     sort_csv(antibody_targets, 'ab_name')
 
     tables_dir = payload_dir / 'excluded'
