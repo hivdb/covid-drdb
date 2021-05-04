@@ -26,6 +26,7 @@ fi
 mkdir -p $TARGET_DIR
 
 dbml2sql --postgres schema.dbml > $TARGET_DIR/01_schema.sql
+cat constraints.sql >> $TARGET_DIR/01_schema.sql
 echo "Written to $TARGET_DIR/01_schema.sql"
 
 copy_csv payload/tables/articles.csv articles > $TARGET_DIR/02_data_tables.sql
