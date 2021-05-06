@@ -96,11 +96,13 @@ if [ -z "$(git status -s .)" ]
 then
     mtime=$(git log -1 --date unix . | \grep '^Date:' | \awk '{print $2}')
 else
+    # echo 'There are uncommited changes under payload/ repository. Please commit your changes.' 1>&2
+    # exit 42
     if [ "$(uname)" = "Darwin" ]
     then
-        mtime=$(stat -f %m .)
+        mtime=$(find . -type f -print0 | xargs -0 stat -f %m | sort -nr | head -1)
     else
-        mtime=$(stat -c %Y .)
+        mtime=$(find . -type f -print0 | xargs -0 stat -c %Y | sort -nr | head -1)
     fi
 fi
 export TZ=0
