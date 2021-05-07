@@ -46,6 +46,7 @@ copy_csv payload/tables/key_mutations.csv key_mutations >> $TARGET_DIR/02_data_t
 copy_csv payload/tables/virus_variants.csv virus_variants >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/variant_mutations.csv variant_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/ref_amino_acid.csv ref_amino_acid >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/vaccines.csv vaccines >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/susc_results | sort -h | while read filepath; do
     copy_csv payload/tables/susc_results/$filepath susc_results >> $TARGET_DIR/02_data_tables.sql
 done

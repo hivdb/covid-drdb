@@ -85,6 +85,25 @@ Table treatments as Rx {
 //  ]
 //}
 
+
+// TODO: add rx_vaccines to allow many-to-many relationship 
+// between rxvp and vaccines tables
+
+Enum vaccine_type_enum {
+  "mRNA"
+  "Viral vector"
+  "Protein subunit"
+  "Inactivated virus"
+}
+
+Table vaccines as V {
+  vaccine_name varchar [pk]
+  vaccine_type vaccine_type_enum
+  priority int [
+    note: "Display priority; lower number first"
+  ]
+}
+
 Table rx_antibodies as RxMAb {
   ref_name varchar
   rx_name varchar
@@ -121,7 +140,7 @@ Table rx_conv_plasma as RxCP {
 Table rx_vacc_plasma as RxIP {
   ref_name varchar
   rx_name varchar
-  vaccine_name varchar // TODO: add vaccine table
+  vaccine_name varchar [ref: > V.vaccine_name] // TODO: many-to-many relationship
   timing numeric(4,1)  [note: "time after vaccination, Month"]
   dosage int
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
@@ -131,6 +150,7 @@ Table rx_vacc_plasma as RxIP {
     (ref_name, rx_name) [pk]
   }
 }
+
 
 Table rx_dms as RxDMS {
   ref_name varchar
