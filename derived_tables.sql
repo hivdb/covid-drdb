@@ -31,3 +31,9 @@ INSERT INTO variant_stats
     var_name IS NOT NULL
   GROUP BY var_name
   ORDER BY count DESC, var_name;
+
+INSERT INTO isolate_stats
+  SELECT iso_name, 'susc_results' AS stat_group, COUNT(*) AS count
+  FROM susc_results
+  GROUP BY iso_name
+  ORDER BY count DESC, iso_name;

@@ -321,6 +321,18 @@ Table isolates as I {
   }
 }
 
+Table isolate_stats as IStat {
+  iso_name varchar [ref: > I.iso_name]
+  
+  stat_group varchar
+  count int
+  
+  indexes {
+    (iso_name, stat_group) [pk]
+    count
+  }
+}
+
 Table genes as G {
   gene varchar [
     pk,
