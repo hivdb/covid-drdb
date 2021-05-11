@@ -27,8 +27,8 @@ def autofill_suscs(tables_dir):
                 row['resistance_level'] = None
             if not row.get('assay'):
                 row['assay'] = None
-            if not row.get('control_variant_name'):
-                row['control_variant_name'] = 'Control'
+            if not row.get('control_iso_name'):
+                row['control_iso_name'] = 'Control'
             if not row.get('ineffective'):
                 row['ineffective'] = None
             if not row.get('inhibition_pcnt'):
@@ -40,8 +40,8 @@ def autofill_suscs(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
-                'control_variant_name',
-                'variant_name',
+                'control_iso_name',
+                'iso_name',
                 'ordinal_number',
                 'section',
                 'fold_cmp',
