@@ -273,7 +273,7 @@ Table antibody_epitopes as MAbEpi {
   ]
 }
 
-Table varaints as VAR {
+Table variants as VAR {
   var_name varchar [pk]
 }
 

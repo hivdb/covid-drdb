@@ -42,7 +42,6 @@ copy_csv payload/tables/antibody_articles.csv antibody_articles >> $TARGET_DIR/0
 
 copy_csv payload/tables/genes.csv genes >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/gene_synonyms.csv gene_synonyms >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/key_mutations.csv key_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/variants.csv variants >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/isolates.csv isolates >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/isolate_mutations.csv isolate_mutations >> $TARGET_DIR/02_data_tables.sql
@@ -113,3 +112,6 @@ popd
 echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_update}');" >> $TARGET_DIR/02_data_tables.sql
 
 echo "Written to $TARGET_DIR/02_data_tables.sql"
+
+cp derived_tables.sql $TARGET_DIR/03_derived_tables.sql
+echo "Written to $TARGET_DIR/03_derived_tables.sql"
