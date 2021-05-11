@@ -43,8 +43,9 @@ copy_csv payload/tables/antibody_articles.csv antibody_articles >> $TARGET_DIR/0
 copy_csv payload/tables/genes.csv genes >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/gene_synonyms.csv gene_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/key_mutations.csv key_mutations >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/virus_variants.csv virus_variants >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/variant_mutations.csv variant_mutations >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/variants.csv variants >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/isolates.csv isolates >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/isolate_mutations.csv isolate_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/ref_amino_acid.csv ref_amino_acid >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/vaccines.csv vaccines >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/susc_results | sort -h | while read filepath; do

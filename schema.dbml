@@ -104,6 +104,17 @@ Table vaccines as V {
   ]
 }
 
+
+Table vaccine_stats as VStat {
+  vaccine_name varchar [ref: > V.vaccine_name]
+  stat_group varchar
+  count int
+  
+  indexes {
+    (vaccine_name, stat_group) [pk]
+  }
+}
+
 Table rx_antibodies as RxMAb {
   ref_name varchar
   rx_name varchar
@@ -134,6 +145,15 @@ Table rx_conv_plasma as RxCP {
 
   indexes {
     (ref_name, rx_name) [pk]
+  }
+}
+
+Table conv_plasma_stats as CPStat {
+  stat_group varchar [pk]
+  count int
+  
+  indexes {
+    count
   }
 }
 
@@ -182,6 +202,17 @@ Table antibodies as MAb {
   ]
   // todo_more_mab_definition varchar
   date_added date [not null]
+}
+
+Table antibody_stats as MAbStat {
+  ab_name varchar [ref: > MAb.ab_name]
+  stat_group varchar
+  count int
+  
+  indexes {
+    (ab_name, stat_group) [pk]
+    count
+  }
 }
 
 Table antibody_articles as MabR {
@@ -242,22 +273,35 @@ Table antibody_epitopes as MAbEpi {
   ]
 }
 
-Table virus_variants as S {
+Table varaints as VAR {
+  var_name varchar [pk]
+}
 
-  variant_name varchar [
+Table variant_stats as VARStat {
+  var_name varchar [ref: > VAR.var_name]
+  
+  stat_group varchar
+  count int
+  
+  indexes {
+    (var_name, stat_group) [pk]
+    count
+  }
+}
+
+Table isolates as I {
+
+  iso_name varchar [
     pk,
-    note: 'Variant name'
+    note: 'Isolate name'
   ]
-  parent_variant_name varchar [
-    ref: > S.variant_name,
-    note: 'Parent variant name'
-  ]
-  display_name varchar [
-    note: 'Variant name for display'
+  var_name varchar [
+    ref: > VAR.var_name,
+    note: 'Variant name of this isolate'
   ]
   site_directed boolean [
     not null,
-    note: 'Is this variant created by site-directed mutagenesis?'
+    note: 'Is this isolate created by site-directed mutagenesis?'
   ]
   gisaid_id int [
     note: 'GISAID isolate accession ID without the common initial "EPI_ISL_"'
@@ -271,6 +315,7 @@ Table virus_variants as S {
   ]
 
   indexes {
+    var_name
     gisaid_id
     genbank_accn
   }
@@ -300,31 +345,11 @@ Table gene_synonyms as GS {
   }
 }
 
-Table key_mutations as KM {
-  gene varchar [
-    ref: > G.gene,
-    note: 'Mutation gene'
-  ]
-  position int [
-    note: 'Position of this mutation'
-  ]
-  position_end int [
-    note: 'Optional key position range end (e.g. S:69-70del)'
-  ]
-  amino_acid amino_acid_enum [
-    note: 'Amino acid of this mutation'
-  ]
+Table isolate_mutations as M {
 
-  indexes {
-    (gene, position, amino_acid) [pk]
-  }
-}
-
-Table variant_mutations as M {
-
-  variant_name varchar [
-    ref: > S.variant_name,
-    note: 'Variant name'
+  iso_name varchar [
+    ref: > I.iso_name,
+    note: 'Isolate name'
   ]
   gene varchar [
     ref: > G.gene,
@@ -338,7 +363,7 @@ Table variant_mutations as M {
   ]
 
   indexes {
-    (variant_name, gene, position, amino_acid) [pk]
+    (iso_name, gene, position, amino_acid) [pk]
   }
 
 }
@@ -358,11 +383,11 @@ Enum ineffective_enum {
 Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
-  control_variant_name varchar [ref: > S.variant_name]
-  variant_name varchar [ref: > S.variant_name]
+  control_iso_name varchar [ref: > I.iso_name]
+  iso_name varchar [ref: > I.iso_name]
   ordinal_number int [
     default: 1,
-    note: 'Ordinal number for the same ref/Rx/variant when multiple results are presented'
+    note: 'Ordinal number for the same ref/Rx/isolate when multiple results are presented'
   ]
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
@@ -381,7 +406,7 @@ Table susc_results as Susc {
     note: 'Qualitative result when quantitative result (fold change) is not available'
   ]
   ineffective ineffective_enum [
-    note: 'Rx has no effect on control variant or experimental variant'
+    note: 'Rx has no effect on control sequence or experimental sequence'
   ]
   cumulative_count int [
     default: 1,
@@ -390,7 +415,7 @@ Table susc_results as Susc {
   assay varchar
   date_added date [not null]
   indexes {
-    (rx_name, control_variant_name, variant_name, ref_name, ordinal_number, inhibition_pcnt) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, inhibition_pcnt) [pk]
   }
 }
 
@@ -421,7 +446,7 @@ Table invivo_selection_results as Vivo {
   rx_name varchar
   dosage varchar
   host varchar
-  infection_name varchar [ref: > S.variant_name]
+  infection_name varchar [ref: > I.iso_name]
   gene varchar [
     note: 'Mutation gene'
   ]
@@ -447,8 +472,8 @@ Table invivo_selection_results as Vivo {
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 
 Table ref_amino_acid as RefAA {
