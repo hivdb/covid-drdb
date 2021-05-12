@@ -37,3 +37,9 @@ INSERT INTO isolate_stats
   FROM susc_results
   GROUP BY iso_name
   ORDER BY count DESC, iso_name;
+
+INSERT INTO article_stats
+  SELECT ref_name, 'susc_results' AS stat_group, COUNT(*) AS count
+  FROM susc_results
+  GROUP BY ref_name
+  ORDER BY count DESC, ref_name;

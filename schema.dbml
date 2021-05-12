@@ -59,9 +59,21 @@ Table articles as R {
   date_updated date
 }
 
-Table article_notes as AN {
+Table article_notes as RN {
   ref_name varchar [ref: > R.ref_name]
   note varchar
+}
+
+Table article_stats as RStat {
+  ref_name varchar [ref: > R.ref_name]
+  
+  stat_group varchar
+  count int
+  
+  indexes {
+    (ref_name, stat_group) [pk]
+    count
+  }
 }
 
 Table treatments as Rx {
