@@ -66,10 +66,10 @@ Table article_notes as RN {
 
 Table article_stats as RStat {
   ref_name varchar [ref: > R.ref_name]
-  
+
   stat_group varchar
   count int
-  
+
   indexes {
     (ref_name, stat_group) [pk]
     count
@@ -98,7 +98,7 @@ Table treatments as Rx {
 //}
 
 
-// TODO: add rx_vaccines to allow many-to-many relationship 
+// TODO: add rx_vaccines to allow many-to-many relationship
 // between rxvp and vaccines tables
 
 Enum vaccine_type_enum {
@@ -121,7 +121,7 @@ Table vaccine_stats as VStat {
   vaccine_name varchar [ref: > V.vaccine_name]
   stat_group varchar
   count int
-  
+
   indexes {
     (vaccine_name, stat_group) [pk]
   }
@@ -163,7 +163,7 @@ Table rx_conv_plasma as RxCP {
 Table conv_plasma_stats as CPStat {
   stat_group varchar [pk]
   count int
-  
+
   indexes {
     count
   }
@@ -220,7 +220,7 @@ Table antibody_stats as MAbStat {
   ab_name varchar [ref: > MAb.ab_name]
   stat_group varchar
   count int
-  
+
   indexes {
     (ab_name, stat_group) [pk]
     count
@@ -291,10 +291,10 @@ Table variants as VAR {
 
 Table variant_stats as VARStat {
   var_name varchar [ref: > VAR.var_name]
-  
+
   stat_group varchar
   count int
-  
+
   indexes {
     (var_name, stat_group) [pk]
     count
@@ -335,10 +335,10 @@ Table isolates as I {
 
 Table isolate_stats as IStat {
   iso_name varchar [ref: > I.iso_name]
-  
+
   stat_group varchar
   count int
-  
+
   indexes {
     (iso_name, stat_group) [pk]
     count
@@ -404,6 +404,13 @@ Enum ineffective_enum {
   "both"
 }
 
+Enum assay_enum {
+  "pseudovirus"
+  "authentic virus"
+  "recombinant virus"
+  "HIV pseudovirus"
+}
+
 Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
@@ -436,7 +443,7 @@ Table susc_results as Susc {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay varchar
+  assay assay_enum
   date_added date [not null]
   indexes {
     (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, inhibition_pcnt) [pk]
