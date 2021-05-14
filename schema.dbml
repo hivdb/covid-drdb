@@ -145,6 +145,52 @@ Enum severity_enum {
   "Hospitalized"
 }
 
+Table patients as Pt {
+  ref_name varchar [ref: > R.ref_name]
+  patient_name varchar
+  
+  indexes {
+    (ref_name, patient_name) [pk]
+  }
+}
+
+Table patient_history as PtH {
+  ref_name varchar
+  patient_name varchar
+  event varchar
+  event_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  event_date date
+  location varchar [
+    note: "Location of where this event happens"
+  ]
+  iso_name varchar [
+    ref: > isolates.iso_name,
+    note: "Infected isolate name"
+  ]
+  severity severity_enum
+  vaccine_dosage numeric(2,0)
+  
+  indexes {
+    (ref_name, patient_name, event, event_date_cmp, event_date) [pk]
+  }
+}
+
+Table patient_treatments as PtRx {
+  ref_name varchar
+  patient_name varchar
+  rx_name varchar
+  
+  indexes {
+    (ref_name, patient_name, rx_name) [pk]
+  }
+}
+
+ref: PtRx.(ref_name, patient_name) > Pt.(ref_name, patient_name)
+ref: PtH.(ref_name, patient_name) > Pt.(ref_name, patient_name)
+
 Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
@@ -473,6 +519,7 @@ Table invitro_selection_results as Vitro {
 }
 
 Table invivo_selection_results as Vivo {
+  // TODO: refactor to use patients table
   ref_name varchar
   rx_name varchar
   dosage varchar
@@ -498,14 +545,14 @@ Table invivo_selection_results as Vivo {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, dosage, patient, sampling)
+    (ref_name, rx_name, dosage, patient, sampling) [pk]
   }
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-
+ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {
   gene varchar [
