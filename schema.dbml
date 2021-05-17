@@ -148,7 +148,7 @@ Enum severity_enum {
 Table patients as Pt {
   ref_name varchar [ref: > R.ref_name]
   patient_name varchar
-  
+
   indexes {
     (ref_name, patient_name) [pk]
   }
@@ -172,7 +172,7 @@ Table patient_history as PtH {
   ]
   severity severity_enum
   vaccine_dosage numeric(2,0)
-  
+
   indexes {
     (ref_name, patient_name, event, event_date_cmp, event_date) [pk]
   }
@@ -182,7 +182,7 @@ Table patient_treatments as PtRx {
   ref_name varchar
   patient_name varchar
   rx_name varchar
-  
+
   indexes {
     (ref_name, patient_name, rx_name) [pk]
   }
@@ -545,7 +545,7 @@ Table invivo_selection_results as Vivo {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, dosage, patient, sampling) [pk]
+    (ref_name, rx_name, dosage, patient, sampling)
   }
 }
 
