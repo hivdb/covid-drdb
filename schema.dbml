@@ -452,6 +452,7 @@ Enum ineffective_enum {
 
 Enum assay_enum {
   "pseudovirus"
+  "VSV pseudovirus"
   "authentic virus"
   "recombinant virus"
   "HIV pseudovirus"

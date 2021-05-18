@@ -259,6 +259,56 @@ def sort_csv(file_path, *key_list):
     dump_csv(file_path, records)
 
 
+def autofill_pt(tables_dir):
+    pt_treatments = load_multiple_csvs(tables_dir / 'patient_treatments')
+
+    patients = list(unique_everseen([
+        {'ref_name': rx['ref_name'],
+         'patient_name': rx['patient_name']}
+        for rx in pt_treatments
+    ]))
+    click.echo('Write to {}'.format(tables_dir / 'patients.csv'))
+    dump_csv(
+        tables_dir / 'patients.csv',
+        records=patients,
+        headers=['ref_name', 'patient_name'],
+        BOM=True
+    )
+
+
+def autofill_pt_history(tables_dir):
+    pth_list = tables_dir / 'patient_history'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('iso_name'):
+                row['iso_name'] = None
+            if not row.get('severity'):
+                row['severity'] = None
+            if not row.get('vaccine_dosage'):
+                row['vaccine_dosage'] = None
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'patient_name',
+                'event',
+                'event_date_cmp',
+                'event_date',
+                'location',
+                'iso_name',
+                'severity',
+                'vaccine_dosage',
+            ],
+            BOM=True
+        )
+
+
 @cli.command()
 @click.argument(
     'payload_dir',
@@ -278,6 +328,9 @@ def autofill_payload(payload_dir):
     autofill_rx_conv_plasma(tables_dir)
     autofill_rx_vacc_plasma(tables_dir)
     autofill_dms(tables_dir)
+
+    autofill_pt(tables_dir)
+    autofill_pt_history(tables_dir)
 
     antibodies = tables_dir / 'antibodies.csv'
     sort_csv(antibodies, 'ab_name')

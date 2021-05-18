@@ -66,6 +66,15 @@ ls payload/tables/rx_vacc_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_vacc_plasma/$filepath rx_vacc_plasma >> $TARGET_DIR/02_data_tables.sql
 done
 
+copy_csv payload/tables/patients.csv patients >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/patient_history | sort -h | while read filepath; do
+    copy_csv payload/tables/patient_history/$filepath patient_history >> $TARGET_DIR/02_data_tables.sql
+done
+ls payload/tables/patient_treatments | sort -h | while read filepath; do
+    copy_csv payload/tables/patient_treatments/$filepath patient_treatments >> $TARGET_DIR/02_data_tables.sql
+done
+
+
 # ## Excluded results
 # copy_csv payload/excluded/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
 # ls payload/excluded/susc_results | sort -h | while read filepath; do
