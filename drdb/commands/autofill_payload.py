@@ -176,6 +176,7 @@ def autofill_rx_conv_plasma(tables_dir):
                 'timing',
                 'titer',
                 'severity',
+                'collection_date',
                 'cumulative_group',
             ],
             BOM=True
@@ -199,6 +200,7 @@ def autofill_rx_vacc_plasma(tables_dir):
                 'vaccine_name',
                 'timing',
                 'dosage',
+                'collection_date',
                 'cumulative_group',
             ],
             BOM=True
