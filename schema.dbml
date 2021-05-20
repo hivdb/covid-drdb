@@ -199,6 +199,7 @@ Table rx_conv_plasma as RxCP {
   timing numeric(4,1) [note: "time from symptom on set, Month"]
   titer varchar
   severity severity_enum
+  collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_cp_definition varchar
 
@@ -222,6 +223,7 @@ Table rx_vacc_plasma as RxIP {
   vaccine_name varchar [ref: > V.vaccine_name] // TODO: many-to-many relationship
   timing numeric(4,1)  [note: "time after vaccination, Month"]
   dosage int
+  collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_ip_definition varchar
 
