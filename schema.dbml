@@ -185,6 +185,7 @@ Table patient_treatments as PtRx {
 
   indexes {
     (ref_name, patient_name, rx_name) [pk]
+    (ref_name, rx_name)
   }
 }
 
