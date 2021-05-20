@@ -174,7 +174,7 @@ Table patient_history as PtH {
   vaccine_dosage numeric(2,0)
 
   indexes {
-    (ref_name, patient_name, event, event_date_cmp, event_date) [pk]
+    (ref_name, patient_name, event, event_date) [pk]
   }
 }
 
