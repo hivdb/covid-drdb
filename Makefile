@@ -3,7 +3,7 @@ autofill:
 
 export-sqlite:
 	@rm local/covid-drdb-$(shell date +"%Y-%m-%d").db 2>/dev/null || true
-	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d").db --all
+	@pipenv run db-to-sqlite "postgresql://postgres@localhost:6543/postgres" local/covid-drdb-$(shell date +"%Y-%m-%d").db --all --no-index-fks
 	@echo "Written local/covid-drdb-$(shell date +"%Y-%m-%d").db"
 	@rm local/covid-drdb-latest.db 2>/dev/null || true
 	@ln -vs covid-drdb-$(shell date +"%Y-%m-%d").db local/covid-drdb-latest.db
