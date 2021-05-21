@@ -143,6 +143,7 @@ Enum severity_enum {
   "Moderate"
   "Severe"
   "Hospitalized"
+  "Non-Hospitalized"
 }
 
 Table patients as Pt {
