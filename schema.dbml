@@ -161,6 +161,8 @@ Enum event_enum {
   "2nd dose"
   "2nd dose isolation"
   "2nd dose saliva isolation"
+  "3rd dose"
+  "3rd dose isolation"
   "infection"
   "isolation"
 }
