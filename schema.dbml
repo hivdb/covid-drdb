@@ -155,10 +155,20 @@ Table patients as Pt {
   }
 }
 
+Enum event_enum {
+  "1st dose"
+  "1st dose isolation"
+  "2nd dose"
+  "2nd dose isolation"
+  "2nd dose saliva isolation"
+  "infection"
+  "isolation"
+}
+
 Table patient_history as PtH {
   ref_name varchar
   patient_name varchar
-  event varchar
+  event event_enum
   event_date_cmp numeric_cmp_enum [
     default: "=",
     note: '"=", ">", or "<"'
