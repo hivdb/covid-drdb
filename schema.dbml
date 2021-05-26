@@ -472,6 +472,7 @@ Enum assay_enum {
   "lentivirus pseudovirus"
   "authentic virus"
   "chimeric virus"
+  "MLV pseudovirus"
 }
 
 Table susc_results as Susc {
