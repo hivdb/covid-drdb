@@ -126,8 +126,7 @@ def autofill_invivos(tables_dir):
 
 def autofill_rx(tables_dir):
     rxmabs = load_multiple_csvs(tables_dir / 'rx_antibodies')
-    rxcps = load_multiple_csvs(tables_dir / 'rx_conv_plasma')
-    rxips = load_multiple_csvs(tables_dir / 'rx_vacc_plasma')
+    rxps = load_multiple_csvs(tables_dir / 'rx_plasma')
 
     invitro = []
     file_path = tables_dir / 'invitro_selection_results'
@@ -147,7 +146,7 @@ def autofill_rx(tables_dir):
     treatments = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxcps + rxips + naive_rx + invitro + rxdms
+        for rx in rxmabs + rxps + naive_rx + invitro + rxdms
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
@@ -158,8 +157,8 @@ def autofill_rx(tables_dir):
     )
 
 
-def autofill_rx_conv_plasma(tables_dir):
-    rxcps = tables_dir / 'rx_conv_plasma'
+def autofill_rx_plasma(tables_dir):
+    rxcps = tables_dir / 'rx_plasma'
     for rxcp in rxcps.iterdir():
         if rxcp.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(rxcp))
@@ -172,34 +171,7 @@ def autofill_rx_conv_plasma(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
-                'infection',
-                'timing',
                 'titer',
-                'severity',
-                'collection_date',
-                'cumulative_group',
-            ],
-            BOM=True
-        )
-
-
-def autofill_rx_vacc_plasma(tables_dir):
-    rxcps = tables_dir / 'rx_vacc_plasma'
-    for rxcp in rxcps.iterdir():
-        if rxcp.suffix.lower() != '.csv':
-            click.echo('Skip {}'.format(rxcp))
-            continue
-        rows = load_csv(rxcp)
-        click.echo('Write to {}'.format(rxcp))
-        dump_csv(
-            rxcp,
-            records=rows,
-            headers=[
-                'ref_name',
-                'rx_name',
-                'vaccine_name',
-                'timing',
-                'dosage',
                 'collection_date',
                 'cumulative_group',
             ],
@@ -264,11 +236,14 @@ def sort_csv(file_path, *key_list):
 def autofill_pt(tables_dir):
     pt_treatments = load_multiple_csvs(tables_dir / 'patient_treatments')
 
-    patients = list(unique_everseen([
-        {'ref_name': rx['ref_name'],
-         'patient_name': rx['patient_name']}
-        for rx in pt_treatments
-    ]))
+    patients = sorted(
+        unique_everseen([
+            {'ref_name': rx['ref_name'],
+             'patient_name': rx['patient_name']}
+            for rx in pt_treatments
+        ]),
+        key=lambda rx: (rx['ref_name'], rx['patient_name'])
+    )
     click.echo('Write to {}'.format(tables_dir / 'patients.csv'))
     dump_csv(
         tables_dir / 'patients.csv',
@@ -290,8 +265,8 @@ def autofill_pt_history(tables_dir):
                 row['iso_name'] = None
             if not row.get('severity'):
                 row['severity'] = None
-            if not row.get('vaccine_dosage'):
-                row['vaccine_dosage'] = None
+            if not row.get('vaccine_name'):
+                row['vaccine_name'] = None
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -304,8 +279,8 @@ def autofill_pt_history(tables_dir):
                 'event_date',
                 'location',
                 'iso_name',
+                'vaccine_name',
                 'severity',
-                'vaccine_dosage',
             ],
             BOM=True
         )
@@ -327,8 +302,7 @@ def autofill_payload(payload_dir):
     autofill_suscs(tables_dir)
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
-    autofill_rx_conv_plasma(tables_dir)
-    autofill_rx_vacc_plasma(tables_dir)
+    autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
 
     autofill_pt(tables_dir)
@@ -343,5 +317,4 @@ def autofill_payload(payload_dir):
     autofill_rx(tables_dir)
     autofill_suscs(tables_dir)
     autofill_invivos(tables_dir)
-    autofill_rx_conv_plasma(tables_dir)
-    autofill_rx_vacc_plasma(tables_dir)
+    autofill_rx_plasma(tables_dir)

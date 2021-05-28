@@ -116,6 +116,14 @@ Table vaccines as V {
   ]
 }
 
+Table vaccine_efficacy as VE {
+  vaccine_name varchar [ref: > V.vaccine_name]
+  iso_name varchar [ref: > I.iso_name]
+  ref_name varchar [ref: > R.ref_name]
+  design varchar
+  lower_bound numeric(2,0)
+  upper_bound numeric(2,0)
+}
 
 Table vaccine_stats as VStat {
   vaccine_name varchar [ref: > V.vaccine_name]
@@ -183,8 +191,11 @@ Table patient_history as PtH {
     ref: > isolates.iso_name,
     note: "Infected isolate name"
   ]
+  vaccine_name varchar [
+    ref: > vaccines.vaccine_name,
+    note: "Vaccine name"
+  ]
   severity severity_enum
-  vaccine_dosage numeric(2,0)
 
   indexes {
     (ref_name, patient_name, event, event_date) [pk]
@@ -205,17 +216,29 @@ Table patient_treatments as PtRx {
 ref: PtRx.(ref_name, patient_name) > Pt.(ref_name, patient_name)
 ref: PtH.(ref_name, patient_name) > Pt.(ref_name, patient_name)
 
-Table rx_conv_plasma as RxCP {
+Table rx_plasma as RxP {
   ref_name varchar
   rx_name varchar
-  infection varchar
+  titer varchar
+  collection_date date
+  cumulative_group varchar [note: "Cumulative group for cumulating results"]
+
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+}
+
+Table rx_conv_plasma as RxCP {
+  // derived table from rx_conv_plasma and patient_history
+  ref_name varchar
+  rx_name varchar
+  infected_iso_name varchar
   timing numeric(4,1) [note: "time from symptom on set, Month"]
   titer varchar
   severity severity_enum
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
-  // todo_more_cp_definition varchar
-
+  
   indexes {
     (ref_name, rx_name) [pk]
   }
@@ -230,12 +253,12 @@ Table conv_plasma_stats as CPStat {
   }
 }
 
-Table rx_vacc_plasma as RxIP {
+Table rx_vacc_plasma as RxVP {
   ref_name varchar
   rx_name varchar
-  vaccine_name varchar [ref: > V.vaccine_name] // TODO: many-to-many relationship
+  vaccine_name varchar
   timing numeric(4,1)  [note: "time after vaccination, Month"]
-  dosage int
+  dosage numeric(2,0)
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
   // todo_more_ip_definition varchar
@@ -258,8 +281,7 @@ Table rx_dms as RxDMS {
 
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxDMS.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxCP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxIP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table antibodies as MAb {
   ab_name varchar [

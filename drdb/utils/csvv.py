@@ -40,7 +40,11 @@ def dump_csv(file_path, records, headers=[],
         encoding = 'utf-8'
 
     with open(file_path, 'w', encoding=encoding) as fd:
-        writer = csv.DictWriter(fd, fieldnames=headers, restval=null_str)
+        writer = csv.DictWriter(
+            fd,
+            fieldnames=headers,
+            restval=null_str,
+            extrasaction='ignore')
         writer.writeheader()
         for row in records:
             for key, val in row.items():

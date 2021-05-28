@@ -14,7 +14,3 @@ ALTER TABLE susc_results
       resistance_level IS NOT NULL
     )
   );
-
--- rx_conv_plasma.infection can be NULL but not empty string
-ALTER TABLE rx_conv_plasma
-  ADD CONSTRAINT chk_infection CHECK (infection != '');
