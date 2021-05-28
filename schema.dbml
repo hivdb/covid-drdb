@@ -232,6 +232,7 @@ Table rx_conv_plasma as RxCP {
   rx_name varchar
   subject_name varchar
   infected_iso_name varchar
+  location varchar
   timing numeric(4,1) [note: "time from symptom on set, Month"]
   titer varchar
   severity severity_enum
@@ -257,6 +258,7 @@ Table rx_vacc_plasma as RxVP {
   rx_name varchar
   subject_name varchar
   vaccine_name varchar [ref: > V.vaccine_name]
+  location varchar
   timing numeric(4,1)  [note: "time after vaccination, Month"]
   dosage numeric(2,0)
   collection_date date

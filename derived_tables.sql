@@ -4,6 +4,7 @@ INSERT INTO rx_conv_plasma
     RX.rx_name,
     RX.subject_name,
     PTH_isolation.iso_name AS infected_iso_name,
+    PTH_isolation.location,
     (PTH_isolation.event_date - PTH_infection.event_date) / 30 AS timing,
     titer,
     PTH_isolation.severity,
@@ -40,6 +41,7 @@ INSERT INTO rx_vacc_plasma
         SH.event_date<=RX.collection_date AND
         SH.vaccine_name IS NOT NULL
     ) AS vaccine_name,
+    PTH_isolation.location,
     (PTH_isolation.event_date - PTH_vaccination.event_date) / 30 AS timing,
     1 AS dosage,
     collection_date,
@@ -72,6 +74,7 @@ INSERT INTO rx_vacc_plasma
         SH.event_date<=RX.collection_date AND
         SH.vaccine_name IS NOT NULL
     ) AS vaccine_name,
+    PTH_isolation.location,
     (PTH_isolation.event_date - PTH_vaccination.event_date) / 30 AS timing,
     2 AS dosage,
     collection_date,
@@ -104,6 +107,7 @@ INSERT INTO rx_vacc_plasma
         SH.event_date<=RX.collection_date AND
         SH.vaccine_name IS NOT NULL
     ) AS vaccine_name,
+    PTH_isolation.location,
     (PTH_isolation.event_date - PTH_vaccination.event_date) / 30 AS timing,
     3 AS dosage,
     collection_date,
