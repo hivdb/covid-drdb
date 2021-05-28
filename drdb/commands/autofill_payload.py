@@ -285,6 +285,8 @@ def autofill_sub_history(tables_dir):
                 row['severity'] = None
             if not row.get('vaccine_name'):
                 row['vaccine_name'] = None
+            if row['event'] not in ('1st dose', '2nd dose', '3rd dose'):
+                row['vaccine_name'] = None
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,

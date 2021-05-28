@@ -14,3 +14,19 @@ ALTER TABLE susc_results
       resistance_level IS NOT NULL
     )
   );
+
+-- In subject_history, vaccine_name must not be empty when event is doses
+ALTER TABLE subject_history
+  ADD CONSTRAINT chk_vaccine_name CHECK (
+    (
+      -- case 1, event is doses
+      event IN ('1st dose', '2nd dose', '3rd dose') AND
+      vaccine_name IS NOT NULL
+    ) OR
+    (
+      -- case 2, event is not doses
+      event NOT IN ('1st dose', '2nd dose', '3rd dose') AND
+      vaccine_name IS NULL
+    )
+  );
+
