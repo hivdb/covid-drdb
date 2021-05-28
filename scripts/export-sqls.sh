@@ -59,16 +59,13 @@ done
 ls payload/tables/rx_antibodies | sort -h | while read filepath; do
     copy_csv payload/tables/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
 done
+copy_csv payload/tables/subjects.csv subjects >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/rx_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_plasma/$filepath rx_plasma >> $TARGET_DIR/02_data_tables.sql
 done
 
-copy_csv payload/tables/patients.csv patients >> $TARGET_DIR/02_data_tables.sql
-ls payload/tables/patient_history | sort -h | while read filepath; do
-    copy_csv payload/tables/patient_history/$filepath patient_history >> $TARGET_DIR/02_data_tables.sql
-done
-ls payload/tables/patient_treatments | sort -h | while read filepath; do
-    copy_csv payload/tables/patient_treatments/$filepath patient_treatments >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/subject_history | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_history/$filepath subject_history >> $TARGET_DIR/02_data_tables.sql
 done
 
 

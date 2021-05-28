@@ -1,13 +1,11 @@
 from .cli import cli
 from .commands import autofill_payload
-from .commands import merge_cpvp
-from .commands import update_pt_history
+from .commands import merge_ptrx_and_plasma
 
 __all__ = [
     'cli',
     'autofill_payload',
-    'merge_cpvp',
-    'update_pt_history'
+    'merge_ptrx_and_plasma'
 ]
 
 

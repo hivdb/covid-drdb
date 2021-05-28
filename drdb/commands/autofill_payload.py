@@ -112,10 +112,10 @@ def autofill_invivos(tables_dir):
                 'gene',
                 'position',
                 'amino_acid',
-                'patient',
+                'subject',
                 'sampling',
-                'num_patients',
-                'num_patients_with_mut',
+                'num_subjects',
+                'num_subjects_with_mut',
                 'section',
                 'note',
                 'date_added',
@@ -164,6 +164,9 @@ def autofill_rx_plasma(tables_dir):
             click.echo('Skip {}'.format(rxcp))
             continue
         rows = load_csv(rxcp)
+        for row in rows:
+            if row.get('subject_name') is None:
+                row['subject_name'] = row['rx_name']
         click.echo('Write to {}'.format(rxcp))
         dump_csv(
             rxcp,
@@ -171,6 +174,7 @@ def autofill_rx_plasma(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
+                'subject_name',
                 'titer',
                 'collection_date',
                 'cumulative_group',
@@ -233,28 +237,42 @@ def sort_csv(file_path, *key_list):
     dump_csv(file_path, records)
 
 
-def autofill_pt(tables_dir):
-    pt_treatments = load_multiple_csvs(tables_dir / 'patient_treatments')
+def autofill_subjects(tables_dir):
+    known_subject_species = {
+        (r['ref_name'], r['subject_name']): r.get('subject_species')
+        for r in load_csv(tables_dir / 'subjects.csv')
+        if r.get('subject_species')
+    }
 
-    patients = sorted(
+    rx_plasma = load_multiple_csvs(tables_dir / 'rx_plasma')
+
+    subjects = sorted(
         unique_everseen([
             {'ref_name': rx['ref_name'],
-             'patient_name': rx['patient_name']}
-            for rx in pt_treatments
+             'subject_name': rx['subject_name'],
+             'subject_species': known_subject_species.get((
+                rx['ref_name'], rx['subject_name']
+             ), 'Human')}
+            for rx in rx_plasma
         ]),
-        key=lambda rx: (rx['ref_name'], rx['patient_name'])
+        key=lambda rx: (rx['ref_name'], rx['subject_name'])
     )
-    click.echo('Write to {}'.format(tables_dir / 'patients.csv'))
+    click.echo('Write to {}'.format(tables_dir / 'subjects.csv'))
     dump_csv(
-        tables_dir / 'patients.csv',
-        records=patients,
-        headers=['ref_name', 'patient_name'],
+        tables_dir / 'subjects.csv',
+        records=subjects,
+        headers=[
+            'ref_name',
+            'subject_name',
+            'subject_species'
+
+        ],
         BOM=True
     )
 
 
-def autofill_pt_history(tables_dir):
-    pth_list = tables_dir / 'patient_history'
+def autofill_sub_history(tables_dir):
+    pth_list = tables_dir / 'subject_history'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(pth))
@@ -273,7 +291,7 @@ def autofill_pt_history(tables_dir):
             records=rows,
             headers=[
                 'ref_name',
-                'patient_name',
+                'subject_name',
                 'event',
                 'event_date_cmp',
                 'event_date',
@@ -305,8 +323,8 @@ def autofill_payload(payload_dir):
     autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
 
-    autofill_pt(tables_dir)
-    autofill_pt_history(tables_dir)
+    autofill_subjects(tables_dir)
+    autofill_sub_history(tables_dir)
 
     antibodies = tables_dir / 'antibodies.csv'
     sort_csv(antibodies, 'ab_name')
