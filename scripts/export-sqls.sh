@@ -43,6 +43,7 @@ copy_csv payload/tables/antibody_articles.csv antibody_articles >> $TARGET_DIR/0
 copy_csv payload/tables/genes.csv genes >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/gene_synonyms.csv gene_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/variants.csv variants >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/variant_synonyms.csv variant_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/isolates.csv isolates >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/isolate_mutations.csv isolate_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/ref_amino_acid.csv ref_amino_acid >> $TARGET_DIR/02_data_tables.sql

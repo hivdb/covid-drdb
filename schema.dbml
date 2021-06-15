@@ -375,6 +375,15 @@ Table variants as VAR {
   var_name varchar [pk]
 }
 
+Table variant_synonyms as VARSYN {
+  var_name varchar [ref: > VAR.var_name]
+  synonym varchar [unique]
+
+  indexes {
+    (var_name, synonym) [pk]
+  }
+}
+
 Table variant_stats as VARStat {
   var_name varchar [ref: > VAR.var_name]
 
@@ -446,12 +455,13 @@ Table gene_synonyms as GS {
     ref: > G.gene,
     note: 'Gene name'
   ]
-  synonym_name varchar [
-    note: 'Gene synonym name'
+  synonym varchar [
+    unique,
+    note: 'Gene synonym'
   ]
 
   indexes {
-    (gene, synonym_name) [pk]
+    (gene, synonym) [pk]
   }
 }
 
