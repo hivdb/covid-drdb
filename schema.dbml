@@ -233,7 +233,7 @@ Table rx_conv_plasma as RxCP {
   subject_name varchar
   infected_iso_name varchar
   location varchar
-  timing numeric(4,1) [note: "time from symptom on set, Month"]
+  timing numeric(4,0) [note: "time from symptom on set, Month"]
   titer varchar
   severity severity_enum
   collection_date date
@@ -259,7 +259,7 @@ Table rx_vacc_plasma as RxVP {
   subject_name varchar
   vaccine_name varchar [ref: > V.vaccine_name]
   location varchar
-  timing numeric(4,1)  [note: "time after vaccination, Month"]
+  timing numeric(4,0)  [note: "time after vaccination, Month"]
   dosage numeric(2,0)
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
