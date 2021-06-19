@@ -158,6 +158,7 @@ Enum subject_species_enum {
   "Human"
   "Mouse"
   "Rat"
+  "Macaque"
 }
 
 Table subjects as Pt {
@@ -238,7 +239,7 @@ Table rx_conv_plasma as RxCP {
   severity severity_enum
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
-  
+
   indexes {
     (ref_name, rx_name) [pk]
   }
