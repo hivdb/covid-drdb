@@ -512,9 +512,9 @@ Enum assay_enum {
 
 Table assay as AS {
   ref_name varchar
-  assay assay_enum
-  upper_titer int
-  lower_titer int
+  assay_name assay_enum
+  upper_titer_limit int
+  lower_titer_limit int
 }
 
 Table fold as FD {
@@ -545,7 +545,7 @@ Table fold as FD {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay assay_enum
+  assay_name assay_enum
   date_added date [not null]
   indexes {
     (rx_name, control_iso_name, iso_name, ref_name, inhibition_pcnt) [pk]
@@ -566,18 +566,20 @@ Table titer as TTR {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay assay_enum
+  assay_name assay_enum
   titer numeric(10,3) [
     note: 'Neutralization titer'
   ]
-  is_control boolean [
-    not null,
-    note: 'Test is control or not'
-  ]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, inhibition_pcnt) [pk]
+    (rx_name, iso_name, ref_name, inhibition_pcnt) [pk]
   }
+}
+
+Table titer_compare as TTC {
+  ref_name varchar
+  control_iso_name varchar [ref: > I.iso_name]
+  iso_name varchar [ref: > I.iso_name]
 }
 
 

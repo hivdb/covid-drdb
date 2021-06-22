@@ -69,6 +69,18 @@ ls payload/tables/subject_history | sort -h | while read filepath; do
     copy_csv payload/tables/subject_history/$filepath subject_history >> $TARGET_DIR/02_data_tables.sql
 done
 
+ls payload/tables/assay | sort -h | while read filepath; do
+    copy_csv payload/tables/assay/$filepath assay >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/titer | sort -h | while read filepath; do
+    copy_csv payload/tables/titer/$filepath titer >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/titer_compare | sort -h | while read filepath; do
+    copy_csv payload/tables/titer_compare/$filepath titer_compare >> $TARGET_DIR/02_data_tables.sql
+done
+
 
 # ## Excluded results
 # copy_csv payload/excluded/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql

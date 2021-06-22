@@ -127,6 +127,46 @@ INSERT INTO rx_vacc_plasma
 
 UPDATE rx_vacc_plasma SET timing=NULL WHERE timing=0;
 
+
+INSERT INTO susc_results
+  SELECT
+    ct.ref_name AS ref_name,
+    ct.rx_name AS rx_name,
+    ct.iso_name AS control_iso_name,
+    exp.iso_name AS iso_name,
+    1 AS ordinal_number,
+    ct.section AS section,
+    CASE WHEN (ct.titer < assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN '='::numeric_cmp_enum
+         WHEN (ct.titer > assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN '>'::numeric_cmp_enum
+         WHEN (ct.titer < assay.lower_titer_limit AND exp.titer > assay.lower_titer_limit) THEN '<'::numeric_cmp_enum
+         ELSE '='::numeric_cmp_enum
+    END AS fold_cmp,
+    ct.titer / exp.titer AS fold,
+    ct.inhibition_pcnt AS inhibition_pcnt,
+    NULL AS resistance_level,
+    CASE WHEN (ct.titer < assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN 'both'::ineffective_enum
+         WHEN (ct.titer > assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN 'experimental'::ineffective_enum
+         WHEN (ct.titer < assay.lower_titer_limit AND exp.titer > assay.lower_titer_limit) THEN 'control'::ineffective_enum
+         ELSE NULL
+    END AS ineffective,
+    ct.cumulative_count AS cumulative_count,
+    ct.assay_name AS assay,
+    ct.date_added AS date_added
+  FROM
+    titer ct,
+    titer exp,
+    titer_compare cmp,
+    assay
+  WHERE
+    ct.ref_name = exp.ref_name AND
+    ct.rx_name = exp.rx_name AND
+    ct.assay_name = exp.assay_name AND
+    ct.ref_name = cmp.ref_name AND
+    ct.iso_name = cmp.control_iso_name AND
+    exp.iso_name = cmp.iso_name AND
+    ct.ref_name = assay.ref_name AND
+    ct.assay_name = assay.assay_name;
+
 INSERT INTO antibody_stats
   SELECT ab_name, 'susc_results' AS stat_group, COUNT(*) AS count
   FROM susc_results S, rx_antibodies RX
