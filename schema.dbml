@@ -159,6 +159,7 @@ Enum subject_species_enum {
   "Mouse"
   "Rat"
   "Macaque"
+  "Hamster"
 }
 
 Table subjects as Pt {
