@@ -313,7 +313,7 @@ def autofill_sub_history(tables_dir):
         )
 
 
-def auto_fill_assay(tables_dir):
+def autofill_assay(tables_dir):
     pth_list = tables_dir / 'assay'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
@@ -338,7 +338,7 @@ def auto_fill_assay(tables_dir):
         )
 
 
-def auto_fill_rx_potency(tables_dir):
+def autofill_rx_potency(tables_dir):
     pth_list = tables_dir / 'rx_potency'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
@@ -442,7 +442,9 @@ def autofill_payload(payload_dir):
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
-    auto_fill_assay(tables_dir)
+    autofill_assay(tables_dir)
+    autofill_rx_fold(tables_dir)
+    autofill_rx_potency(tables_dir)
 
     autofill_subjects(tables_dir)
     autofill_sub_history(tables_dir)
