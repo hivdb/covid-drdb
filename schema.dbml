@@ -511,14 +511,28 @@ Enum assay_enum {
   "MLV pseudovirus"
 }
 
+Enum potency_type_enum {
+  "NT50"
+  "NT90"
+  "IC50"
+  "IC90"
+}
+
 Table assay as AS {
   ref_name varchar
   assay_name assay_enum
-  upper_titer_limit int
-  lower_titer_limit int
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
+  ]
+  potency_upper_limit int
+  potency_lower_limit int
+
+  indexes {
+    (ref_name, assay_name, potency_type) [pk]
+  }
 }
 
-Table fold as FD {
+Table rx_fold as RxF {
   ref_name varchar
   rx_name varchar
   control_iso_name varchar [ref: > I.iso_name]
@@ -526,15 +540,16 @@ Table fold as FD {
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
+  assay_name assay_enum
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
+  ]
   fold_cmp numeric_cmp_enum [
     default: "=",
     note: '"=", ">", or "<"'
   ]
   fold numeric(10,1) [
     note: 'Fold change comparing to wild type'
-  ]
-  inhibition_pcnt numeric(2,0) [
-    note: 'Percentage of inhibition (e.g. IC50, IC90); 0 means unknown or is pending for entering'
   ]
   resistance_level resistance_level_enum [
     note: 'Qualitative result when quantitative result (fold change) is not available'
@@ -546,38 +561,37 @@ Table fold as FD {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay_name assay_enum
   date_added date [not null]
   indexes {
     (rx_name, control_iso_name, iso_name, ref_name, inhibition_pcnt) [pk]
   }
 }
 
-Table titer as TTR {
+Table rx_potency as RxPo {
   ref_name varchar
   rx_name varchar
   iso_name varchar [ref: > I.iso_name]
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
-  inhibition_pcnt numeric(2,0) [
-    note: 'Percentage of inhibition (e.g. IC50, IC90); 0 means unknown or is pending for entering'
+  assay_name assay_enum
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
+  ]
+  potency numeric(10,3) [
+    note: 'Potency value, can be IC50, Titer, etc.'
   ]
   cumulative_count int [
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay_name assay_enum
-  titer numeric(10,3) [
-    note: 'Neutralization titer'
-  ]
   date_added date [not null]
   indexes {
-    (rx_name, iso_name, ref_name, inhibition_pcnt) [pk]
+    (ref_name, rx_name, iso_name, potency_type) [pk]
   }
 }
 
-Table titer_compare as TTC {
+Table ref_potency_pairs as RxPoPair {
   ref_name varchar
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
@@ -603,8 +617,8 @@ Table susc_results as Susc {
   fold numeric(10,1) [
     note: 'Fold change comparing to wild type'
   ]
-  inhibition_pcnt numeric(2,0) [
-    note: 'Percentage of inhibition (e.g. IC50, IC90); 0 means unknown or is pending for entering'
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
   ]
   resistance_level resistance_level_enum [
     note: 'Qualitative result when quantitative result (fold change) is not available'

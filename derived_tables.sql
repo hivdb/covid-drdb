@@ -130,40 +130,65 @@ UPDATE rx_vacc_plasma SET timing=NULL WHERE timing=0;
 
 INSERT INTO susc_results
   SELECT
-    ct.ref_name AS ref_name,
+    cmp.ref_name AS ref_name,
     ct.rx_name AS rx_name,
-    ct.iso_name AS control_iso_name,
-    exp.iso_name AS iso_name,
+    cmp.control_iso_name AS control_iso_name,
+    cmp.iso_name AS iso_name,
     1 AS ordinal_number,
     ct.section AS section,
-    CASE WHEN (ct.titer < assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN '='::numeric_cmp_enum
-         WHEN (ct.titer > assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN '>'::numeric_cmp_enum
-         WHEN (ct.titer < assay.lower_titer_limit AND exp.titer > assay.lower_titer_limit) THEN '<'::numeric_cmp_enum
-         ELSE '='::numeric_cmp_enum
-    END AS fold_cmp,
-    ct.titer / exp.titer AS fold,
-    ct.inhibition_pcnt AS inhibition_pcnt,
+    IF ct.potency_type IN ('NT50', 'NT90') THEN
+      CASE WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN '='::numeric_cmp_enum
+           WHEN (ct.potency > assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN '>'::numeric_cmp_enum
+           WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency > assay.potency_lower_limit) THEN '<'::numeric_cmp_enum
+           ELSE '='::numeric_cmp_enum
+      END
+    ELSE
+      CASE WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN '='::numeric_cmp_enum
+           WHEN (ct.potency < assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN '>'::numeric_cmp_enum
+           WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency < assay.potency_upper_limit) THEN '<'::numeric_cmp_enum
+           ELSE '='::numeric_cmp_enum
+      END
+    END IF AS fold_cmp,
+
+    IF ct.potency_type IN ('NT50', 'NT90') THEN
+      ct.potency / exp.potency
+    ELSE
+      exp.potency / ct.potency
+    END IF AS fold,
+
+    ct.potency_type,
     NULL AS resistance_level,
-    CASE WHEN (ct.titer < assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN 'both'::ineffective_enum
-         WHEN (ct.titer > assay.lower_titer_limit AND exp.titer < assay.lower_titer_limit) THEN 'experimental'::ineffective_enum
-         WHEN (ct.titer < assay.lower_titer_limit AND exp.titer > assay.lower_titer_limit) THEN 'control'::ineffective_enum
-         ELSE NULL
-    END AS ineffective,
+
+    IF ct.potency_type IN ('NT50', 'NT90') THEN
+      CASE WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'both'::numeric_cmp_enum
+           WHEN (ct.potency > assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'experimental'::numeric_cmp_enum
+           WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency > assay.potency_lower_limit) THEN 'control'::numeric_cmp_enum
+           ELSE '='::numeric_cmp_enum
+      END
+    ELSE
+      CASE WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'both'::numeric_cmp_enum
+           WHEN (ct.potency < assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'experimental'::numeric_cmp_enum
+           WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency < assay.potency_upper_limit) THEN 'control'::numeric_cmp_enum
+           ELSE '='::numeric_cmp_enum
+      END
+    END IF AS ineffective,
+
     ct.cumulative_count AS cumulative_count,
     ct.assay_name AS assay,
     ct.date_added AS date_added
   FROM
-    titer ct,
-    titer exp,
-    titer_compare cmp,
+    ref_potency_pairs cmp,
+    rx_potency ct,
+    rx_potency exp,
     assay
   WHERE
-    ct.ref_name = exp.ref_name AND
-    ct.rx_name = exp.rx_name AND
-    ct.assay_name = exp.assay_name AND
     ct.ref_name = cmp.ref_name AND
     ct.iso_name = cmp.control_iso_name AND
+    exp.ref_name = cmp.ref_name AND
     exp.iso_name = cmp.iso_name AND
+    ct.rx_name = exp.rx_name AND
+    ct.assay_name = exp.assay_name AND
+    ct.potency_type = exp.potency_type AND
     ct.ref_name = assay.ref_name AND
     ct.assay_name = assay.assay_name;
 

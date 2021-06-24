@@ -73,12 +73,16 @@ ls payload/tables/assay | sort -h | while read filepath; do
     copy_csv payload/tables/assay/$filepath assay >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/titer | sort -h | while read filepath; do
-    copy_csv payload/tables/titer/$filepath titer >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/rx_fold | sort -h | while read filepath; do
+    copy_csv payload/tables/rx_fold/$filepath rx_fold >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/titer_compare | sort -h | while read filepath; do
-    copy_csv payload/tables/titer_compare/$filepath titer_compare >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/rx_potency | sort -h | while read filepath; do
+    copy_csv payload/tables/rx_potency/$filepath rx_potency >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/ref_potency_pairs | sort -h | while read filepath; do
+    copy_csv payload/tables/ref_potency_pairs/$filepath ref_potency_pairs >> $TARGET_DIR/02_data_tables.sql
 done
 
 
