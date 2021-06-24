@@ -111,6 +111,8 @@ Enum vaccine_type_enum {
 Table vaccines as V {
   vaccine_name varchar [pk]
   vaccine_type vaccine_type_enum
+  developer varchar
+  developer_country varchar
   priority int [
     note: "Display priority; lower number first"
   ]
