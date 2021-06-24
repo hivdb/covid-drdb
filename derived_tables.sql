@@ -174,7 +174,7 @@ INSERT INTO susc_results
     END AS ineffective,
 
     ct.cumulative_count AS cumulative_count,
-    ct.assay_name AS assay,
+    ct.assay_name,
     ct.date_added AS date_added
   FROM
     ref_potency_pairs cmp,
@@ -207,7 +207,7 @@ INSERT INTO susc_results
     resistance_level,
     ineffective,
     cumulative_count,
-    assay_name AS assay,
+    assay_name,
     date_added
   FROM
     rx_fold;

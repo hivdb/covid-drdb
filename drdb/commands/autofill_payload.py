@@ -25,8 +25,8 @@ def autofill_suscs(tables_dir):
                 row['cumulative_count'] = 1
             if not row.get('resistance_level'):
                 row['resistance_level'] = None
-            if not row.get('assay'):
-                row['assay'] = None
+            if not row.get('assay_name'):
+                row['assay_name'] = None
             if not row.get('control_iso_name'):
                 row['control_iso_name'] = 'Control'
             if not row.get('ineffective'):
@@ -57,7 +57,7 @@ def autofill_suscs(tables_dir):
                 'resistance_level',
                 'ineffective',
                 'cumulative_count',
-                'assay',
+                'assay_name',
                 'date_added'
             ],
             BOM=True
@@ -313,6 +313,117 @@ def autofill_sub_history(tables_dir):
         )
 
 
+def auto_fill_assay(tables_dir):
+    pth_list = tables_dir / 'assay'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('potency_type'):
+                row['potency_type'] = "NT50"
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'assay_name',
+                'potency_type',
+                'potency_upper_limit',
+                'potency_lower_limit',
+            ],
+            BOM=True
+        )
+
+
+def auto_fill_rx_potency(tables_dir):
+    pth_list = tables_dir / 'rx_potency'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('potency_type'):
+                row['potency_type'] = "NT50"
+            if not row.get('cumulative_count'):
+                row['cumulative_count'] = 1
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'rx_name',
+                'iso_name',
+                'section',
+                'assay_name',
+                'potency_type',
+                'potency',
+                'cumulative_count',
+                'date_added',
+            ],
+            BOM=True
+        )
+
+
+def autofill_rx_fold(tables_dir):
+    suscs = tables_dir / 'rx_fold'
+    for susc in suscs.iterdir():
+        if susc.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(susc))
+            continue
+        rows = load_csv(susc)
+        for row in rows:
+            if not row.get('fold'):
+                row['fold'] = None
+                row['fold_cmp'] = None
+            elif not row.get('fold_cmp'):
+                row['fold_cmp'] = '='
+            if not row.get('cumulative_count'):
+                row['cumulative_count'] = 1
+            if not row.get('resistance_level'):
+                row['resistance_level'] = None
+            if not row.get('assay_name'):
+                row['assay_name'] = None
+            if not row.get('control_iso_name'):
+                row['control_iso_name'] = 'Control'
+            if not row.get('ineffective'):
+                row['ineffective'] = None
+            if not row.get('potency_type'):
+                row['potency_type'] = 'IC50'
+            if row.get('potency_type') == '0':
+                row['potency_type'] = 'IC50'
+            if row.get('potency_type') == '90':
+                row['potency_type'] = 'IC90'
+            if row.get('potency_type') == '50':
+                row['potency_type'] = 'IC50'
+
+        click.echo('Write to {}'.format(susc))
+        dump_csv(
+            susc,
+            records=rows,
+            headers=[
+                'ref_name',
+                'rx_name',
+                'control_iso_name',
+                'iso_name',
+                'section',
+                'assay_name',
+                'potency_type',
+                'fold_cmp',
+                'fold',
+                'resistance_level',
+                'ineffective',
+                'cumulative_count',
+                'date_added'
+            ],
+            BOM=True
+        )
+
+
 @cli.command()
 @click.argument(
     'payload_dir',
@@ -331,6 +442,7 @@ def autofill_payload(payload_dir):
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
+    auto_fill_assay(tables_dir)
 
     autofill_subjects(tables_dir)
     autofill_sub_history(tables_dir)
@@ -345,3 +457,5 @@ def autofill_payload(payload_dir):
     autofill_suscs(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
+
+
