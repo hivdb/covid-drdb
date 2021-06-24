@@ -508,6 +508,7 @@ Enum assay_enum {
   "pseudovirus"
   "vsv pseudovirus"
   "lentivirus pseudovirus"
+  "HIV pseudovirus"
   "authentic virus"
   "chimeric virus"
   "MLV pseudovirus"
@@ -565,7 +566,7 @@ Table rx_fold as RxF {
   ]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, inhibition_pcnt) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, potency_type) [pk]
   }
 }
 
@@ -635,7 +636,7 @@ Table susc_results as Susc {
   assay assay_enum
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, inhibition_pcnt) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type) [pk]
   }
 }
 

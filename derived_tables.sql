@@ -136,7 +136,7 @@ INSERT INTO susc_results
     cmp.iso_name AS iso_name,
     1 AS ordinal_number,
     ct.section AS section,
-    IF ct.potency_type IN ('NT50', 'NT90') THEN
+    CASE WHEN ct.potency_type IN ('NT50', 'NT90') THEN
       CASE WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN '='::numeric_cmp_enum
            WHEN (ct.potency > assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN '>'::numeric_cmp_enum
            WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency > assay.potency_lower_limit) THEN '<'::numeric_cmp_enum
@@ -148,30 +148,30 @@ INSERT INTO susc_results
            WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency < assay.potency_upper_limit) THEN '<'::numeric_cmp_enum
            ELSE '='::numeric_cmp_enum
       END
-    END IF AS fold_cmp,
+    END AS fold_cmp,
 
-    IF ct.potency_type IN ('NT50', 'NT90') THEN
+    CASE WHEN ct.potency_type IN ('NT50', 'NT90') THEN
       ct.potency / exp.potency
     ELSE
       exp.potency / ct.potency
-    END IF AS fold,
+    END AS fold,
 
     ct.potency_type,
     NULL AS resistance_level,
 
-    IF ct.potency_type IN ('NT50', 'NT90') THEN
-      CASE WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'both'::numeric_cmp_enum
-           WHEN (ct.potency > assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'experimental'::numeric_cmp_enum
-           WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency > assay.potency_lower_limit) THEN 'control'::numeric_cmp_enum
-           ELSE '='::numeric_cmp_enum
-      END
+    CASE WHEN ct.potency_type IN ('NT50', 'NT90') THEN
+        CASE WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'both'::ineffective_enum
+           WHEN (ct.potency > assay.potency_lower_limit AND exp.potency <= assay.potency_lower_limit) THEN 'experimental'::ineffective_enum
+           WHEN (ct.potency <= assay.potency_lower_limit AND exp.potency > assay.potency_lower_limit) THEN 'control'::ineffective_enum
+           ELSE NULL
+        END
     ELSE
-      CASE WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'both'::numeric_cmp_enum
-           WHEN (ct.potency < assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'experimental'::numeric_cmp_enum
-           WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency < assay.potency_upper_limit) THEN 'control'::numeric_cmp_enum
-           ELSE '='::numeric_cmp_enum
+      CASE WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'both'::ineffective_enum
+           WHEN (ct.potency < assay.potency_upper_limit AND exp.potency >= assay.potency_upper_limit) THEN 'experimental'::ineffective_enum
+           WHEN (ct.potency >= assay.potency_upper_limit AND exp.potency < assay.potency_upper_limit) THEN 'control'::ineffective_enum
+           ELSE NULL
       END
-    END IF AS ineffective,
+    END AS ineffective,
 
     ct.cumulative_count AS cumulative_count,
     ct.assay_name AS assay,
@@ -191,6 +191,26 @@ INSERT INTO susc_results
     ct.potency_type = exp.potency_type AND
     ct.ref_name = assay.ref_name AND
     ct.assay_name = assay.assay_name;
+
+
+INSERT INTO susc_results
+  SELECT
+    ref_name,
+    rx_name,
+    control_iso_name,
+    iso_name,
+    1 AS ordinal_number,
+    section AS section,
+    fold_cmp,
+    fold,
+    potency_type,
+    resistance_level,
+    ineffective,
+    cumulative_count,
+    assay_name AS assay,
+    date_added
+  FROM
+    rx_fold;
 
 INSERT INTO antibody_stats
   SELECT ab_name, 'susc_results' AS stat_group, COUNT(*) AS count

@@ -31,8 +31,15 @@ def autofill_suscs(tables_dir):
                 row['control_iso_name'] = 'Control'
             if not row.get('ineffective'):
                 row['ineffective'] = None
-            if not row.get('inhibition_pcnt'):
-                row['inhibition_pcnt'] = 50
+            if not row.get('potency_type'):
+                row['potency_type'] = 'IC50'
+            if row.get('potency_type') == '0':
+                row['potency_type'] = 'IC50'
+            if row.get('potency_type') == '90':
+                row['potency_type'] = 'IC90'
+            if row.get('potency_type') == '50':
+                row['potency_type'] = 'IC50'
+
         click.echo('Write to {}'.format(susc))
         dump_csv(
             susc,
@@ -46,7 +53,7 @@ def autofill_suscs(tables_dir):
                 'section',
                 'fold_cmp',
                 'fold',
-                'inhibition_pcnt',
+                'potency_type',
                 'resistance_level',
                 'ineffective',
                 'cumulative_count',
