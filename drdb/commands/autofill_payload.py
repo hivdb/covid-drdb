@@ -245,10 +245,9 @@ def sort_csv(file_path, *key_list):
 
 
 def autofill_subjects(tables_dir):
-    known_subject_species = {
-        (r['ref_name'], r['subject_name']): r.get('subject_species')
+    known_subjects = {
+        (r['ref_name'], r['subject_name']): r
         for r in load_csv(tables_dir / 'subjects.csv')
-        if r.get('subject_species')
     }
 
     rx_plasma = load_multiple_csvs(tables_dir / 'rx_plasma')
@@ -257,9 +256,17 @@ def autofill_subjects(tables_dir):
         unique_everseen([
             {'ref_name': rx['ref_name'],
              'subject_name': rx['subject_name'],
-             'subject_species': known_subject_species.get((
-                rx['ref_name'], rx['subject_name']
-             ), 'Human')}
+             'subject_species': (
+                 known_subjects
+                 .get((rx['ref_name'], rx['subject_name']), {})
+                 .get('subject_species') or 'Human'
+             ),
+             'num_subjects': (
+                 known_subjects
+                 .get((rx['ref_name'], rx['subject_name']), {})
+                 .get('num_subjects') or 1
+             ),
+             }
             for rx in rx_plasma
         ]),
         key=lambda rx: (rx['ref_name'], rx['subject_name'])
@@ -271,8 +278,8 @@ def autofill_subjects(tables_dir):
         headers=[
             'ref_name',
             'subject_name',
-            'subject_species'
-
+            'subject_species',
+            'num_subjects'
         ],
         BOM=True
     )
@@ -459,5 +466,3 @@ def autofill_payload(payload_dir):
     autofill_suscs(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
-
-
