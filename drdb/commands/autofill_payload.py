@@ -329,7 +329,7 @@ def autofill_assay(tables_dir):
         rows = load_csv(pth)
         for row in rows:
             if not row.get('potency_type'):
-                row['potency_type'] = "NT50"
+                row['potency_type'] = row['potency_type'] or 'NT50'
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,

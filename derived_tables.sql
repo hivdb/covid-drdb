@@ -188,7 +188,8 @@ INSERT INTO susc_results
     exp.iso_name = cmp.iso_name AND
     ct.rx_name = exp.rx_name AND
     ct.assay_name = exp.assay_name AND
-    ct.potency_type = exp.potency_type AND
+    ct.potency_type = assay.potency_type AND
+    exp.potency_type = assay.potency_type AND
     ct.ref_name = assay.ref_name AND
     ct.assay_name = assay.assay_name;
 
