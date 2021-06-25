@@ -328,8 +328,7 @@ def autofill_assay(tables_dir):
             continue
         rows = load_csv(pth)
         for row in rows:
-            if not row.get('potency_type'):
-                row['potency_type'] = row['potency_type'] or 'NT50'
+            row['potency_type'] = row.get('potency_type') or 'NT50'
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -340,6 +339,7 @@ def autofill_assay(tables_dir):
                 'potency_type',
                 'potency_upper_limit',
                 'potency_lower_limit',
+                'potency_unit'
             ],
             BOM=True
         )

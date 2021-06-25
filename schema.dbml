@@ -524,6 +524,11 @@ Enum potency_type_enum {
   "IC90"
 }
 
+Enum potency_unit_enum {
+  "ng/ml"
+  "µM"
+}
+
 Table assay as AS {
   ref_name varchar
   assay_name assay_enum
@@ -532,6 +537,7 @@ Table assay as AS {
   ]
   potency_upper_limit int
   potency_lower_limit int
+  potency_unit potency_unit_enum
 
   indexes {
     (ref_name, assay_name, potency_type) [pk]
