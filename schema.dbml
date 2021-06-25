@@ -507,16 +507,6 @@ Enum ineffective_enum {
   "both"
 }
 
-Enum assay_enum {
-  "pseudovirus"
-  "vsv pseudovirus"
-  "lentivirus pseudovirus"
-  "HIV pseudovirus"
-  "authentic virus"
-  "chimeric virus"
-  "MLV pseudovirus"
-}
-
 Enum potency_type_enum {
   "NT50"
   "NT90"
@@ -529,9 +519,14 @@ Enum potency_unit_enum {
   "µM"
 }
 
-Table assay as AS {
+Enum virus_type_enum {
+  "live-virus"
+  "pseudovirus"
+}
+
+Table experiment_groups as ExpG {
   ref_name varchar
-  assay_name assay_enum
+  virus_type virus_type_enum
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
   ]
@@ -540,8 +535,13 @@ Table assay as AS {
   potency_unit potency_unit_enum
 
   indexes {
-    (ref_name, assay_name, potency_type) [pk]
+    (ref_name, virus_type, potency_type) [pk]
   }
+}
+
+Table assays as A {
+  assay_name varchar [pk]
+  virus_type virus_type_enum
 }
 
 Table rx_fold as RxF {
@@ -552,7 +552,7 @@ Table rx_fold as RxF {
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
-  assay_name assay_enum
+  assay_name varchar [ref: > A.assay_name]
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
   ]
@@ -575,7 +575,7 @@ Table rx_fold as RxF {
   ]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, potency_type) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, assay_name, potency_type) [pk]
   }
 }
 
@@ -586,7 +586,7 @@ Table rx_potency as RxPo {
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
-  assay_name assay_enum
+  assay_name varchar [ref: > A.assay_name]
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
   ]
@@ -599,11 +599,11 @@ Table rx_potency as RxPo {
   ]
   date_added date [not null]
   indexes {
-    (ref_name, rx_name, iso_name, potency_type) [pk]
+    (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
   }
 }
 
-Table ref_potency_pairs as RxPoPair {
+Table ref_isolate_pairs as RxIsoPair {
   ref_name varchar
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
@@ -642,7 +642,7 @@ Table susc_results as Susc {
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
-  assay assay_enum
+  assay_name varchar [ref: > A.assay_name]
   date_added date [not null]
   indexes {
     (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type) [pk]

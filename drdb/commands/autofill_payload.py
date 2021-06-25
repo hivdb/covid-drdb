@@ -320,8 +320,8 @@ def autofill_sub_history(tables_dir):
         )
 
 
-def autofill_assay(tables_dir):
-    pth_list = tables_dir / 'assay'
+def autofill_expgroup(tables_dir):
+    pth_list = tables_dir / 'experiment_groups'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(pth))
@@ -335,7 +335,7 @@ def autofill_assay(tables_dir):
             records=rows,
             headers=[
                 'ref_name',
-                'assay_name',
+                'virus_type',
                 'potency_type',
                 'potency_upper_limit',
                 'potency_lower_limit',
@@ -449,7 +449,7 @@ def autofill_payload(payload_dir):
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
-    autofill_assay(tables_dir)
+    autofill_expgroup(tables_dir)
     autofill_rx_fold(tables_dir)
     autofill_rx_potency(tables_dir)
 

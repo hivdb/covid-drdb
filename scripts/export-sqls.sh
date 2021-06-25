@@ -29,7 +29,8 @@ dbml2sql --postgres schema.dbml > $TARGET_DIR/01_schema.sql
 cat constraints.sql >> $TARGET_DIR/01_schema.sql
 echo "Written to $TARGET_DIR/01_schema.sql"
 
-copy_csv payload/tables/articles.csv articles > $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/assays.csv assays > $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/articles.csv articles >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/article_notes.csv article_notes >> $TARGET_DIR/02_data_tables.sql
 
 copy_csv payload/tables/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
@@ -69,8 +70,8 @@ ls payload/tables/subject_history | sort -h | while read filepath; do
     copy_csv payload/tables/subject_history/$filepath subject_history >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/assay | sort -h | while read filepath; do
-    copy_csv payload/tables/assay/$filepath assay >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/experiment_groups | sort -h | while read filepath; do
+    copy_csv payload/tables/experiment_groups/$filepath experiment_groups >> $TARGET_DIR/02_data_tables.sql
 done
 
 ls payload/tables/rx_fold | sort -h | while read filepath; do
@@ -81,8 +82,8 @@ ls payload/tables/rx_potency | sort -h | while read filepath; do
     copy_csv payload/tables/rx_potency/$filepath rx_potency >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/ref_potency_pairs | sort -h | while read filepath; do
-    copy_csv payload/tables/ref_potency_pairs/$filepath ref_potency_pairs >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/ref_isolate_pairs | sort -h | while read filepath; do
+    copy_csv payload/tables/ref_isolate_pairs/$filepath ref_isolate_pairs >> $TARGET_DIR/02_data_tables.sql
 done
 
 
