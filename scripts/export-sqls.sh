@@ -26,7 +26,7 @@ fi
 mkdir -p $TARGET_DIR
 
 dbml2sql --postgres schema.dbml > $TARGET_DIR/01_schema.sql
-cat constraints.sql >> $TARGET_DIR/01_schema.sql
+cat constraints_pre-import.sql >> $TARGET_DIR/01_schema.sql
 echo "Written to $TARGET_DIR/01_schema.sql"
 
 copy_csv payload/tables/assays.csv assays > $TARGET_DIR/02_data_tables.sql
@@ -128,4 +128,5 @@ echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_upd
 echo "Written to $TARGET_DIR/02_data_tables.sql"
 
 cp derived_tables.sql $TARGET_DIR/03_derived_tables.sql
+cat constraints_post-import.sql >> $TARGET_DIR/03_derived_tables.sql
 echo "Written to $TARGET_DIR/03_derived_tables.sql"
