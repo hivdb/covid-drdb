@@ -137,15 +137,15 @@ INSERT INTO susc_results
     1 AS ordinal_number,
     ctl.section AS section,
     CASE WHEN ctl.potency_type IN ('NT50', 'NT90') THEN
-      CASE WHEN (ctl.potency <= ctl_exp.potency_lower_limit AND tgt.potency <= tgt_exp.potency_lower_limit) THEN '='::numeric_cmp_enum
-           WHEN (ctl.potency > ctl_exp.potency_lower_limit AND tgt.potency <= tgt_exp.potency_lower_limit) THEN '>'::numeric_cmp_enum
-           WHEN (ctl.potency <= ctl_exp.potency_lower_limit AND tgt.potency > tgt_exp.potency_lower_limit) THEN '<'::numeric_cmp_enum
+      CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
+           WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '>'::numeric_cmp_enum
+           WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN '<'::numeric_cmp_enum
            ELSE '='::numeric_cmp_enum
       END
     ELSE
-      CASE WHEN (ctl.potency >= ctl_exp.potency_upper_limit AND tgt.potency >= tgt_exp.potency_upper_limit) THEN '='::numeric_cmp_enum
-           WHEN (ctl.potency < ctl_exp.potency_upper_limit AND tgt.potency >= tgt_exp.potency_upper_limit) THEN '>'::numeric_cmp_enum
-           WHEN (ctl.potency >= ctl_exp.potency_upper_limit AND tgt.potency < tgt_exp.potency_upper_limit) THEN '<'::numeric_cmp_enum
+      CASE WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '='::numeric_cmp_enum
+           WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '>'::numeric_cmp_enum
+           WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN '<'::numeric_cmp_enum
            ELSE '='::numeric_cmp_enum
       END
     END AS fold_cmp,
@@ -160,15 +160,15 @@ INSERT INTO susc_results
     NULL AS resistance_level,
 
     CASE WHEN ctl.potency_type IN ('NT50', 'NT90') THEN
-        CASE WHEN (ctl.potency <= ctl_exp.potency_lower_limit AND tgt.potency <= tgt_exp.potency_lower_limit) THEN 'both'::ineffective_enum
-           WHEN (ctl.potency > ctl_exp.potency_lower_limit AND tgt.potency <= tgt_exp.potency_lower_limit) THEN 'experimental'::ineffective_enum
-           WHEN (ctl.potency <= ctl_exp.potency_lower_limit AND tgt.potency > tgt_exp.potency_lower_limit) THEN 'control'::ineffective_enum
+        CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'both'::ineffective_enum
+           WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'experimental'::ineffective_enum
+           WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN 'control'::ineffective_enum
            ELSE NULL
         END
     ELSE
-      CASE WHEN (ctl.potency >= ctl_exp.potency_upper_limit AND tgt.potency >= tgt_exp.potency_upper_limit) THEN 'both'::ineffective_enum
-           WHEN (ctl.potency < ctl_exp.potency_upper_limit AND tgt.potency >= tgt_exp.potency_upper_limit) THEN 'experimental'::ineffective_enum
-           WHEN (ctl.potency >= ctl_exp.potency_upper_limit AND tgt.potency < tgt_exp.potency_upper_limit) THEN 'control'::ineffective_enum
+      CASE WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'both'::ineffective_enum
+           WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'experimental'::ineffective_enum
+           WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN 'control'::ineffective_enum
            ELSE NULL
       END
     END AS ineffective,
@@ -178,20 +178,8 @@ INSERT INTO susc_results
     ctl.date_added AS date_added
   FROM
     ref_isolate_pairs pair,
-    rx_potency ctl
-      JOIN assays ctl_assay ON
-        ctl.assay_name = ctl_assay.assay_name
-      JOIN experiment_groups ctl_exp ON
-        ctl.ref_name = ctl_exp.ref_name AND
-        ctl_assay.virus_type = ctl_exp.virus_type AND
-        ctl.potency_type = ctl_exp.potency_type,
+    rx_potency ctl,
     rx_potency tgt
-      JOIN assays tgt_assay ON
-        tgt.assay_name = tgt_assay.assay_name
-      JOIN experiment_groups tgt_exp ON
-        tgt.ref_name = tgt_exp.ref_name AND
-        tgt_assay.virus_type = tgt_exp.virus_type AND
-        tgt.potency_type = tgt_exp.potency_type
   WHERE
     ctl.ref_name = pair.ref_name AND
     ctl.iso_name = pair.control_iso_name AND

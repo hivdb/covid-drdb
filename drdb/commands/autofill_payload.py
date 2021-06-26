@@ -320,31 +320,6 @@ def autofill_sub_history(tables_dir):
         )
 
 
-def autofill_expgroup(tables_dir):
-    pth_list = tables_dir / 'experiment_groups'
-    for pth in pth_list.iterdir():
-        if pth.suffix.lower() != '.csv':
-            click.echo('Skip {}'.format(pth))
-            continue
-        rows = load_csv(pth)
-        for row in rows:
-            row['potency_type'] = row.get('potency_type') or 'NT50'
-        click.echo('Write to {}'.format(pth))
-        dump_csv(
-            pth,
-            records=rows,
-            headers=[
-                'ref_name',
-                'virus_type',
-                'potency_type',
-                'potency_upper_limit',
-                'potency_lower_limit',
-                'potency_unit'
-            ],
-            BOM=True
-        )
-
-
 def autofill_rx_potency(tables_dir):
     pth_list = tables_dir / 'rx_potency'
     for pth in pth_list.iterdir():
@@ -353,10 +328,8 @@ def autofill_rx_potency(tables_dir):
             continue
         rows = load_csv(pth)
         for row in rows:
-            if not row.get('potency_type'):
-                row['potency_type'] = "NT50"
-            if not row.get('cumulative_count'):
-                row['cumulative_count'] = 1
+            row['potency_type'] = row.get('potency_type') or 'NT50'
+            row['cumulative_count'] = row.get('cumulative_count') or 1
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -370,6 +343,9 @@ def autofill_rx_potency(tables_dir):
                 'potency_type',
                 'potency',
                 'cumulative_count',
+                'potency_upper_limit',
+                'potency_lower_limit',
+                'potency_unit',
                 'date_added',
             ],
             BOM=True
@@ -449,7 +425,6 @@ def autofill_payload(payload_dir):
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
     autofill_dms(tables_dir)
-    autofill_expgroup(tables_dir)
     autofill_rx_fold(tables_dir)
     autofill_rx_potency(tables_dir)
 

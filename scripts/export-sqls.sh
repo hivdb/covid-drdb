@@ -70,10 +70,6 @@ ls payload/tables/subject_history | sort -h | while read filepath; do
     copy_csv payload/tables/subject_history/$filepath subject_history >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/experiment_groups | sort -h | while read filepath; do
-    copy_csv payload/tables/experiment_groups/$filepath experiment_groups >> $TARGET_DIR/02_data_tables.sql
-done
-
 ls payload/tables/rx_fold | sort -h | while read filepath; do
     copy_csv payload/tables/rx_fold/$filepath rx_fold >> $TARGET_DIR/02_data_tables.sql
 done
