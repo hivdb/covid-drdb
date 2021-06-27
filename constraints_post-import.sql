@@ -11,6 +11,8 @@ ALTER TABLE subjects
     hasSubjectHistory(ref_name, subject_name) IS TRUE
   );
 
+-- for each iso_name in rx_potency, it must exist in ref_isolate_pairs either as
+-- control_iso_name or as iso_name
 CREATE FUNCTION isIsolateReferred(rname varchar, iname varchar) RETURNS boolean AS $$
   SELECT EXISTS (
     SELECT 1 FROM ref_isolate_pairs P

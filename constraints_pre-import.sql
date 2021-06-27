@@ -30,6 +30,13 @@ ALTER TABLE subject_history
     )
   );
 
+-- severity should only be presented when event is infection
+ALTER TABLE subject_history
+  ADD CONSTRAINT chk_severity CHECK (
+    event = 'infection' OR
+    severity IS NULL
+  );
+
 ALTER TABLE rx_potency
   ADD CONSTRAINT chk_potency_limit_and_unit CHECK (
     (
