@@ -507,6 +507,7 @@ Enum assay_enum {
   "pseudovirus"
   "vsv pseudovirus"
   "lentivirus pseudovirus"
+  "HIV pseudovirus"
   "authentic virus"
   "chimeric virus"
   "MLV pseudovirus"
