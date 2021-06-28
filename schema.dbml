@@ -633,7 +633,7 @@ Table susc_results as Susc {
   assay_name varchar [ref: > A.assay_name]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type, assay_name) [pk]
   }
 }
 
