@@ -178,14 +178,15 @@ INSERT INTO susc_results
     ctl.date_added AS date_added
   FROM
     ref_isolate_pairs pair,
-    rx_potency ctl,
-    rx_potency tgt
+    rx_potency ctl JOIN assays AS ctl_assay ON ctl_assay.assay_name = ctl.assay_name,
+    rx_potency tgt JOIN assays AS tgt_assay ON tgt_assay.assay_name = tgt.assay_name
   WHERE
     ctl.ref_name = pair.ref_name AND
     ctl.iso_name = pair.control_iso_name AND
     tgt.ref_name = pair.ref_name AND
     tgt.iso_name = pair.iso_name AND
-    ctl.rx_name = tgt.rx_name;
+    ctl.rx_name = tgt.rx_name AND
+    ctl_assay.virus_type = tgt_assay.virus_type;
 
 
 INSERT INTO susc_results
