@@ -509,8 +509,10 @@ Enum ineffective_enum {
 
 Enum potency_type_enum {
   "NT50"
+  "NT80"
   "NT90"
   "IC50"
+  "IC80"
   "IC90"
 }
 
@@ -595,6 +597,10 @@ Table ref_isolate_pairs as RxIsoPair {
   ref_name varchar
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
+
+  indexes {
+    (ref_name, control_iso_name, iso_name) [pk]
+  }
 }
 
 

@@ -67,4 +67,3 @@ $$;
 --   ADD CONSTRAINT chk_susc_results CHECK (
 --     isSuscRecordCreated(ref_name, rx_name, iso_name) IS TRUE
 --   );
-

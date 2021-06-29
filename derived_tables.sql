@@ -136,7 +136,7 @@ INSERT INTO susc_results
     pair.iso_name AS iso_name,
     1 AS ordinal_number,
     ctl.section AS section,
-    CASE WHEN ctl.potency_type IN ('NT50', 'NT90') THEN
+    CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
       CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
            WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '>'::numeric_cmp_enum
            WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN '<'::numeric_cmp_enum
@@ -150,7 +150,7 @@ INSERT INTO susc_results
       END
     END AS fold_cmp,
 
-    CASE WHEN ctl.potency_type IN ('NT50', 'NT90') THEN
+    CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
       ctl.potency / tgt.potency
     ELSE
       tgt.potency / ctl.potency
@@ -159,7 +159,7 @@ INSERT INTO susc_results
     ctl.potency_type,
     NULL AS resistance_level,
 
-    CASE WHEN ctl.potency_type IN ('NT50', 'NT90') THEN
+    CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
         CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'both'::ineffective_enum
            WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'experimental'::ineffective_enum
            WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN 'control'::ineffective_enum
@@ -186,6 +186,7 @@ INSERT INTO susc_results
     tgt.ref_name = pair.ref_name AND
     tgt.iso_name = pair.iso_name AND
     ctl.rx_name = tgt.rx_name AND
+    ctl.potency_type = tgt.potency_type AND
     ctl_assay.virus_type = tgt_assay.virus_type;
 
 

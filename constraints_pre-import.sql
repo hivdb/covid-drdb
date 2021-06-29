@@ -41,13 +41,13 @@ ALTER TABLE rx_potency
   ADD CONSTRAINT chk_potency_limit_and_unit CHECK (
     (
       -- case 1
-      potency_type IN ('NT50', 'NT90') AND
+      potency_type IN ('NT50', 'NT80', 'NT90') AND
       potency_lower_limit IS NOT NULL AND
       potency_unit IS NULL
     ) OR
     (
       -- case 2
-      potency_type IN ('IC50', 'IC90') AND
+      potency_type IN ('IC50', 'IC80', 'IC90') AND
       potency_upper_limit IS NOT NULL AND
       potency_unit IS NOT NULL
     )
