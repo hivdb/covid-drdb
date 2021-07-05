@@ -1,12 +1,12 @@
 #! /bin/bash
 
-set -e
-
-cd $(dirname $0)/..
-
 DBML2SQL=$(which dbml2sql)
 GSTAT=$(which gstat)
 TARGET_DIR="local/sqls"
+
+set -e
+
+cd $(dirname $0)/..
 
 function copy_csv() {
     source_csv=$1
@@ -20,7 +20,7 @@ EOF
 }
 
 if [ ! -x "$DBML2SQL" ]; then
-    @npm install -g @dbml/cli
+    npm install -g @dbml/cli
 fi
 
 mkdir -p $TARGET_DIR
