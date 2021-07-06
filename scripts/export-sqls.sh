@@ -1,7 +1,7 @@
 #! /bin/bash
 
 DBML2SQL=$(which dbml2sql)
-GSTAT=$(which gstat)
+DOS2UNIX=$(which dos2unix)
 TARGET_DIR="local/sqls"
 
 set -e
@@ -21,6 +21,10 @@ EOF
 
 if [ ! -x "$DBML2SQL" ]; then
     npm install -g @dbml/cli
+fi
+
+if [ ! -x "$DOS2UNIX" ]; then
+    brew install dos2unix
 fi
 
 mkdir -p $TARGET_DIR

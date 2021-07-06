@@ -513,6 +513,7 @@ Enum potency_type_enum {
   "IC50"
   "IC80"
   "IC90"
+  "IC100"
 }
 
 Enum potency_unit_enum {
