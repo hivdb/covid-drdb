@@ -519,6 +519,7 @@ Enum potency_type_enum {
 Enum potency_unit_enum {
   "ng/ml"
   "µM"
+  "pM"
 }
 
 Enum virus_type_enum {
