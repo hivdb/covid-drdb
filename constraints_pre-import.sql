@@ -20,8 +20,8 @@ ALTER TABLE subject_history
   ADD CONSTRAINT chk_vaccine_name CHECK (
     (
       -- case 1, event is doses
-      event IN ('1st dose', '2nd dose', '3rd dose') AND
-      vaccine_name IS NOT NULL
+      event IN ('1st dose', '2nd dose', '3rd dose')
+      -- AND vaccine_name IS NOT NULL
     ) OR
     (
       -- case 2, event is not doses

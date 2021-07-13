@@ -227,7 +227,8 @@ INSERT INTO vaccine_stats
   FROM susc_results S, rx_vacc_plasma RX
   WHERE
     RX.ref_name=S.ref_name AND
-    RX.rx_name=S.rx_name
+    RX.rx_name=S.rx_name AND
+    vaccine_name IS NOT NULL
   GROUP BY vaccine_name
   ORDER BY count DESC, vaccine_name;
 
