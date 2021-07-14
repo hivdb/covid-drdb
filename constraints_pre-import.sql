@@ -18,7 +18,7 @@ ALTER TABLE susc_results
 -- In subject_history, vaccine_name must be empty when event is not doses
 ALTER TABLE subject_history
   ADD CONSTRAINT chk_vaccine_name CHECK (
-    event NOT IN ('1st dose', '2nd dose', '3rd dose') AND
+    event IN ('1st dose', '2nd dose', '3rd dose') OR
     vaccine_name IS NULL
   );
 
