@@ -141,16 +141,18 @@ INSERT INTO susc_results
     1 AS ordinal_number,
     ctl.section AS section,
     CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
-      CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
-           WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '>'::numeric_cmp_enum
-           WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN '<'::numeric_cmp_enum
-           ELSE '='::numeric_cmp_enum
+      CASE
+        WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
+        WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '>'::numeric_cmp_enum
+        WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN '<'::numeric_cmp_enum
+        ELSE '='::numeric_cmp_enum
       END
     ELSE
-      CASE WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '='::numeric_cmp_enum
-           WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '>'::numeric_cmp_enum
-           WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN '<'::numeric_cmp_enum
-           ELSE '='::numeric_cmp_enum
+      CASE
+        WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '='::numeric_cmp_enum
+        WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN '>'::numeric_cmp_enum
+        WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN '<'::numeric_cmp_enum
+        ELSE '='::numeric_cmp_enum
       END
     END AS fold_cmp,
 
@@ -164,16 +166,18 @@ INSERT INTO susc_results
     NULL AS resistance_level,
 
     CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
-        CASE WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'both'::ineffective_enum
-           WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'experimental'::ineffective_enum
-           WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN 'control'::ineffective_enum
-           ELSE NULL
-        END
+      CASE
+        WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'both'::ineffective_enum
+        WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'experimental'::ineffective_enum
+        WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency > tgt.potency_lower_limit) THEN 'control'::ineffective_enum
+        ELSE NULL
+      END
     ELSE
-      CASE WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'both'::ineffective_enum
-           WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'experimental'::ineffective_enum
-           WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN 'control'::ineffective_enum
-           ELSE NULL
+      CASE
+        WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'both'::ineffective_enum
+        WHEN (ctl.potency < ctl.potency_upper_limit AND tgt.potency >= tgt.potency_upper_limit) THEN 'experimental'::ineffective_enum
+        WHEN (ctl.potency >= ctl.potency_upper_limit AND tgt.potency < tgt.potency_upper_limit) THEN 'control'::ineffective_enum
+        ELSE NULL
       END
     END AS ineffective,
 
@@ -191,7 +195,19 @@ INSERT INTO susc_results
     tgt.iso_name = pair.iso_name AND
     ctl.rx_name = tgt.rx_name AND
     ctl.potency_type = tgt.potency_type AND
-    ctl_assay.virus_type = tgt_assay.virus_type;
+    CASE WHEN EXISTS (
+      SELECT 1 FROM rx_potency strict_tgt
+      WHERE
+        tgt.ref_name = strict_tgt.ref_name AND
+        tgt.rx_name = strict_tgt.rx_name AND
+        tgt.iso_name = strict_tgt.iso_name AND
+        tgt.potency_type = strict_tgt.potency_type AND
+        ctl.assay_name = strict_tgt.assay_name
+    ) THEN
+      ctl.assay_name = tgt.assay_name
+    ELSE
+      ctl_assay.virus_type = tgt_assay.virus_type
+    END;
 
 
 INSERT INTO susc_results
