@@ -162,6 +162,7 @@ Enum subject_species_enum {
   "Rat"
   "Macaque"
   "Hamster"
+  "HyperIG" // Hyperimmune immunoglobulin TODO: this should be another type of Rx
 }
 
 Table subjects as Pt {
