@@ -195,6 +195,8 @@ INSERT INTO susc_results
     tgt.iso_name = pair.iso_name AND
     ctl.rx_name = tgt.rx_name AND
     ctl.potency_type = tgt.potency_type AND
+    ctl.potency != 0 AND
+    tgt.potency != 0 AND
     CASE WHEN EXISTS (
       SELECT 1 FROM rx_potency strict_tgt
       WHERE
