@@ -15,6 +15,38 @@ ALTER TABLE susc_results
     )
   );
 
+-- In rx_potency, potency must be greater than 0
+CREATE FUNCTION check_potency_nonzero(
+  potency NUMERIC(10,3),
+  ref_name VARCHAR,
+  rx_name VARCHAR,
+  iso_name VARCHAR,
+  potency_type VARCHAR,
+  lower_limit NUMERIC(10,3),
+  upper_limit NUMERIC(10,3)
+) RETURNS BOOLEAN
+AS
+$$
+DECLARE
+  lim NUMERIC(10,3);
+  msg VARCHAR;
+BEGIN
+  IF potency > 0 THEN
+    RETURN TRUE;
+  END IF;
+  lim := lower_limit;
+  msg := FORMAT('(potency_lower_limit for %s)', potency_type);
+  IF potency_type LIKE 'IC%' THEN
+    lim := upper_limit;
+    msg := FORMAT('(potency_upper_limit for %s)', potency_type);
+  END IF;
+  RAISE EXCEPTION E'rx_potency.potency must be greater than 0 (ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m potency=\x1b[1m%\x1b[0m); consider changing it to \x1b[1m%\x1b[0m %', ref_name, rx_name, iso_name, potency, lim, msg;
+END;
+$$ LANGUAGE PLPGSQL IMMUTABLE;
+
+ALTER TABLE rx_potency
+  ADD CONSTRAINT chk_potency_nonzero CHECK (check_potency_nonzero(potency, ref_name, rx_name, iso_name, potency_type::text, potency_lower_limit, potency_upper_limit));
+
 -- In subject_history, vaccine_name must be empty when event is not doses
 ALTER TABLE subject_history
   ADD CONSTRAINT chk_vaccine_name CHECK (
