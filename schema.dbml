@@ -510,6 +510,7 @@ Enum potency_type_enum {
   "NT50"
   "NT80"
   "NT90"
+  "NT100"
   "IC50"
   "IC80"
   "IC90"
