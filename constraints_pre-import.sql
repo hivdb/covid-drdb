@@ -15,19 +15,11 @@ ALTER TABLE susc_results
     )
   );
 
--- In subject_history, vaccine_name must not be empty when event is doses
+-- In subject_history, vaccine_name must be empty when event is not doses
 ALTER TABLE subject_history
   ADD CONSTRAINT chk_vaccine_name CHECK (
-    (
-      -- case 1, event is doses
-      event IN ('1st dose', '2nd dose', '3rd dose')
-      -- AND vaccine_name IS NOT NULL
-    ) OR
-    (
-      -- case 2, event is not doses
-      event NOT IN ('1st dose', '2nd dose', '3rd dose') AND
-      vaccine_name IS NULL
-    )
+    event NOT IN ('1st dose', '2nd dose', '3rd dose') AND
+    vaccine_name IS NULL
   );
 
 -- severity should only be presented when event is infection
