@@ -6,64 +6,6 @@ from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv, load_multiple_csvs
 
 
-def autofill_suscs(tables_dir):
-    suscs = tables_dir / 'susc_results'
-    for susc in suscs.iterdir():
-        if susc.suffix.lower() != '.csv':
-            click.echo('Skip {}'.format(susc))
-            continue
-        rows = load_csv(susc)
-        for row in rows:
-            if not row.get('fold'):
-                row['fold'] = None
-                row['fold_cmp'] = None
-            elif not row.get('fold_cmp'):
-                row['fold_cmp'] = '='
-            if not row.get('ordinal_number'):
-                row['ordinal_number'] = 1
-            if not row.get('cumulative_count'):
-                row['cumulative_count'] = 1
-            if not row.get('resistance_level'):
-                row['resistance_level'] = None
-            if not row.get('assay_name'):
-                row['assay_name'] = None
-            if not row.get('control_iso_name'):
-                row['control_iso_name'] = 'Control'
-            if not row.get('ineffective'):
-                row['ineffective'] = None
-            if not row.get('potency_type'):
-                row['potency_type'] = 'IC50'
-            if row.get('potency_type') == '0':
-                row['potency_type'] = 'IC50'
-            if row.get('potency_type') == '90':
-                row['potency_type'] = 'IC90'
-            if row.get('potency_type') == '50':
-                row['potency_type'] = 'IC50'
-
-        click.echo('Write to {}'.format(susc))
-        dump_csv(
-            susc,
-            records=rows,
-            headers=[
-                'ref_name',
-                'rx_name',
-                'control_iso_name',
-                'iso_name',
-                'ordinal_number',
-                'section',
-                'fold_cmp',
-                'fold',
-                'potency_type',
-                'resistance_level',
-                'ineffective',
-                'cumulative_count',
-                'assay_name',
-                'date_added'
-            ],
-            BOM=True
-        )
-
-
 def autofill_invitros(tables_dir):
     invitros = tables_dir / 'invitro_selection_results'
     for invitro in invitros.iterdir():
@@ -420,7 +362,6 @@ def autofill_payload(payload_dir):
     payload_dir = Path(payload_dir)
     tables_dir = payload_dir / 'tables'
     autofill_rx(tables_dir)
-    autofill_suscs(tables_dir)
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
@@ -438,6 +379,5 @@ def autofill_payload(payload_dir):
 
     tables_dir = payload_dir / 'excluded'
     autofill_rx(tables_dir)
-    autofill_suscs(tables_dir)
     autofill_invivos(tables_dir)
     autofill_rx_plasma(tables_dir)
