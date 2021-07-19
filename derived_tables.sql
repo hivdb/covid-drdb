@@ -162,7 +162,11 @@ INSERT INTO susc_results
       tgt.potency / ctl.potency
     END AS fold,
 
-    ctl.potency_type,
+    tgt.potency_type AS potency_type,
+    ctl.potency AS control_potency,
+    tgt.potency AS potency,
+    tgt.potency_unit AS potency_unit,
+
     NULL AS resistance_level,
 
     CASE WHEN ctl.potency_type IN ('NT50', 'NT80', 'NT90') THEN
@@ -194,6 +198,13 @@ INSERT INTO susc_results
     tgt.ref_name = pair.ref_name AND
     tgt.iso_name = pair.iso_name AND
     ctl.rx_name = tgt.rx_name AND
+    (
+      (
+        ctl.potency_unit IS NULL AND
+        tgt.potency_unit IS NULL
+      ) OR
+      ctl.potency_unit = tgt.potency_unit
+    ) AND
     ctl.potency_type = tgt.potency_type AND
     CASE WHEN EXISTS (
       SELECT 1 FROM rx_potency strict_tgt
@@ -221,6 +232,9 @@ INSERT INTO susc_results
     fold_cmp,
     fold,
     potency_type,
+    NULL as control_potency,
+    NULL as potency,
+    NULL as potency_unit,
     resistance_level,
     ineffective,
     cumulative_count,

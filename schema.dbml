@@ -581,7 +581,7 @@ Table rx_potency as RxPo {
     note: 'Potency type (e.g. IC50, IC90)'
   ]
   potency numeric(10,3) [
-    note: 'Potency value, can be IC50, Titer, etc.'
+    note: 'Potency against this isolate, can be IC50, Titer, etc.'
   ]
   cumulative_count int [
     default: 1,
@@ -589,7 +589,9 @@ Table rx_potency as RxPo {
   ]
   potency_upper_limit numeric(10,3)
   potency_lower_limit numeric(10,3)
-  potency_unit potency_unit_enum
+  potency_unit potency_unit_enum [
+    note: 'Unit used by the potency value. Can be ng/ml, µM or pM'
+  ]
   date_added date [not null]
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
@@ -628,6 +630,15 @@ Table susc_results as Susc {
   ]
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
+  ]
+  control_potency numeric(10,3) [
+    note: 'Potency against control isolate'
+  ]
+  potency numeric(10,3) [
+    note: 'Potency against experimental isolate'
+  ]
+  potency_unit potency_unit_enum [
+    note: 'Unit used by the control & exp potency value. Can be ng/ml, µM or pM'
   ]
   resistance_level resistance_level_enum [
     note: 'Qualitative result when quantitative result (fold change) is not available'

@@ -57,7 +57,7 @@ DO $$
   BEGIN
     FOR row in SELECT * FROM rx_potency LOOP
       IF NOT isSuscRecordDerived(row.ref_name, row.rx_name, row.iso_name) THEN
-        RAISE EXCEPTION E'Derived `susc_results` is not found for `rx_potency` ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m; check if the paired control/exp isolate for this rx_name exists', row.ref_name, row.rx_name, row.iso_name;
+        RAISE EXCEPTION E'Derived `susc_results` is not found for `rx_potency` ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m; check if the paired control/exp isolate for this rx_name exists, and if their potency_type and potency_unit are matched', row.ref_name, row.rx_name, row.iso_name;
       END IF;
     END LOOP;
   END
