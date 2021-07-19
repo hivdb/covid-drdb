@@ -86,9 +86,6 @@ done
 
 # ## Excluded results
 # copy_csv payload/excluded/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
-# ls payload/excluded/susc_results | sort -h | while read filepath; do
-#     copy_csv payload/excluded/susc_results/$filepath susc_results >> $TARGET_DIR/02_data_tables.sql
-# done
 # # ls payload/excluded/invitro_selection_results | sort -h | while read filepath; do
 # #     copy_csv payload/excluded/invitro_selection_results/$filepath invitro_selection_results >> $TARGET_DIR/02_data_tables.sql
 # # done
