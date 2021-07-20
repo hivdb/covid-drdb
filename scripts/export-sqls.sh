@@ -125,6 +125,9 @@ echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_upd
 
 echo "Written to $TARGET_DIR/02_data_tables.sql"
 
-cp derived_tables.sql $TARGET_DIR/03_derived_tables.sql
+echo '' > $TARGET_DIR/03_derived_tables.sql
+ls derived_tables/*.sql | sort -h | while read filepath; do
+    cat $filepath >> $TARGET_DIR/03_derived_tables.sql
+done
 cat constraints_post-import.sql >> $TARGET_DIR/03_derived_tables.sql
 echo "Written to $TARGET_DIR/03_derived_tables.sql"

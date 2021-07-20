@@ -64,18 +64,6 @@ Table article_notes as RN {
   note varchar
 }
 
-Table article_stats as RStat {
-  ref_name varchar [ref: > R.ref_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (ref_name, stat_group) [pk]
-    count
-  }
-}
-
 Table treatments as Rx {
   ref_name varchar [ref: > R.ref_name]
   rx_name varchar [note: 'Name of the treatment']
@@ -83,20 +71,7 @@ Table treatments as Rx {
   indexes {
     (ref_name, rx_name) [pk]
   }
-  //treatment_type varchar [
-  //  not null,
-  //  ref: > RxType.treatment_type,
-  //  note: 'Type of the treatment'
-  //]
 }
-
-//Table lu_treatment_types as RxType {
-//  treatment_type varchar [
-//    pk,
-//    note: 'Type of a treatment'
-//  ]
-//}
-
 
 // TODO: add rx_vaccines to allow many-to-many relationship
 // between rxvp and vaccines tables
@@ -125,16 +100,6 @@ Table vaccine_efficacy as VE {
   design varchar
   lower_bound numeric(2,0)
   upper_bound numeric(2,0)
-}
-
-Table vaccine_stats as VStat {
-  vaccine_name varchar [ref: > V.vaccine_name]
-  stat_group varchar
-  count int
-
-  indexes {
-    (vaccine_name, stat_group) [pk]
-  }
 }
 
 Table rx_antibodies as RxMAb {
@@ -232,52 +197,6 @@ Table rx_plasma as RxP {
 }
 ref: RxP.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 
-
-Table rx_conv_plasma as RxCP {
-  // derived table from rx_conv_plasma and subject_history
-  ref_name varchar
-  rx_name varchar
-  subject_name varchar
-  infected_iso_name varchar
-  location varchar
-  timing numeric(4,0) [note: "time from symptom on set, Month"]
-  titer varchar
-  severity severity_enum
-  collection_date date
-  cumulative_group varchar [note: "Cumulative group for cumulating results"]
-
-  indexes {
-    (ref_name, rx_name) [pk]
-  }
-}
-
-Table conv_plasma_stats as CPStat {
-  stat_group varchar [pk]
-  count int
-
-  indexes {
-    count
-  }
-}
-
-Table rx_vacc_plasma as RxVP {
-  ref_name varchar
-  rx_name varchar
-  subject_name varchar
-  vaccine_name varchar [ref: > V.vaccine_name]
-  location varchar
-  timing numeric(4,0)  [note: "time after vaccination, Month"]
-  dosage numeric(2,0)
-  collection_date date
-  cumulative_group varchar [note: "Cumulative group for cumulating results"]
-  // todo_more_ip_definition varchar
-
-  indexes {
-    (ref_name, rx_name) [pk]
-  }
-}
-
-
 Table rx_dms as RxDMS {
   ref_name varchar
   rx_name varchar
@@ -307,17 +226,6 @@ Table antibodies as MAb {
   ]
   // todo_more_mab_definition varchar
   date_added date [not null]
-}
-
-Table antibody_stats as MAbStat {
-  ab_name varchar [ref: > MAb.ab_name]
-  stat_group varchar
-  count int
-
-  indexes {
-    (ab_name, stat_group) [pk]
-    count
-  }
 }
 
 Table antibody_articles as MabR {
@@ -391,18 +299,6 @@ Table variant_synonyms as VARSYN {
   }
 }
 
-Table variant_stats as VARStat {
-  var_name varchar [ref: > VAR.var_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (var_name, stat_group) [pk]
-    count
-  }
-}
-
 Table isolates as I {
 
   iso_name varchar [
@@ -432,18 +328,6 @@ Table isolates as I {
     var_name
     gisaid_id
     genbank_accn
-  }
-}
-
-Table isolate_stats as IStat {
-  iso_name varchar [ref: > I.iso_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (iso_name, stat_group) [pk]
-    count
   }
 }
 
@@ -608,55 +492,6 @@ Table ref_isolate_pairs as RxIsoPair {
   }
 }
 
-
-Table susc_results as Susc {
-  ref_name varchar
-  rx_name varchar
-  control_iso_name varchar [ref: > I.iso_name]
-  iso_name varchar [ref: > I.iso_name]
-  ordinal_number int [
-    default: 1,
-    note: 'Ordinal number for the same ref/Rx/isolate when multiple results are presented'
-  ]
-  section varchar [
-    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
-  ]
-  fold_cmp numeric_cmp_enum [
-    default: "=",
-    note: '"=", ">", or "<"'
-  ]
-  fold numeric(10,1) [
-    note: 'Fold change comparing to wild type'
-  ]
-  potency_type potency_type_enum [
-    note: 'Potency type (e.g. IC50, IC90)'
-  ]
-  control_potency numeric(10,3) [
-    note: 'Potency against control isolate'
-  ]
-  potency numeric(10,3) [
-    note: 'Potency against experimental isolate'
-  ]
-  potency_unit potency_unit_enum [
-    note: 'Unit used by the control & exp potency value. Can be ng/ml, µM or pM'
-  ]
-  resistance_level resistance_level_enum [
-    note: 'Qualitative result when quantitative result (fold change) is not available'
-  ]
-  ineffective ineffective_enum [
-    note: 'Rx has no effect on control sequence or experimental sequence'
-  ]
-  cumulative_count int [
-    default: 1,
-    note: 'Cumulative count of matching results (when multiple)'
-  ]
-  assay_name varchar [ref: > A.assay_name]
-  date_added date [not null]
-  indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type, assay_name) [pk]
-  }
-}
-
 Table invitro_selection_results as Vitro {
   ref_name varchar
   rx_name varchar
@@ -775,4 +610,240 @@ Ref: DMSEscape.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Table last_update {
   scope varchar [pk]
   last_update timestamptz [not null]
+}
+
+// Derived tables begin
+
+Enum rx_type_enum {
+  "antibody"
+  "conv-plasma"
+  "vacc-plasma"
+}
+
+Enum iso_type_enum {
+  "indiv-mut"
+  "combo-muts"
+}
+
+
+Table susc_summary as SSmry {
+  rx_type rx_type_enum
+  iso_type iso_type_enum
+
+  ref_name varchar [
+    note: 'Study/article name'
+  ]
+  antibody_names varchar [
+    note: 'Comma separated antibody names'
+  ]
+  antibody_order integer [
+    note: 'Order when sorting by antibody'
+  ]
+  vaccine_names varchar [
+    note: 'Comma separated vaccine names'
+  ]
+  vaccine_order integer [
+    note: 'Order when sorting by vaccine'
+  ]
+  infected_iso_name varchar [
+    note: 'Infected isolate name'
+  ]
+  infected_var_name varchar [
+    note: 'Variant name of the infected isolate'
+  ]
+  control_iso_name varchar [
+    note: 'Control isolate name'
+  ]
+  control_var_name varchar [
+    note: 'Variant name of the control isolate'
+  ]
+  iso_name varchar [
+    note: 'Experimental isolate name'
+  ]
+  var_name varchar [
+    note: 'Variant name of the Experimental isolate'
+  ]
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
+  ]
+  potency_unit potency_unit_enum [
+    note: 'Unit used by the potency value. Can be ng/ml, µM or pM'
+  ]
+  has_cumulative_data boolean [
+    note: 'Whether this summary record includes cumulative data'
+  ]
+  has_individual_data boolean [
+    note: 'Whether this summary record includes individual data'
+  ]
+  num_studies integer [
+    note: 'Number of studies; count of distinct ref_name'
+  ]
+  num_subjects integer [
+    note: 'Number of subjects; count of distinct ref_name/subject_name pairs'
+  ]
+  num_samples integer [
+    note: 'Number of samples; count of unique ref_name/rx_name pairs'
+  ]
+  num_experiments integer [
+    note: 'Number of experiments; count of ref_name/rx_name/iso_name/potency_type pairs'
+  ]
+  control_potency_array varchar [
+    note: 'Comma separated control potency of all matched experiments'
+  ]
+  potency_array varchar [
+    note: 'Comma separated potency of all matched experiments'
+  ]
+  fold_array varchar [
+    note: 'Comma separated fold changes of all matched experiments'
+  ]
+}
+
+
+Table article_stats as RStat {
+  ref_name varchar [ref: > R.ref_name]
+
+  stat_group varchar
+  count int
+
+  indexes {
+    (ref_name, stat_group) [pk]
+    count
+  }
+}
+
+Table vaccine_stats as VStat {
+  vaccine_name varchar [ref: > V.vaccine_name]
+  stat_group varchar
+  count int
+
+  indexes {
+    (vaccine_name, stat_group) [pk]
+  }
+}
+
+Table rx_conv_plasma as RxCP {
+  // derived table from rx_conv_plasma and subject_history
+  ref_name varchar
+  rx_name varchar
+  subject_name varchar
+  infected_iso_name varchar
+  location varchar
+  timing numeric(4,0) [note: "time from symptom on set, Month"]
+  titer varchar
+  severity severity_enum
+  collection_date date
+  cumulative_group varchar [note: "Cumulative group for cumulating results"]
+
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+}
+
+Table conv_plasma_stats as CPStat {
+  stat_group varchar [pk]
+  count int
+
+  indexes {
+    count
+  }
+}
+
+Table rx_vacc_plasma as RxVP {
+  ref_name varchar
+  rx_name varchar
+  subject_name varchar
+  vaccine_name varchar [ref: > V.vaccine_name]
+  location varchar
+  timing numeric(4,0)  [note: "time after vaccination, Month"]
+  dosage numeric(2,0)
+  collection_date date
+  cumulative_group varchar [note: "Cumulative group for cumulating results"]
+  // todo_more_ip_definition varchar
+
+  indexes {
+    (ref_name, rx_name) [pk]
+  }
+}
+
+Table antibody_stats as MAbStat {
+  ab_name varchar [ref: > MAb.ab_name]
+  stat_group varchar
+  count int
+
+  indexes {
+    (ab_name, stat_group) [pk]
+    count
+  }
+}
+
+Table variant_stats as VARStat {
+  var_name varchar [ref: > VAR.var_name]
+
+  stat_group varchar
+  count int
+
+  indexes {
+    (var_name, stat_group) [pk]
+    count
+  }
+}
+
+Table isolate_stats as IStat {
+  iso_name varchar [ref: > I.iso_name]
+
+  stat_group varchar
+  count int
+
+  indexes {
+    (iso_name, stat_group) [pk]
+    count
+  }
+}
+
+Table susc_results as Susc {
+  ref_name varchar
+  rx_name varchar
+  control_iso_name varchar [ref: > I.iso_name]
+  iso_name varchar [ref: > I.iso_name]
+  ordinal_number int [
+    default: 1,
+    note: 'Ordinal number for the same ref/Rx/isolate when multiple results are presented'
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+  fold_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  fold numeric(10,1) [
+    note: 'Fold change comparing to wild type'
+  ]
+  potency_type potency_type_enum [
+    note: 'Potency type (e.g. IC50, IC90)'
+  ]
+  control_potency numeric(10,3) [
+    note: 'Potency against control isolate'
+  ]
+  potency numeric(10,3) [
+    note: 'Potency against experimental isolate'
+  ]
+  potency_unit potency_unit_enum [
+    note: 'Unit used by the control & exp potency value. Can be ng/ml, µM or pM'
+  ]
+  resistance_level resistance_level_enum [
+    note: 'Qualitative result when quantitative result (fold change) is not available'
+  ]
+  ineffective ineffective_enum [
+    note: 'Rx has no effect on control sequence or experimental sequence'
+  ]
+  cumulative_count int [
+    default: 1,
+    note: 'Cumulative count of matching results (when multiple)'
+  ]
+  assay_name varchar [ref: > A.assay_name]
+  date_added date [not null]
+  indexes {
+    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type, assay_name) [pk]
+  }
 }
