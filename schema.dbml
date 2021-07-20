@@ -94,12 +94,13 @@ Table vaccines as V {
 }
 
 Table vaccine_efficacy as VE {
-  vaccine_name varchar [ref: > V.vaccine_name]
-  iso_name varchar [ref: > I.iso_name]
   ref_name varchar [ref: > R.ref_name]
+  vaccine_name varchar [ref: > V.vaccine_name]
+  var_name varchar [ref: > VAR.var_name]
   design varchar
-  lower_bound numeric(2,0)
-  upper_bound numeric(2,0)
+  efficacy varchar
+  // lower_bound numeric(2,0)
+  // upper_bound numeric(2,0)
 }
 
 Table rx_antibodies as RxMAb {
