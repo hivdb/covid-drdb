@@ -338,8 +338,14 @@ Table genes as G {
     note: 'Canonical gene name (compatible with Sierra-SARS2)'
   ]
   display_name varchar [
+    unique,
     note: 'Display gene name'
   ]
+  gene_order integer
+
+  indexes {
+    gene_order
+  }
 }
 
 Table gene_synonyms as GS {
@@ -761,7 +767,7 @@ Table rx_conv_plasma as RxCP {
   // derived table from rx_conv_plasma and subject_history
   ref_name varchar
   rx_name varchar
-  subject_name varchar
+  subject_name varchar [not null]
   infected_iso_name varchar
   location varchar
   timing numeric(4,0) [note: "time from symptom on set, Month"]
