@@ -608,6 +608,26 @@ Table dms_escape_results as DMSEscape {
 
 Ref: DMSEscape.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
+Table ignore_mutations {
+  gene varchar [ref: > G.gene]
+  position integer
+  amino_acid amino_acid_enum
+
+  indexes {
+    (gene, position, amino_acid) [pk]
+  }
+}
+
+Table known_deletion_ranges {
+  gene varchar [ref: > G.gene]
+  position_start integer
+  position_end integer
+
+  indexes {
+    (gene, position_start, position_end) [pk]
+  }
+}
+
 Table last_update {
   scope varchar [pk]
   last_update timestamptz [not null]
@@ -631,6 +651,7 @@ Table susc_summary as SSmry {
   rx_type rx_type_enum
   iso_type iso_type_enum
 
+  // aggregate keys
   ref_name varchar [
     note: 'Study/article name'
   ]
@@ -646,23 +667,38 @@ Table susc_summary as SSmry {
   vaccine_order integer [
     note: 'Order when sorting by vaccine'
   ]
-  infected_iso_name varchar [
-    note: 'Infected isolate name'
-  ]
+  // infected_iso_name varchar [
+  //   note: 'Infected isolate name'
+  // ]
+  // infected_iso_display varchar [
+  //   note: 'Display name of infected isolate'
+  // ]
   infected_var_name varchar [
-    note: 'Variant name of the infected isolate'
+    note: 'Variant of the infected isolate'
   ]
   control_iso_name varchar [
     note: 'Control isolate name'
   ]
+  control_iso_display varchar [
+    note: 'Display name of control isolate'
+  ]
   control_var_name varchar [
-    note: 'Variant name of the control isolate'
+    note: 'Variant of the control isolate'
   ]
   iso_name varchar [
     note: 'Experimental isolate name'
   ]
+  iso_display varchar [
+    note: 'Display name of experimental isolate'
+  ]
   var_name varchar [
-    note: 'Variant name of the Experimental isolate'
+    note: 'Variant of the experimental isolate'
+  ]
+  iso_aggkey varchar [
+    note: 'Rule based isolate aggregation key. This key removes mutations from control isolate and D614G. It also treats a deletion range as one mutation.'
+  ]
+  iso_agg_display varchar [
+    note: 'Display name of rule based isolate aggregation key'
   ]
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
@@ -670,12 +706,8 @@ Table susc_summary as SSmry {
   potency_unit potency_unit_enum [
     note: 'Unit used by the potency value. Can be ng/ml, µM or pM'
   ]
-  has_cumulative_data boolean [
-    note: 'Whether this summary record includes cumulative data'
-  ]
-  has_individual_data boolean [
-    note: 'Whether this summary record includes individual data'
-  ]
+
+  // aggregated data
   num_studies integer [
     note: 'Number of studies; count of distinct ref_name'
   ]
@@ -688,13 +720,16 @@ Table susc_summary as SSmry {
   num_experiments integer [
     note: 'Number of experiments; count of ref_name/rx_name/iso_name/potency_type pairs'
   ]
-  control_potency_array varchar [
+  all_studies varchar [
+    note: 'All study/article name'
+  ]
+  all_control_potency text [
     note: 'Comma separated control potency of all matched experiments'
   ]
-  potency_array varchar [
+  all_potency text [
     note: 'Comma separated potency of all matched experiments'
   ]
-  fold_array varchar [
+  all_fold text [
     note: 'Comma separated fold changes of all matched experiments'
   ]
 }

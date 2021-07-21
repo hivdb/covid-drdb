@@ -56,7 +56,9 @@ INSERT INTO susc_results
     ctl.date_added AS date_added
   FROM
     ref_isolate_pairs pair,
-    rx_potency ctl JOIN assays AS ctl_assay ON ctl_assay.assay_name = ctl.assay_name,
+    rx_potency ctl
+    JOIN assays AS ctl_assay ON ctl_assay.assay_name = ctl.assay_name
+    JOIN isolates AS ctl_iso ON ctl.iso_name = ctl_iso.iso_name,
     rx_potency tgt JOIN assays AS tgt_assay ON tgt_assay.assay_name = tgt.assay_name
   WHERE
     ctl.ref_name = pair.ref_name AND
@@ -84,7 +86,43 @@ INSERT INTO susc_results
       ctl.assay_name = tgt.assay_name
     ELSE
       ctl_assay.virus_type = tgt_assay.virus_type
-    END;
+    END AND (
+      NOT EXISTS (
+        SELECT 1 FROM rx_conv_plasma rxcp
+        WHERE
+          rxcp.ref_name = ctl.ref_name AND
+          rxcp.rx_name = ctl.rx_name
+      ) OR (
+        EXISTS (
+          SELECT 1
+          FROM
+            rx_conv_plasma rxcp
+            LEFT JOIN isolates infected ON
+              rxcp.infected_iso_name = infected.iso_name
+          WHERE
+            rxcp.ref_name = ctl.ref_name AND
+            rxcp.rx_name = ctl.rx_name AND (
+              -- require infected.var_name must be the same as control.var_name,
+              infected.var_name = ctl_iso.var_name OR
+              (
+                infected.var_name IN ('B', 'B.1') AND
+                ctl_iso.var_name IN ('B', 'B.1')
+              ) OR
+              -- unless infected.var_name is empty,
+              infected.var_name IS NULL OR
+              -- or the expected control.var_name hasn't been tested
+              NOT EXISTS (
+                SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
+                WHERE
+                  rxcp.ref_name = strict_ctl.ref_name AND
+                  rxcp.rx_name = strict_ctl.rx_name AND
+                  strict_ctl.iso_name = strict_ctl_iso.iso_name AND
+                  infected.var_name = strict_ctl_iso.var_name
+              )
+            )
+        )
+      )
+    );
 
 
 INSERT INTO susc_results
