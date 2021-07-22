@@ -105,8 +105,8 @@ INSERT INTO susc_results
               -- require infected.var_name must be the same as control.var_name,
               infected.var_name = ctl_iso.var_name OR
               (
-                infected.var_name IN ('B', 'B.1') AND
-                ctl_iso.var_name IN ('B', 'B.1')
+                infected.var_name IN ('A', 'B', 'B.1') AND
+                ctl_iso.var_name IN ('A', 'B', 'B.1')
               ) OR
               -- unless infected.var_name is empty,
               infected.var_name IS NULL OR
