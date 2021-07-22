@@ -654,6 +654,7 @@ Enum iso_type_enum {
 
 
 Table susc_summary as SSmry {
+  aggregate_by varchar
   rx_type rx_type_enum
   iso_type iso_type_enum
 
@@ -667,8 +668,8 @@ Table susc_summary as SSmry {
   antibody_order integer [
     note: 'Order when sorting by antibody'
   ]
-  vaccine_names varchar [
-    note: 'Comma separated vaccine names'
+  vaccine_name varchar [
+    note: 'Vaccine name'
   ]
   vaccine_order integer [
     note: 'Order when sorting by vaccine'
