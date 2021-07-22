@@ -293,6 +293,7 @@ CREATE TYPE susc_summary_agg_key AS ENUM (
   'variant',
   'isolate_agg',
   'isolate',
+  'vaccine_dosage',
   'potency_type',
   'potency_unit'
 );
@@ -794,6 +795,7 @@ $$ LANGUAGE PLPGSQL;
 DROP TABLE known_isolate_pairs;
 DROP TABLE isolate_displays;
 DROP TABLE isolate_aggkeys;
+DROP TABLE rx_antibody_names;
 DROP FUNCTION get_isolate_aggkey;
 DROP FUNCTION get_isolate_mutobjs;
 DROP FUNCTION get_isolate_agg_var_name;
