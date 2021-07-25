@@ -2,7 +2,8 @@
 
 DBML2SQL=$(which dbml2sql)
 DOS2UNIX=$(which dos2unix)
-TARGET_DIR="local/sqls"
+TARGET_DIR="/local/sqls"
+EXPOSE_DIR="local/sqls"
 
 set -e
 
@@ -114,15 +115,10 @@ then
 else
     # echo 'There are uncommited changes under payload/ repository. Please commit your changes.' 1>&2
     # exit 42
-    if [ "$(uname)" = "Darwin" ]
-    then
-        mtime=$(find . -type f -print0 | xargs -0 stat -f %m | sort -nr | head -1)
-    else
-        mtime=$(find . -type f -print0 | xargs -0 stat -c %Y | sort -nr | head -1)
-    fi
+    mtime=$(find . -type f -print0 | xargs -0 stat -c %Y | sort -nr | head -1)
 fi
 export TZ=0
-last_update=$(date -r ${mtime} +%FT%TZ)
+last_update=$(date -d @${mtime} +%FT%TZ)
 popd
 echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_update}');" >> $TARGET_DIR/02_data_tables.sql
 
@@ -134,3 +130,6 @@ ls derived_tables/*.sql | sort -h | while read filepath; do
 done
 cat constraints_post-import.sql >> $TARGET_DIR/03_derived_tables.sql
 echo "Written to $TARGET_DIR/03_derived_tables.sql"
+
+rm -rf $EXPOSE_DIR 2>/dev/null || true
+mv $TARGET_DIR $EXPOSE_DIR
