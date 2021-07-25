@@ -1,63 +1,94 @@
 #! /bin/bash
 
 set -e
+export TZ=America/Los_Angeles
+
+PRE_RELEASE=
+
+while (($#)); do
+  if [[ "$1" == "--pre-release" ]]; then
+    PRE_RELEASE=$1
+  fi
+  shift
+done
+
+if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
+  VERSION=$(date +"%Y%m%d-%H%M%S")
+  TODAY=$(date +"%Y-%m-%d %H:%M:%S %Z")
+else
+  VERSION=$(date +"%Y%m%d")
+  TODAY=$(date +"%Y-%m-%d")
+fi
 
 GIT="git -C payload/"
-VERSION=$(date +"%Y%m%d")
-TODAY=$(date +"%Y-%m-%d")
 export GITHUB_USER=hivdb
 export GITHUB_REPO=covid-drdb-payload
 
-remote_commit=$($GIT rev-parse HEAD --branches=origin/master)
-local_commit=$($GIT rev-parse HEAD)
-if [[ "$remote_commit" != "$local_commit" ]]; then
-  echo "Release abort: the local repository payload/ seems not up-to-date. Forgot running 'git pull --rebase' and 'git push'?" 1>&2
-  exit 1
+if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
+  title="Pre-release $VERSION"
+  description="Pre-release date: $TODAY"
+else
+  remote_commit=$($GIT rev-parse HEAD --branches=origin/master)
+  local_commit=$($GIT rev-parse HEAD)
+  if [[ "$remote_commit" != "$local_commit" ]]; then
+    echo "Release abort: the local repository payload/ seems not up-to-date. Forgot running 'git pull --rebase' and 'git push'?" 1>&2
+    exit 1
+  fi
+  
+  if [ -n "$($GIT status -s .)" ]; then
+    $GIT status
+    echo "Release abort: uncommitted changes are found under payload/ directory. Please submit them & run 'git push' first." 1>&2
+    exit 1
+  fi
+  
+  info=$(github-release info --json)
+  prev_tag=$(echo $info | jq -r .Releases[0].tag_name)
+  if [[ "$prev_tag" == "$VERSION" ]]; then
+    echo "Release abort: today's version $VERSION is already released. You may want to 'make pre-release' for deploy a testing version." 1>&2
+    exit 3
+  fi
+
+  num_tags=$(echo $info | jq -r '.Tags | length')
+  for i in $(seq 0 $((num_tags - 1))); do
+    test_tag=$(echo $info | jq -r .Tags[$i].name)
+    if [[ "$test_tag" == "null" ]]; then
+        continue
+    fi
+    if [[ "$test_tag" != "$prev_tag" ]]; then
+        continue
+    fi
+    prev_commit=$(echo $info | jq -r .Tags[$i].commit.sha)
+  done
+  
+  title="COVID-DRDB $VERSION"
+  description="Release date: $TODAY"
+  
+  if [ -n "$prev_commit" ]; then
+    description="Release date $TODAY\n\nChanges since previous release:\n
+$($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)"
+  fi
 fi
 
-if [ -n "$($GIT status -s .)" ]; then
-  $GIT status
-  echo "Release abort: uncommitted changes are found under payload/ directory. Please submit them & run 'git push' first." 1>&2
-  exit 1
-fi
+scripts/export-sqlite.sh $VERSION
 
 if [ ! -f "build/covid-drdb-$VERSION.db" ]; then
-  echo "Release abort: file 'build/covid-drdb-$VERSION.db' is not found. Forgot running 'make export-sqlite'?" 1>&2
+  echo "Release abort: file 'build/covid-drdb-$VERSION.db' is not found. Something wrong, please contact Philip." 1>&2
   exit 2
 fi
 
 if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
-  echo "Release abort: file 'build/covid-drdb-$VERSION-slim.db' is not found. Forgot running 'make export-sqlite'?" 1>&2
+  echo "Release abort: file 'build/covid-drdb-$VERSION-slim.db' is not found. Something wrong, please contact Philip." 1>&2
   exit 2
 fi
 
-info=$(github-release info --json)
-prev_tag=$(echo $info | jq -r .Releases[0].tag_name)
-if [[ "$prev_tag" == "$VERSION" ]]; then
-  echo "Release abort: current version $VERSION is already release." 1>&2
-  exit 3
-fi
-
-for i in $(seq 0 10); do
-  test_tag=$(echo $info | jq -r .Tags[$i].name)
-  if [[ "$test_tag" == "null" ]]; then
-      continue
-  fi
-  if [[ "$test_tag" != "$prev_tag" ]]; then
-      continue
-  fi
-  prev_commit=$(echo $info | jq -r .Tags[$i].commit.sha)
-done
-
-description="Release date: $TODAY"
-
-if [ -n "$prev_commit" ]; then
-  description="Release date $TODAY\n\nChanges since previous release:\n
-$($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)"
-fi
-
-echo -e $description | github-release release --tag $VERSION --name "COVID-DRDB $VERSION" --description -
+echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
 
-echo "Release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
+if [[ "PRE_RELEASE" == "--pre-release" ]]; then
+  echo "Pre-release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
+else
+  echo "Release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
+fi
+
+scripts/sync-to-s3.sh

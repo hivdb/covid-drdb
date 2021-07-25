@@ -12,6 +12,7 @@ inspect-builder: network docker-envfile
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--network=covid-drdb-network \
+		--volume ~/.aws:/root/.aws:ro \
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest /bin/bash
 
@@ -25,22 +26,34 @@ autofill:
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry autofill-payload payload/
 
-export-sqlite: network
-	@docker run \
-		--rm -it \
-		--volume=$(shell pwd):/covid-drdb/ \
-		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
-		--network=covid-drdb-network \
-		hivdb/covid-drdb-builder:latest \
-		scripts/export-sqlite.sh
-
-release: docker-envfile
+release: network docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+		--network=covid-drdb-network \
+		--volume ~/.aws:/root/.aws:ro \
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
 		scripts/github-release.sh
+
+pre-release: network docker-envfile
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+		--network=covid-drdb-network \
+		--volume ~/.aws:/root/.aws:ro \
+		--env-file ./docker-envfile \
+   		hivdb/covid-drdb-builder:latest \
+		scripts/github-release.sh --pre-release
+
+sync-to-s3: docker-envfile
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+		--volume ~/.aws:/root/.aws:ro \
+		--env-file ./docker-envfile \
+   		hivdb/covid-drdb-builder:latest \
+		scripts/sync-to-s3.sh
 
 devdb: network
 	@docker run \
@@ -67,4 +80,4 @@ log-devdb:
 psql-devdb:
 	@docker exec -it covid-drdb-devdb psql -U postgres
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release sync-to-s3

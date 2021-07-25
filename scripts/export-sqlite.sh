@@ -2,7 +2,7 @@
 
 set -e
 
-VERSION=$(date +"%Y%m%d")
+VERSION=$1
 
 pipenv run python scripts/db_to_sqlite.py "postgresql://postgres@covid-drdb-devdb:5432/postgres" /local/covid-drdb-$VERSION.db --all
 echo "Written build/covid-drdb-$VERSION.db"
@@ -21,5 +21,3 @@ echo "Written build/covid-drdb-$VERSION-slim.db"
 
 mkdir -p build/
 mv /local/*.db build/
-
-echo "SQLite files have been created. Use command 'make release' to release a new version and upload them to GitHub."

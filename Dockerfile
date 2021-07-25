@@ -9,6 +9,8 @@ RUN curl -fsSL https://github.com/github-release/github-release/releases/downloa
     mv github-release /usr/bin/github-release && \
     chmod +x /usr/bin/github-release
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-    apt-get update && apt-get -y install nodejs dos2unix sqlite3 jq
+    apt-get update && apt-get -y install nodejs dos2unix sqlite3 jq pigz
 RUN npm install -g @dbml/cli
+RUN curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip && \
+    unzip awscliv2.zip && aws/install && rm -rf awscliv2.zip aws
 RUN mkdir -p /local
