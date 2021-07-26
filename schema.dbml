@@ -418,6 +418,7 @@ Enum potency_unit_enum {
 Enum virus_type_enum {
   "live-virus"
   "pseudovirus"
+  "chimeric-virus"
 }
 
 Table assays as A {
