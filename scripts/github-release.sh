@@ -24,6 +24,16 @@ GIT="git -C payload/"
 export GITHUB_USER=hivdb
 export GITHUB_REPO=covid-drdb-payload
 
+info=$(github-release info --json)
+known_tag=$(echo "$info" | jq -r ".Releases | map(select(.tag_name == \"$VERSION\")) | .[0].tag_name")
+if [[ "$known_tag" == "$VERSION" ]]; then
+  echo "Release abort: today's version $VERSION is already released." 1>&2
+  if [[ "$PRE_RELEASE" != "--pre-release" ]]; then
+    echo "You may want to 'make pre-release' for deploy a testing version." 1>&2
+  fi
+  exit 3
+fi
+
 if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
   title="Pre-release $VERSION"
   description="Pre-release date: $TODAY"
@@ -41,30 +51,14 @@ else
     exit 1
   fi
   
-  info=$(github-release info --json)
-  prev_tag=$(echo $info | jq -r .Releases[0].tag_name)
-  if [[ "$prev_tag" == "$VERSION" ]]; then
-    echo "Release abort: today's version $VERSION is already released. You may want to 'make pre-release' for deploy a testing version." 1>&2
-    exit 3
-  fi
+  prev_tag=$(echo "$info" | jq -r '.Releases | map(select(.prerelease == false)) | .[0].tag_name')
+  prev_commit=$(echo "$info" | jq -r ".Tags | map(select(.name == \"$prev_tag\")) | .[0].commit.sha")
 
-  num_tags=$(echo $info | jq -r '.Tags | length')
-  for i in $(seq 0 $((num_tags - 1))); do
-    test_tag=$(echo $info | jq -r .Tags[$i].name)
-    if [[ "$test_tag" == "null" ]]; then
-        continue
-    fi
-    if [[ "$test_tag" != "$prev_tag" ]]; then
-        continue
-    fi
-    prev_commit=$(echo $info | jq -r .Tags[$i].commit.sha)
-  done
-  
   title="COVID-DRDB $VERSION"
   description="Release date: $TODAY"
   
-  if [ -n "$prev_commit" ]; then
-    description="Release date $TODAY\n\nChanges since previous release:\n
+  if [[ "$prev_commit" != "null" ]]; then
+    description="Release date $TODAY\n\nChanges since previous release ($prev_tag):\n
 $($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)"
   fi
 fi
