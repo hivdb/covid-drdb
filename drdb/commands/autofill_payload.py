@@ -376,8 +376,3 @@ def autofill_payload(payload_dir):
     sort_csv(antibodies, 'ab_name')
     antibody_targets = tables_dir / 'antibody_targets.csv'
     sort_csv(antibody_targets, 'ab_name')
-
-    tables_dir = payload_dir / 'excluded'
-    autofill_rx(tables_dir)
-    autofill_invivos(tables_dir)
-    autofill_rx_plasma(tables_dir)
