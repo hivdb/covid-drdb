@@ -36,7 +36,16 @@ fi
 
 if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
   title="Pre-release $VERSION"
-  description="Pre-release date: $TODAY"
+  description="Pre-release date: $TODAY\n\n
+Usage of the \`.db\` files:\n\n
+The \`.db\` files are SQLite3 databases. You can simply use this command to open them (if SQLite3 is installed):\n\n
+\`\`\`bash\n
+sqlite3 covid-drdb-$VERSION.db\n
+\`\`\`\n\n
+Once the SQLite shell prompts, type \`.tables\` to list all tables.\n\n
+You can also use any SQLite viewer to open the database, e.g.:\n\n
+- https://inloop.github.io/sqlite-viewer/\n
+- https://sqlitebrowser.org/\n"
 else
   remote_commit=$($GIT rev-parse HEAD --branches=origin/master)
   local_commit=$($GIT rev-parse HEAD)
@@ -59,7 +68,16 @@ else
   
   if [[ "$prev_commit" != "null" ]]; then
     description="Release date $TODAY\n\nChanges since previous release ($prev_tag):\n
-$($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)"
+$($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)\n\n
+Usage of the \`.db\` files:\n\n
+The \`.db\` files are SQLite3 databases. You can simply use this command to open them (if SQLite3 is installed):\n\n
+\`\`\`bash\n
+sqlite3 covid-drdb-$VERSION.db\n
+\`\`\`\n\n
+Once the SQLite shell prompts, type \`.tables\` to list all tables.\n\n
+You can also use any SQLite viewer to open the database, e.g.:\n\n
+- https://inloop.github.io/sqlite-viewer/\n
+- https://sqlitebrowser.org/\n"
   fi
 fi
 
