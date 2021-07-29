@@ -197,7 +197,7 @@ INSERT INTO isolate_pairs (
     ),
     1
   ) AS num_mutations
-FROM ref_isolate_pairs;
+FROM susc_results;
 
 SELECT
   iso_name,
