@@ -654,6 +654,19 @@ Enum iso_type_enum {
 }
 
 
+Table isolate_aggs as IAgg {
+
+  control_iso_name varchar [ref: > I.iso_name]
+  iso_name varchar [ref: > I.iso_name]
+  iso_aggkey varchar
+  num_mutations integer
+
+  indexes {
+    (control_iso_name, iso_name) [pk]
+  }
+}
+
+
 Table susc_summary as SSmry {
   aggregate_by varchar
   rx_type rx_type_enum

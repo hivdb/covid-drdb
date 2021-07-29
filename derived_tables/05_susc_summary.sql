@@ -182,7 +182,12 @@ BEGIN
 END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
 
-SELECT DISTINCT
+INSERT INTO isolate_aggs (
+  control_iso_name,
+  iso_name,
+  iso_aggkey,
+  num_mutations
+) SELECT DISTINCT
   control_iso_name,
   iso_name,
   get_isolate_aggkey(iso_name, control_iso_name) AS iso_aggkey,
@@ -192,7 +197,6 @@ SELECT DISTINCT
     ),
     1
   ) AS num_mutations
-INTO TABLE known_isolate_pairs
 FROM ref_isolate_pairs;
 
 SELECT
@@ -206,7 +210,7 @@ CREATE FUNCTION get_isolate_agg_var_name(_iso_aggkey VARCHAR) RETURNS VARCHAR AS
   SELECT var_name
   FROM isolates iso
   WHERE var_name IS NOT NULL AND EXISTS(
-    SELECT 1 FROM known_isolate_pairs pair
+    SELECT 1 FROM isolate_aggs pair
     WHERE pair.iso_name = iso.iso_name AND pair.iso_aggkey = _iso_aggkey
   )
   LIMIT 1
@@ -223,7 +227,7 @@ CREATE FUNCTION get_isolate_agg_mutobjs(_iso_aggkey VARCHAR) RETURNS mutation_ty
   )
   FROM
     isolate_mutations mut,
-    known_isolate_pairs pair
+    isolate_aggs pair
   WHERE
     mut.gene = 'S' AND
     pair.iso_aggkey = _iso_aggkey AND
@@ -271,7 +275,7 @@ SELECT DISTINCT
   get_isolate_agg_display(iso_aggkey) AS iso_agg_display,
   get_isolate_agg_var_name(iso_aggkey) AS var_name
 INTO TABLE isolate_aggkeys
-FROM known_isolate_pairs;
+FROM isolate_aggs;
 
 SELECT
   ref_name,
@@ -547,7 +551,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         isoagg.var_name AS var_name
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
-        JOIN known_isolate_pairs pair ON
+        JOIN isolate_aggs pair ON
           S.control_iso_name = pair.control_iso_name AND
           S.iso_name = pair.iso_name
         JOIN isolate_aggkeys isoagg ON
@@ -637,7 +641,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         isoagg.iso_agg_display
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
-        JOIN known_isolate_pairs pair ON
+        JOIN isolate_aggs pair ON
           S.iso_name = pair.iso_name AND
           S.control_iso_name = pair.control_iso_name
         JOIN isolate_aggkeys isoagg ON
@@ -823,7 +827,6 @@ DO $$
   END
 $$ LANGUAGE PLPGSQL;
 
-DROP TABLE known_isolate_pairs;
 DROP TABLE isolate_displays;
 DROP TABLE isolate_aggkeys;
 DROP TABLE rx_antibody_names;
