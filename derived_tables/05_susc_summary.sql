@@ -319,7 +319,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           num_studies,
           num_samples,
           num_experiments,
-          all_studies,
+          all_studies
           %1s
         ) SELECT
           $1 AS aggregate_by,
@@ -340,12 +340,12 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
               S.cumulative_count
             )::unique_sum_type)
           ) AS num_experiments,
-          csv_agg(DISTINCT S.ref_name ORDER BY S.ref_name) AS all_studies,
+          csv_agg(DISTINCT S.ref_name ORDER BY S.ref_name) AS all_studies
           %2s
         FROM
           susc_results S %3s
         WHERE %4s
-        GROUP BY %5s
+        GROUP BY aggregate_by %5s
         RETURNING 1
       )
       SELECT count(*) FROM rows;
@@ -670,11 +670,14 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
     
     _stmt := FORMAT(
       _stmt,
-      ARRAY_TO_STRING(_ext_col_names, ', '),
-      ARRAY_TO_STRING(_ext_col_values, ', '),
+      CASE WHEN _ext_col_names IS NULL THEN ''
+      ELSE ', ' || ARRAY_TO_STRING(_ext_col_names, ', ') END,
+      CASE WHEN _ext_col_values IS NULL THEN ''
+      ELSE ', ' || ARRAY_TO_STRING(_ext_col_values, ', ') END,
       ARRAY_TO_STRING(_ext_joins, ' '),
       ARRAY_TO_STRING(_ext_where, ' AND '),
-      ARRAY_TO_STRING(_ext_group_by, ', ')
+      CASE WHEN _ext_group_by IS NULL THEN ''
+      ELSE ', ' || ARRAY_TO_STRING(_ext_group_by, ', ') END
     );
 
     EXECUTE _stmt INTO _ret USING ARRAY_TO_STRING(_agg_by, ',');
@@ -815,6 +818,8 @@ DO $$
       'potency_type',
       'potency_unit'
     ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[]::susc_summary_agg_key[]);
   END
 $$ LANGUAGE PLPGSQL;
 

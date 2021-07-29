@@ -67,3 +67,25 @@ $$;
 --   ADD CONSTRAINT chk_susc_results CHECK (
 --     isSuscRecordCreated(ref_name, rx_name, iso_name) IS TRUE
 --   );
+
+DO $$
+  DECLARE
+    _rows "rx_plasma"[];
+  BEGIN
+    _rows := (
+      SELECT ARRAY_AGG(rx) FROM rx_plasma rx
+      WHERE NOT EXISTS (
+        SELECT 1 FROM subject_history h WHERE
+          rx.ref_name = h.ref_name AND
+          rx.subject_name = h.subject_name AND
+          rx.collection_date = h.event_date AND
+          h.event::TEXT LIKE '%isolation'
+      )
+    );
+    IF ARRAY_LENGTH(_rows, 1) > 0 THEN
+      RAISE EXCEPTION E'Unmatched records were found in `rx_plasma`. Each `rx_plasma.collection_date` must match an isolation `event_date` from table `subject_history`:\n%', ARRAY_TO_JSON(_rows, TRUE);
+    END IF;
+  END
+$$ LANGUAGE PLPGSQL;
+
+
