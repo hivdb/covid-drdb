@@ -746,21 +746,6 @@ Table susc_summary as SSmry {
 
   indexes {
     aggregate_by
-    rx_type
-    ref_name
-    antibody_names
-    antibody_order
-    vaccine_name
-    vaccine_order
-    vaccine_dosage
-    infected_var_name
-    control_iso_name
-    control_var_name
-    iso_name
-    var_name
-    iso_aggkey
-    potency_type
-    potency_unit
   }
 }
 
