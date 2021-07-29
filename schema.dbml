@@ -675,6 +675,9 @@ Table susc_summary as SSmry {
   vaccine_order integer [
     note: 'Order when sorting by vaccine'
   ]
+  vaccine_dosage numeric(2,0) [
+    note: 'Vaccine shots received when plasma/serum was collected'
+  ]
   // infected_iso_name varchar [
   //   note: 'Infected isolate name'
   // ]

@@ -285,6 +285,7 @@ WHERE
 GROUP BY ref_name, rx_name;
 
 CREATE TYPE susc_summary_agg_key AS ENUM (
+  'rx_type',
   'article',
   'infected_variant',
   'vaccine',
@@ -349,6 +350,29 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       )
       SELECT count(*) FROM rows;
     $STMT$;
+
+    IF 'rx_type' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, 'rx_type');
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
+        CASE
+          WHEN rxab.rx_name IS NOT NULL THEN 'antibody'
+          WHEN rxcp.rx_name IS NOT NULL THEN 'conv-plasma'
+          WHEN rxvp.rx_name IS NOT NULL THEN 'vacc-plasma'
+        END::rx_type_enum AS rx_type
+      $X$);
+      _ext_joins := ARRAY_APPEND(_ext_joins, $X$
+        LEFT JOIN rx_antibodies rxab ON
+          S.ref_name = rxab.ref_name AND
+          S.rx_name = rxab.rx_name
+        LEFT JOIN rx_conv_plasma rxcp ON
+          S.ref_name = rxcp.ref_name AND
+          S.rx_name = rxcp.rx_name
+        LEFT JOIN rx_vacc_plasma rxvp ON
+          S.ref_name = rxvp.ref_name AND
+          S.rx_name = rxvp.rx_name
+      $X$);
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rx_type');
+    END IF;
 
     IF 'article' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, 'ref_name');
@@ -670,6 +694,7 @@ DO $$
     _iso_agg_by susc_summary_agg_key[];
   BEGIN
     _agg_by_auto_options := ARRAY[
+      'rx_type',
       'article',
       'infected_variant',
       'vaccine',
@@ -680,6 +705,7 @@ DO $$
       'potency_type'
     ];
     _rx_agg_by := ARRAY[
+      'rx_type',
       'antibody',
       'antibody:indiv',
       'vaccine',
