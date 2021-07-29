@@ -654,7 +654,7 @@ Enum iso_type_enum {
 }
 
 
-Table isolate_aggs as IAgg {
+Table isolate_pairs as IPair {
 
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
