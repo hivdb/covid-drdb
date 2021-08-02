@@ -299,6 +299,7 @@ CREATE TYPE susc_summary_agg_key AS ENUM (
   'isolate_agg',
   'isolate',
   'vaccine_dosage',
+  'subject_species',
   'potency_type',
   'potency_unit'
 );
@@ -461,6 +462,12 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         rxvp.vaccine_name,
         v.priority
       $X$);
+    END IF;
+
+    IF 'vaccine_dosage' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, 'vaccine_dosage');
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, 'rxvp.dosage');
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rxvp.dosage');
     END IF;
 
     IF 'infected_variant' = ANY(_agg_by) THEN
@@ -668,6 +675,12 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
     END IF;
 
+    IF 'subject_species' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, 'subject_species');
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, 'subject_species');
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, 'subject_species');
+    END IF;
+
     IF _ext_where IS NULL THEN
       _ext_where := ARRAY['TRUE'];
     END IF;
@@ -708,8 +721,8 @@ DO $$
       'antibody',
       'antibody:indiv',
       'variant',
-      'isolate_agg',
-      'potency_type'
+      'isolate_agg'
+      -- 'potency_type'
     ];
     _rx_agg_by := ARRAY[
       'rx_type',
@@ -730,7 +743,7 @@ DO $$
       -- combination of one element
       SELECT DISTINCT ARRAY[one] agg_by
       FROM UNNEST(_agg_by_auto_options) one
-      WHERE one NOT IN ('potency_type', 'potency_unit')
+      WHERE one != 'potency_type'
 
       UNION
       -- combination of two elements
@@ -740,6 +753,7 @@ DO $$
         UNNEST(_agg_by_auto_options) two
       WHERE
         one < two AND
+        'potency_type' NOT IN (one, two) AND
         array_intersect_count(ARRAY[one, two], _rx_agg_by) < 2 AND
         array_intersect_count(ARRAY[one, two], _iso_agg_by) < 2
 
@@ -751,12 +765,12 @@ DO $$
         UNNEST(_agg_by_auto_options) two,
         UNNEST(_agg_by_auto_options) three
       WHERE
-        one < two AND two < three AND (
-          'potency_type' NOT IN (one, two, three) OR (
-            ARRAY[one, two, three] && _rx_agg_by AND
-            ARRAY[one, two, three] && _iso_agg_by
-          )
-        ) AND
+        one < two AND two < three AND -- (
+        --   'potency_type' NOT IN (one, two, three) OR (
+        --     ARRAY[one, two, three] && _rx_agg_by AND
+        --     ARRAY[one, two, three] && _iso_agg_by
+        --   )
+        -- ) AND
         array_intersect_count(ARRAY[one, two, three], _rx_agg_by) < 2 AND
         array_intersect_count(ARRAY[one, two, three], _iso_agg_by) < 2
     ) agg_by
@@ -798,6 +812,7 @@ DO $$
     PERFORM summarize_susc_results(ARRAY[
       'infected_variant',
       'variant',
+      'subject_species',
       'potency_type',
       'potency_unit'
     ]::susc_summary_agg_key[]);
@@ -805,6 +820,7 @@ DO $$
     PERFORM summarize_susc_results(ARRAY[
       'infected_variant',
       'isolate_agg',
+      'subject_species',
       'potency_type',
       'potency_unit'
     ]::susc_summary_agg_key[]);
@@ -812,6 +828,8 @@ DO $$
     PERFORM summarize_susc_results(ARRAY[
       'vaccine',
       'variant',
+      'vaccine_dosage',
+      'subject_species',
       'potency_type',
       'potency_unit'
     ]::susc_summary_agg_key[]);
@@ -819,6 +837,8 @@ DO $$
     PERFORM summarize_susc_results(ARRAY[
       'vaccine',
       'isolate_agg',
+      'vaccine_dosage',
+      'subject_species',
       'potency_type',
       'potency_unit'
     ]::susc_summary_agg_key[]);
