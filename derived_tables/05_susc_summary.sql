@@ -281,6 +281,7 @@ SELECT
   ref_name,
   rx_name,
   csv_agg(ab.ab_name ORDER BY ab.priority)::VARCHAR AS antibody_names,
+  BOOL_AND(ab.visibility) AS visibility,
   MAX(ab.priority) * 10 + COUNT(ab.ab_name) AS antibody_order
 INTO TABLE rx_antibody_names
 FROM rx_antibodies rxab, antibodies ab
@@ -422,7 +423,8 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_antibody_names ab ON
           S.ref_name = ab.ref_name AND
-          S.rx_name = ab.rx_name
+          S.rx_name = ab.rx_name AND
+          ab.visibility IS TRUE
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         ab.antibody_names,
