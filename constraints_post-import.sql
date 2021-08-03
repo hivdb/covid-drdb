@@ -96,6 +96,26 @@ DO $$
         RAISE EXCEPTION E'An experiment record of monoclonal antibody must use IC50/IC80/ICXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
       END IF;
     END LOOP;
+    FOR row IN SELECT * FROM rx_potency pot JOIN rx_plasma plasma ON pot.ref_name = plasma.ref_name AND pot.rx_name = plasma.rx_name LOOP
+      IF row.potency_type::text NOT LIKE 'NT%' THEN
+        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      END IF;
+    END LOOP;
   END
 $$;
 
+DO $$
+  DECLARE row rx_fold%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM rx_fold fold JOIN rx_antibodies ab ON fold.ref_name = ab.ref_name AND fold.rx_name = ab.rx_name LOOP
+      IF row.potency_type::text NOT LIKE 'IC%' THEN
+        RAISE EXCEPTION E'An experiment record of monoclonal antibody must use IC50/IC80/ICXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      END IF;
+    END LOOP;
+    FOR row IN SELECT * FROM rx_fold fold JOIN rx_plasma plasma ON fold.ref_name = plasma.ref_name AND fold.rx_name = plasma.rx_name LOOP
+      IF row.potency_type::text NOT LIKE 'NT%' THEN
+        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      END IF;
+    END LOOP;
+  END
+$$;
