@@ -9,7 +9,7 @@ $$ LANGUAGE SQL;
 DO $$
   DECLARE row subjects%rowtype;
   BEGIN
-    FOR row in SELECT * FROM subjects LOOP
+    FOR row IN SELECT * FROM subjects LOOP
       IF NOT hasSubjectHistory(row.ref_name, row.subject_name) THEN
         RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_history`', row.ref_name, row.subject_name;
       END IF;
@@ -32,7 +32,7 @@ $$ LANGUAGE SQL;
 DO $$
   DECLARE row rx_potency%rowtype;
   BEGIN
-    FOR row in SELECT * FROM rx_potency LOOP
+    FOR row IN SELECT * FROM rx_potency LOOP
       IF NOT isIsolateReferred(row.ref_name, row.iso_name) THEN
         RAISE EXCEPTION E'Isolate \x1b[1m%\x1b[0m used by article \x1b[1m%\x1b[0m is neither referred as `control_iso_name` nor `iso_name` in `ref_isolate_pairs` table', row.iso_name, row.ref_name;
       END IF;
@@ -55,7 +55,7 @@ $$ LANGUAGE SQL;
 DO $$
   DECLARE row rx_potency%rowtype;
   BEGIN
-    FOR row in SELECT * FROM rx_potency LOOP
+    FOR row IN SELECT * FROM rx_potency LOOP
       IF NOT isSuscRecordDerived(row.ref_name, row.rx_name, row.iso_name) THEN
         RAISE EXCEPTION E'Derived `susc_results` is not found for `rx_potency` ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m; check if the paired control/exp isolate for this rx_name exists, if their potency_type and potency_unit are matched, and if the infected_iso_name matches the control_iso_name presented in the table ref_isolate_pairs', row.ref_name, row.rx_name, row.iso_name;
       END IF;
@@ -88,4 +88,14 @@ DO $$
   END
 $$ LANGUAGE PLPGSQL;
 
+DO $$
+  DECLARE row rx_potency%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM rx_potency pot JOIN rx_antibodies ab ON pot.ref_name = ab.ref_name AND pot.rx_name = ab.rx_name LOOP
+      IF row.potency_type::text NOT LIKE 'IC%' THEN
+        RAISE EXCEPTION E'An experiment record of monoclonal antibody must use IC50/IC80/ICXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      END IF;
+    END LOOP;
+  END
+$$;
 
