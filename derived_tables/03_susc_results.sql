@@ -4,7 +4,6 @@ INSERT INTO susc_results
     ctl.rx_name AS rx_name,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
-    1 AS ordinal_number,
     ctl.section AS section,
     CASE WHEN ctl.potency_type::text LIKE 'NT%' THEN
       CASE
@@ -131,7 +130,6 @@ INSERT INTO susc_results
     rx_name,
     control_iso_name,
     iso_name,
-    1 AS ordinal_number,
     section AS section,
     fold_cmp,
     fold,

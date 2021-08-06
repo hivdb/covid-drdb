@@ -870,10 +870,6 @@ Table susc_results as Susc {
   rx_name varchar
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
-  ordinal_number int [
-    default: 1,
-    note: 'Ordinal number for the same ref/Rx/isolate when multiple results are presented'
-  ]
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
@@ -909,6 +905,6 @@ Table susc_results as Susc {
   assay_name varchar [ref: > A.assay_name]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, ordinal_number, potency_type, assay_name) [pk]
+    (rx_name, control_iso_name, iso_name, ref_name, potency_type, assay_name) [pk]
   }
 }

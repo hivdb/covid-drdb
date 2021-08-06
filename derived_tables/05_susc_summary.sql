@@ -653,7 +653,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         JOIN isolate_pairs pair ON
           S.iso_name = pair.iso_name AND
           S.control_iso_name = pair.control_iso_name
-        JOIN isolate_aggkeys isoagg ON
+        LEFT JOIN isolate_aggkeys isoagg ON
           pair.iso_aggkey = isoagg.iso_aggkey
         JOIN isolates target ON
           S.iso_name = target.iso_name
@@ -723,7 +723,8 @@ DO $$
       'antibody',
       'antibody:indiv',
       'variant',
-      'isolate_agg'
+      'isolate_agg',
+      'isolate'
       -- 'potency_type'
     ];
     _rx_agg_by := ARRAY[
