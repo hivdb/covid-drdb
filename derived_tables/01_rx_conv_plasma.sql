@@ -10,7 +10,6 @@ INSERT INTO rx_conv_plasma
     END AS infected_iso_name,
     PTH_isolation.location,
     GREATEST(ROUND((PTH_isolation.event_date - PTH_infection.event_date) / 30.), 1) AS timing,
-    titer,
     PTH_infection.severity,
     collection_date,
     cumulative_group

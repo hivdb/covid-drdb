@@ -124,7 +124,6 @@ def autofill_rx_plasma(tables_dir):
                 'ref_name',
                 'rx_name',
                 'subject_name',
-                'titer',
                 'collection_date',
                 'cumulative_group',
             ],

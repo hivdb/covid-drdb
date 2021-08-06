@@ -188,7 +188,6 @@ Table rx_plasma as RxP {
   ref_name varchar
   rx_name varchar
   subject_name varchar
-  titer varchar
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
 
@@ -794,7 +793,6 @@ Table rx_conv_plasma as RxCP {
   infected_iso_name varchar
   location varchar
   timing numeric(4,0) [note: "time from symptom on set, Month"]
-  titer varchar
   severity severity_enum
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]

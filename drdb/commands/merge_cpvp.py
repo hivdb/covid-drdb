@@ -33,7 +33,6 @@ def merge_cpvp_core(tables_dir):
             headers=[
                 'ref_name',
                 'rx_name',
-                'titer',
                 'collection_date',
                 'cumulative_group'
             ],
