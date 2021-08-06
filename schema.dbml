@@ -81,6 +81,7 @@ Enum vaccine_type_enum {
   "Viral vector"
   "Protein subunit"
   "Inactivated virus"
+  "Mixed"
 }
 
 Table vaccines as V {
