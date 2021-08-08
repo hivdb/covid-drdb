@@ -725,7 +725,6 @@ DO $$
       'variant',
       'isolate_agg',
       'isolate'
-      -- 'potency_type'
     ];
     _rx_agg_by := ARRAY[
       'rx_type',
@@ -746,7 +745,6 @@ DO $$
       -- combination of one element
       SELECT DISTINCT ARRAY[one] agg_by
       FROM UNNEST(_agg_by_auto_options) one
-      WHERE one != 'potency_type'
 
       UNION
       -- combination of two elements
@@ -756,7 +754,6 @@ DO $$
         UNNEST(_agg_by_auto_options) two
       WHERE
         one < two AND
-        'potency_type' NOT IN (one, two) AND
         array_intersect_count(ARRAY[one, two], _rx_agg_by) < 2 AND
         array_intersect_count(ARRAY[one, two], _iso_agg_by) < 2
 
@@ -768,12 +765,7 @@ DO $$
         UNNEST(_agg_by_auto_options) two,
         UNNEST(_agg_by_auto_options) three
       WHERE
-        one < two AND two < three AND -- (
-        --   'potency_type' NOT IN (one, two, three) OR (
-        --     ARRAY[one, two, three] && _rx_agg_by AND
-        --     ARRAY[one, two, three] && _iso_agg_by
-        --   )
-        -- ) AND
+        one < two AND two < three AND
         array_intersect_count(ARRAY[one, two, three], _rx_agg_by) < 2 AND
         array_intersect_count(ARRAY[one, two, three], _iso_agg_by) < 2
     ) agg_by
