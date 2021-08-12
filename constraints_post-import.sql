@@ -119,3 +119,30 @@ DO $$
     END LOOP;
   END
 $$;
+
+DO $$
+  DECLARE _iso_aggkey VARCHAR;
+  DECLARE _iso_aggkeys VARCHAR[];
+  DECLARE _iso_names VARCHAR[];
+  BEGIN
+    _iso_aggkeys := (
+      SELECT ARRAY_AGG(iso_aggkey) FROM (
+        SELECT
+          iso_aggkey,
+          COUNT(
+            DISTINCT CASE WHEN var_name IS NULL THEN '__NULL_PH' ELSE var_name END
+          ) AS num_variants
+          FROM isolate_pairs pair, isolates iso
+          WHERE pair.iso_name = iso.iso_name
+          GROUP BY iso_aggkey
+      ) numvars
+      WHERE num_variants > 1 AND iso_aggkey IS NOT NULL
+    );
+    FOREACH _iso_aggkey IN ARRAY _iso_aggkeys LOOP
+      _iso_names := (
+        SELECT ARRAY_AGG(DISTINCT iso_name) FROM isolate_pairs WHERE iso_aggkey = _iso_aggkey
+      );
+      RAISE WARNING E'Following isolates are identical at Spike mutation level but were assigned different var_name: \x1b[1m%\x1b[0m', ARRAY_TO_STRING(_iso_names, ', ');
+    END LOOP;
+  END
+$$ LANGUAGE PLPGSQL;
