@@ -220,7 +220,7 @@ def autofill_subjects(tables_dir):
             'ref_name',
             'subject_name',
             'subject_species',
-            'birthday',
+            'birth_year',
             'num_subjects'
         ],
         BOM=True

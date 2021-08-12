@@ -131,7 +131,7 @@ Table subjects as Pt {
   ref_name varchar [ref: > R.ref_name]
   subject_name varchar
   subject_species subject_species_enum
-  birthday date
+  birth_year numeric(4)
   num_subjects int [
     note: "Indicates if this record is for an individual subject (=1) or a group of subjects (>1)."
   ]
@@ -215,6 +215,7 @@ Table antibodies as MAb {
   ]
   abbreviation_name varchar
   availability varchar
+  mature_month numeric(4,1)
   priority int [
     note: "Display priority; lower number first"
   ]
