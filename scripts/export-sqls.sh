@@ -36,7 +36,6 @@ echo "Written to $TARGET_DIR/01_schema.sql"
 
 copy_csv payload/tables/assays.csv assays > $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/articles.csv articles >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/article_notes.csv article_notes >> $TARGET_DIR/02_data_tables.sql
 
 copy_csv payload/tables/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
 

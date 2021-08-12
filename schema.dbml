@@ -59,11 +59,6 @@ Table articles as R {
   date_updated date
 }
 
-Table article_notes as RN {
-  ref_name varchar [ref: > R.ref_name]
-  note varchar
-}
-
 Table treatments as Rx {
   ref_name varchar [ref: > R.ref_name]
   rx_name varchar [note: 'Name of the treatment']
