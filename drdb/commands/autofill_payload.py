@@ -202,6 +202,11 @@ def autofill_subjects(tables_dir):
                  .get((rx['ref_name'], rx['subject_name']), {})
                  .get('subject_species') or 'Human'
              ),
+             'birth_year': (
+                 known_subjects
+                 .get((rx['ref_name'], rx['subject_name']), {})
+                 .get('birth_year') or 'NULL'
+             ),
              'num_subjects': (
                  known_subjects
                  .get((rx['ref_name'], rx['subject_name']), {})
