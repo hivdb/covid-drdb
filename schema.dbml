@@ -416,6 +416,7 @@ Enum virus_type_enum {
   "live-virus"
   "pseudovirus"
   "chimeric-virus"
+  "surrogate"
 }
 
 Table assays as A {
