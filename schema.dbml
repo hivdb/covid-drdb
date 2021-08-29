@@ -216,6 +216,8 @@ Table antibodies as MAb {
   abbreviation_name varchar
   availability varchar
   mature_month numeric(4,1)
+  institute varchar
+  origin varchar
   priority int [
     note: "Display priority; lower number first"
   ]
