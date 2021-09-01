@@ -90,7 +90,7 @@ BEGIN
   ) THEN
     RETURN NULL;
   ELSE
-    RETURN _filtered[1].gene || _filtered[1].pos;
+    RETURN _filtered[1].gene || ':' || _filtered[1].pos;
   END IF;
 END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
