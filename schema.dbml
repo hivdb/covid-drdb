@@ -267,11 +267,24 @@ Table antibody_seq as MabSeq {
   iglv_gene varchar
 }
 
+Enum antibody_class {
+  "RBM Class I"
+  "RBM Class II"
+  "RBM Class III"
+  "RBD Core Cluster I"
+  "RBD Core Cluster II"
+  "RBD Core"
+  "NTD"
+  "S1"
+  "S2"
+  "S"
+}
+
 Table antibody_targets as MAbT {
   ab_name varchar [ref: > MAb.ab_name]
   pdb_id varchar
   target varchar
-  class varchar
+  class antibody_class
   source varchar
 
   indexes {
