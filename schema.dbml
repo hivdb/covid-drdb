@@ -274,6 +274,8 @@ Enum antibody_class {
   "RBD Core Cluster I"
   "RBD Core Cluster II"
   "RBD Core"
+  "RBD Class I" // TODO: probably a typo?
+  "RBD Class II" // TODO: probably a typo?
   "NTD"
   "S1"
   "S2"
