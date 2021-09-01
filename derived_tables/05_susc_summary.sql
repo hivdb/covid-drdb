@@ -62,6 +62,40 @@ END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
 
 
+CREATE FUNCTION get_indiv_mut_position(_iso_aggkey VARCHAR) RETURNS VARCHAR AS $$
+DECLARE
+  _mutobjs mutation_type[];
+  _filtered mutation_type[];
+BEGIN
+  _mutobjs := get_isolate_agg_mutobjs(_iso_aggkey);
+  _filtered := (
+    SELECT ARRAY_AGG(mut)
+    FROM UNNEST(_mutobjs) mut
+    WHERE
+      NOT EXISTS (
+        SELECT 1 FROM ignore_mutations igm
+        WHERE
+          igm.gene = mut.gene AND
+          igm.position = mut.pos AND
+          igm.amino_acid = mut.aa
+      )
+  );
+  IF ARRAY_LENGTH(_filtered, 1) = 0 THEN
+    _filtered := _mutobjs;
+  END IF;
+  IF ARRAY_LENGTH(_filtered, 1) != 1 THEN
+    RETURN NULL;
+  ELSIF EXISTS (
+    SELECT 1 FROM UNNEST(_filtered) WHERE aa = 'del'
+  ) THEN
+    RETURN NULL;
+  ELSE
+    RETURN _filtered[1].gene || _filtered[1].pos;
+  END IF;
+END
+$$ LANGUAGE PLPGSQL IMMUTABLE;
+
+
 CREATE FUNCTION get_countable_mutations(_mutobjs mutation_type[]) RETURNS VARCHAR[] AS $$
 DECLARE
   _prev_gene varchar;
@@ -272,6 +306,7 @@ SELECT DISTINCT
     ),
     1
   ) AS num_mutations,
+  get_indiv_mut_position(iso_aggkey) AS position,
   get_isolate_agg_display(iso_aggkey) AS iso_agg_display,
   get_isolate_agg_var_name(iso_aggkey) AS var_name
 INTO TABLE isolate_aggkeys
@@ -299,6 +334,7 @@ CREATE TYPE susc_summary_agg_key AS ENUM (
   'variant',
   'isolate_agg',
   'isolate',
+  'position',
   'vaccine_dosage',
   'subject_species',
   'potency_type',
@@ -676,6 +712,24 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
     END IF;
 
+    IF 'position' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, 'position');
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, 'isoagg.position');
+      _ext_joins := ARRAY_APPEND(_ext_joins, $X$
+        JOIN isolate_pairs pair ON
+          S.control_iso_name = pair.control_iso_name AND
+          S.iso_name = pair.iso_name
+        JOIN isolate_aggkeys isoagg ON
+          pair.iso_aggkey = isoagg.iso_aggkey
+      $X$);
+      _ext_where := ARRAY_APPEND(_ext_where, $X$
+        isoagg.position IS NOT NULL
+      $X$);
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
+        isoagg.position
+      $X$);
+    END IF;
+
     IF 'subject_species' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, 'subject_species');
       _ext_col_values := ARRAY_APPEND(_ext_col_values, 'subject_species');
@@ -723,7 +777,8 @@ DO $$
       'antibody:indiv',
       'variant',
       'isolate_agg',
-      'isolate'
+      'isolate',
+      'position'
     ];
     _rx_agg_by := ARRAY[
       'rx_type',
@@ -735,7 +790,8 @@ DO $$
     _iso_agg_by := ARRAY[
       'isolate_agg',
       'variant',
-      'isolate'
+      'isolate',
+      'position'
     ];
 
     FOR _agg_by IN

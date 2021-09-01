@@ -740,6 +740,9 @@ Table susc_summary as SSmry {
   iso_agg_display varchar [
     note: 'Display name of rule based isolate aggregation key'
   ]
+  position varchar [
+    note: 'Gene position for individual mutations'
+  ]
   potency_type potency_type_enum [
     note: 'Potency type (e.g. IC50, IC90)'
   ]
