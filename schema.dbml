@@ -707,6 +707,7 @@ Table susc_summary as SSmry {
     note: 'Vaccine shots received when plasma/serum was collected'
   ]
   subject_species subject_species_enum
+  timing numeric(4,0) [note: "time after vaccination / from symptom on set, Month"]
   // infected_iso_name varchar [
   //   note: 'Infected isolate name'
   // ]

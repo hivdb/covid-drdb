@@ -336,6 +336,7 @@ CREATE TYPE susc_summary_agg_key AS ENUM (
   'isolate',
   'position',
   'vaccine_dosage',
+  'timing',
   'subject_species',
   'potency_type',
   'potency_unit'
@@ -538,6 +539,17 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
     END IF;
 
+    IF 'timing' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, 'timing');
+      IF 'vaccine' = ANY(_agg_by) THEN
+        _ext_col_values := ARRAY_APPEND(_ext_col_values, 'rxvp.timing');
+        _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rxvp.timing');
+      ELSE
+        _ext_col_values := ARRAY_APPEND(_ext_col_values, 'rx.timing');
+        _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rx.timing');
+      END IF;
+    END IF;
+
     _plasma_related_agg_by := ARRAY['vaccine', 'infected_variant'];
     _isolate_related_agg_by := ARRAY['variant', 'isolate_agg', 'isolate'];
 
@@ -618,10 +630,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         S.potency_type AS potency_type,
         csv_agg(
           CASE WHEN S.cumulative_count > 1 THEN
-            NULL
+            S.fold::TEXT || ':' || S.cumulative_count::TEXT
           ELSE
-            S.fold
-          END::TEXT
+            S.fold::TEXT
+          END
         ) AS all_fold
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
@@ -639,17 +651,17 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         S.potency_unit AS potency_unit,
         csv_agg(
           CASE WHEN S.cumulative_count > 1 THEN
-            NULL
+            S.control_potency::TEXT || ':' || S.cumulative_count::TEXT
           ELSE
-            S.control_potency
-          END::TEXT
+            S.control_potency::TEXT
+          END
         ) AS all_control_potency,
         csv_agg(
           CASE WHEN S.cumulative_count > 1 THEN
-            NULL
+            S.potency::TEXT || ':' || S.cumulative_count::TEXT
           ELSE
-            S.potency
-          END::TEXT
+            S.potency::TEXT
+          END
         ) AS all_potency
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
@@ -752,7 +764,12 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       ELSE ', ' || ARRAY_TO_STRING(_ext_group_by, ', ') END
     );
 
-    EXECUTE _stmt INTO _ret USING ARRAY_TO_STRING(_agg_by, ',');
+    EXECUTE _stmt INTO _ret USING ARRAY_TO_STRING((
+      SELECT ARRAY_AGG(x) FROM (
+        SELECT UNNEST(_agg_by) AS x
+        ORDER BY x
+      ) AS _
+    ), ',');
     RAISE NOTICE
       'Summarized susc_results by %: % rows created',
       ARRAY_TO_STRING(_agg_by, ' + '),
@@ -839,6 +856,15 @@ DO $$
 
     PERFORM summarize_susc_results(ARRAY[
       'article',
+      'infected_variant',
+      'isolate',
+      'timing',
+      'potency_type',
+      'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
+      'article',
       'vaccine',
       'isolate',
       'potency_type',
@@ -846,6 +872,15 @@ DO $$
     ]::susc_summary_agg_key[]);
 
     PERFORM summarize_susc_results(ARRAY[
+      'article',
+      'vaccine',
+      'isolate',
+      'timing',
+      'potency_type',
+      'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
       'antibody',
       'variant',
       'potency_type',
@@ -869,7 +904,25 @@ DO $$
 
     PERFORM summarize_susc_results(ARRAY[
       'infected_variant',
+      'variant',
+      'timing',
+      'subject_species',
+      'potency_type',
+      'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
+      'infected_variant',
       'isolate_agg',
+      'subject_species',
+      'potency_type',
+      'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
+      'infected_variant',
+      'isolate_agg',
+      'timing',
       'subject_species',
       'potency_type',
       'potency_unit'
@@ -886,11 +939,31 @@ DO $$
 
     PERFORM summarize_susc_results(ARRAY[
       'vaccine',
+      'variant',
+      'vaccine_dosage',
+      'timing',
+      'subject_species',
+      'potency_type',
+      'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
+      'vaccine',
       'isolate_agg',
       'vaccine_dosage',
       'subject_species',
       'potency_type',
       'potency_unit'
+    ]::susc_summary_agg_key[]);
+
+    PERFORM summarize_susc_results(ARRAY[
+      'vaccine',
+      'isolate_agg',
+      'vaccine_dosage',
+      'timing',
+      'subject_species',
+      'potency_unit',
+      'potency_type'
     ]::susc_summary_agg_key[]);
 
     PERFORM summarize_susc_results(ARRAY[]::susc_summary_agg_key[]);
@@ -902,6 +975,7 @@ DROP TABLE isolate_aggkeys;
 DROP TABLE rx_antibody_names;
 DROP FUNCTION get_isolate_aggkey;
 DROP FUNCTION get_isolate_mutobjs;
+DROP FUNCTION get_indiv_mut_position;
 DROP FUNCTION get_isolate_agg_var_name;
 DROP FUNCTION get_isolate_agg_mutobjs;
 DROP FUNCTION get_isolate_agg_display;
