@@ -7,6 +7,9 @@ VERSION=$1
 pipenv run python scripts/db_to_sqlite.py "postgresql://postgres@covid-drdb-devdb:5432/postgres" /local/covid-drdb-$VERSION.db --all
 echo "Written build/covid-drdb-$VERSION.db"
 ln -s covid-drdb-$VERSION.db /local/covid-drdb-latest.db
+ls ./views/*.sql | sort -h | while read filepath; do
+    sqlite3 /local/covid-drdb-latest.db < $filepath
+done
 echo "build/covid-drdb-latest.db -> covid-drdb-$VERSION.db"
 # cp -v local/covid-drdb-$VERSION.db ../chiro-cms/downloads/covid-drdb/$VERSION.db
 # rm ../chiro-cms/downloads/covid-drdb/latest.db 2>/dev/null || true
