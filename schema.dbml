@@ -515,6 +515,15 @@ Table ref_isolate_pairs as RxIsoPair {
   }
 }
 
+Table ref_isolate_unpairs as RxIsoUnpair {
+  ref_name varchar
+  iso_name varchar [ref: > I.iso_name]
+
+  indexes {
+    (ref_name, iso_name) [pk]
+  }
+}
+
 Table invitro_selection_results as Vitro {
   ref_name varchar
   rx_name varchar
