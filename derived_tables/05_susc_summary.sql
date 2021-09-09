@@ -172,7 +172,7 @@ BEGIN
     FROM isolate_mutations mut
     WHERE
       mut.gene = 'S' AND
-      mut.iso_name = my_iso_name AND
+      mut.iso_name = my_iso_name/* AND
       NOT EXISTS (
         SELECT 1 FROM isolate_mutations ctl_mut
         WHERE
@@ -180,7 +180,7 @@ BEGIN
           ctl_mut.gene = mut.gene AND
           ctl_mut.position = mut.position AND
           ctl_mut.amino_acid = mut.amino_acid
-      )
+      ) */
   );
   _mutations := get_countable_mutations(_mutobjs);
   RETURN ARRAY_TO_STRING(_mutations, '+');
