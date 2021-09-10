@@ -306,6 +306,9 @@ Table antibody_epitopes as MAbEpi {
 
 Table variants as VAR {
   var_name varchar [pk]
+  as_wildtype bool [
+    note: 'Should variant be treated as a wild type virus'
+  ]
 }
 
 Table variant_synonyms as VARSYN {
