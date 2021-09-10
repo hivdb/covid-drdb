@@ -516,7 +516,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
         'conv-plasma' AS rx_type,
-        infected.var_name,
+        CASE
+          WHEN infected.as_wildtype IS TRUE THEN 'Wild Type'
+          ELSE infected.var_name
+        END AS var_name,
         unique_sum(
           ARRAY_AGG((
             sbj.ref_name || '$##$' || sbj.subject_name,
@@ -531,8 +534,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         JOIN subjects sbj ON
           S.ref_name = sbj.ref_name AND
           rx.subject_name = sbj.subject_name
-        LEFT JOIN isolates infected ON
-          rx.infected_iso_name = infected.iso_name
+        LEFT JOIN isolates iso_infected ON
+          rx.infected_iso_name = iso_infected.iso_name
+        LEFT JOIN variants infected ON
+          iso_infected.var_name = infected.var_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         infected.var_name
@@ -846,7 +851,7 @@ DO $$
       PERFORM summarize_susc_results(_agg_by);
     END LOOP;
 
-    PERFORM summarize_susc_results(ARRAY[
+    /*PERFORM summarize_susc_results(ARRAY[
       'article',
       'infected_variant',
       'isolate',
@@ -964,7 +969,7 @@ DO $$
       'subject_species',
       'potency_unit',
       'potency_type'
-    ]::susc_summary_agg_key[]);
+    ]::susc_summary_agg_key[]);*/
 
     PERFORM summarize_susc_results(ARRAY[]::susc_summary_agg_key[]);
   END
