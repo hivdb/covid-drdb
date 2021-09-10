@@ -519,7 +519,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         CASE
           WHEN infected.as_wildtype IS TRUE THEN 'Wild Type'
           ELSE infected.var_name
-        END AS var_name,
+        END AS infected_var_name,
         unique_sum(
           ARRAY_AGG((
             sbj.ref_name || '$##$' || sbj.subject_name,
@@ -540,7 +540,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           iso_infected.var_name = infected.var_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
-        infected.var_name
+        infected_var_name
       $X$);
     END IF;
 
