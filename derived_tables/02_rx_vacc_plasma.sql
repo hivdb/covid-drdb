@@ -9,7 +9,7 @@ INSERT INTO rx_vacc_plasma
       WHERE
         SH.ref_name=RX.ref_name AND
         SH.subject_name=RX.subject_name AND
-        SH.event_date<=RX.collection_date AND
+        SH.event_date<RX.collection_date AND
         SH.vaccine_name IS NOT NULL
     ) AS vaccine_name,
     PTH_isolation.location,
