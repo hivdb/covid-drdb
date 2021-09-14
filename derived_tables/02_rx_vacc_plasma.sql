@@ -4,6 +4,17 @@ INSERT INTO rx_vacc_plasma
     RX.rx_name,
     RX.subject_name,
     (
+      SELECT iso_name
+      FROM subject_history SH
+      WHERE
+        SH.ref_name=RX.ref_name AND
+        SH.subject_name=RX.subject_name AND
+        SH.event_date<RX.collection_date AND
+        SH.event='infection' AND
+        SH.iso_name IS NOT NULL
+        LIMIT 1
+    ) as infected_iso_name,
+    (
       SELECT STRING_AGG(DISTINCT vaccine_name, ' + ')
       FROM subject_history SH
       WHERE
@@ -37,6 +48,17 @@ INSERT INTO rx_vacc_plasma
     RX.rx_name,
     RX.subject_name,
     (
+      SELECT iso_name
+      FROM subject_history SH
+      WHERE
+        SH.ref_name=RX.ref_name AND
+        SH.subject_name=RX.subject_name AND
+        SH.event_date<RX.collection_date AND
+        SH.event='infection' AND
+        SH.iso_name IS NOT NULL
+        LIMIT 1
+    ) as infected_iso_name,
+    (
       SELECT STRING_AGG(DISTINCT vaccine_name, ' + ')
       FROM subject_history SH
       WHERE
@@ -69,6 +91,17 @@ INSERT INTO rx_vacc_plasma
     RX.ref_name,
     RX.rx_name,
     RX.subject_name,
+    (
+      SELECT iso_name
+      FROM subject_history SH
+      WHERE
+        SH.ref_name=RX.ref_name AND
+        SH.subject_name=RX.subject_name AND
+        SH.event_date<RX.collection_date AND
+        SH.event='infection' AND
+        SH.iso_name IS NOT NULL
+        LIMIT 1
+    ) as infected_iso_name,
     (
       SELECT STRING_AGG(DISTINCT vaccine_name, ' + ')
       FROM subject_history SH
