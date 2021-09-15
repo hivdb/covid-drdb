@@ -4,7 +4,17 @@ INSERT INTO susc_results
     ctl.rx_name AS rx_name,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
-    ctl.section AS section,
+    (
+      SELECT STRING_AGG(uniqmerged.section, '; ')
+        FROM (
+          SELECT merged.section
+            FROM (
+              SELECT ctl.section UNION SELECT tgt.section
+            ) AS merged
+            GROUP BY merged.section
+            ORDER BY merged.section
+        ) uniqmerged
+    ) AS section,
     CASE WHEN ctl.potency_type::text LIKE 'NT%' THEN
       CASE
         WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
