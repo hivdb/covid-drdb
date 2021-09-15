@@ -313,7 +313,7 @@ Table variants as VAR {
 
 Table variant_synonyms as VARSYN {
   var_name varchar [ref: > VAR.var_name]
-  synonym varchar [unique]
+  synonym varchar
 
   indexes {
     (var_name, synonym) [pk]
