@@ -602,10 +602,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         var_name
       $X$);
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
-        CASE WHEN isoagg.num_mutations > 1 THEN
-          'combo-muts'
-        ELSE
+        CASE WHEN isoagg.num_mutations = 1 THEN
           'indiv-mut'
+        ELSE
+          'combo-muts'
         END::iso_type_enum AS iso_type,
         isoagg.iso_aggkey AS iso_aggkey,
         isoagg.iso_agg_display AS iso_agg_display,
@@ -687,10 +687,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         iso_agg_display
       $X$);
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
-        CASE WHEN pair.num_mutations > 1 THEN
-          'combo-muts'
-        ELSE
+        CASE WHEN pair.num_mutations = 1 THEN
           'indiv-mut'
+        ELSE
+          'combo-muts'
         END::iso_type_enum AS iso_type,
         pair.control_iso_name,
         ctl_display.iso_display,
