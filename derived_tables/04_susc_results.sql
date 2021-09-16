@@ -111,22 +111,55 @@ INSERT INTO susc_results
           WHERE
             rxcp.ref_name = ctl.ref_name AND
             rxcp.rx_name = ctl.rx_name AND (
-              -- require infected.var_name must be the same as control.var_name,
+              -- require control.var_name must be wild-type
+              ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
+              -- unless infected.var_name is the same as control.var_name
               infected.var_name = ctl_iso.var_name OR
-              (
-                infected.var_name IN ('A', 'B', 'B.1') AND
-                ctl_iso.var_name IN ('A', 'B', 'B.1')
-              ) OR
-              -- unless infected.var_name is empty,
-              infected.var_name IS NULL OR
               -- or the expected control.var_name hasn't been tested
               NOT EXISTS (
                 SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
                 WHERE
                   rxcp.ref_name = strict_ctl.ref_name AND
                   rxcp.rx_name = strict_ctl.rx_name AND
-                  strict_ctl.iso_name = strict_ctl_iso.iso_name AND
-                  infected.var_name = strict_ctl_iso.var_name
+                  strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
+                    strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
+                    infected.var_name = strict_ctl_iso.var_name
+                  )
+              )
+              
+            )
+        )
+      )
+    ) AND (
+      NOT EXISTS (
+        SELECT 1 FROM rx_vacc_plasma rxvp
+        WHERE
+          rxvp.ref_name = ctl.ref_name AND
+          rxvp.rx_name = ctl.rx_name
+      ) OR (
+        EXISTS (
+          SELECT 1
+          FROM
+            rx_vacc_plasma rxvp
+            LEFT JOIN isolates infected ON
+              rxvp.infected_iso_name = infected.iso_name
+          WHERE
+            rxvp.ref_name = ctl.ref_name AND
+            rxvp.rx_name = ctl.rx_name AND (
+              -- require control.var_name must be wild-type
+              ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
+              -- unless infected.var_name is the same as control.var_name
+              infected.var_name = ctl_iso.var_name OR
+              -- or the expected control.var_name hasn't been tested
+              NOT EXISTS (
+                SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
+                WHERE
+                  rxvp.ref_name = strict_ctl.ref_name AND
+                  rxvp.rx_name = strict_ctl.rx_name AND
+                  strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
+                    strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
+                    infected.var_name = strict_ctl_iso.var_name
+                  )
               )
             )
         )
