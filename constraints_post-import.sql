@@ -26,7 +26,7 @@ CREATE FUNCTION isIsolateReferred(rname varchar, iname varchar) RETURNS boolean 
       iname = P.control_iso_name OR
       iname = P.iso_name
     ) OR EXISTS (
-      SELECT 1 FROM ref_isolate_unpairs P2
+      SELECT 1 FROM ref_unpaired_isolates P2
       WHERE rname = P2.ref_name AND
         iname = P2.iso_name
     )
@@ -53,7 +53,7 @@ CREATE FUNCTION isSuscRecordDerived(ref varchar, rx varchar, iso varchar) RETURN
         iso = R.control_iso_name OR
         iso = R.iso_name
       ) OR EXISTS (
-        SELECT 1 FROM ref_isolate_unpairs P2
+        SELECT 1 FROM ref_unpaired_isolates P2
         WHERE ref = P2.ref_name AND
           iso = P2.iso_name
       )

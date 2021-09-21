@@ -521,7 +521,7 @@ Table ref_isolate_pairs as RxIsoPair {
   }
 }
 
-Table ref_isolate_unpairs as RxIsoUnpair {
+Table ref_unpaired_isolates as RxIsoUnpair {
   ref_name varchar
   iso_name varchar [ref: > I.iso_name]
 

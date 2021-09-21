@@ -83,7 +83,7 @@ done
 ls payload/tables/ref_isolate_pairs | sort -h | while read filepath; do
     copy_csv payload/tables/ref_isolate_pairs/$filepath ref_isolate_pairs >> $TARGET_DIR/02_data_tables.sql
 done
-copy_csv payload/tables/ref_isolate_unpairs.csv ref_isolate_unpairs >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/ref_unpaired_isolates.csv ref_unpaired_isolates >> $TARGET_DIR/02_data_tables.sql
 
 
 # ## Excluded results
