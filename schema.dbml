@@ -308,6 +308,32 @@ Table variants as VAR {
   as_wildtype bool [
     note: 'Should variant be treated as a wild type virus'
   ]
+  consensus_availability bool [
+    note: 'If consensus mutations of this variant exist in variant_consensus table'
+  ]
+}
+
+Table variant_consensus as VCons {
+
+  var_name varchar [
+    ref: > VAR.var_name,
+    note: 'Variant name'
+  ]
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+
+  indexes {
+    (var_name, gene, position, amino_acid) [pk]
+  }
+
 }
 
 Table variant_synonyms as VARSYN {

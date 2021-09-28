@@ -10,6 +10,7 @@ click = "*"
 more-itertools = "*"
 db-to-sqlite = "*"
 psycopg2-binary = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"
