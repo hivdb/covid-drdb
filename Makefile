@@ -26,6 +26,20 @@ autofill:
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry autofill-payload payload/
 
+sync-refaa:
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+   		hivdb/covid-drdb-builder:latest \
+		pipenv run python -m drdb.entry update-ref-amino-acid payload/
+
+sync-varcons:
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+   		hivdb/covid-drdb-builder:latest \
+		pipenv run python -m drdb.entry update-variant-consensus payload/
+
 release: network docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \

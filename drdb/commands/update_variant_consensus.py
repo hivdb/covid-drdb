@@ -19,6 +19,7 @@ PANGO_LINEAGE_PATTERN = re.compile(r"""
 GENE_PATTERN = re.compile(r'^([^:]+):')
 DIGIT_PATTERN = re.compile(r'(\d+)')
 MUTAA_PATTERN = re.compile(r'([A-Z]|ins|del|stop)$')
+WILDTYPES = ['B']
 
 QUERY_URL = 'https://api.outbreak.info/genomics/lineage-mutations'
 ORDERED_GENES = [
@@ -124,12 +125,13 @@ def fetch_consensus(variant_maps, consensus_availability):
     for var_name, pango, mod, extra_muts in variant_maps:
         muts = all_muts_lookup.get(pango)
         if not muts:
-            consensus_availability[var_name] = 'FALSE'
-            click.echo(
-                'Pangolin lineage {} does not exist on Outbreak.Info'
-                .format(pango),
-                err=True
-            )
+            if var_name not in WILDTYPES:
+                consensus_availability[var_name] = 'FALSE'
+                click.echo(
+                    'Pangolin lineage {} does not exist on Outbreak.Info'
+                    .format(pango),
+                    err=True
+                )
             continue
         if mod == '/':
             muts = muts + extra_muts
@@ -204,4 +206,3 @@ def update_variant_consensus(payload_dir):
           'consensus_availability': cons_avail.get(var['var_name'], 'TRUE')}
          for var in variants],
         ['var_name', 'as_wildtype', 'consensus_availability'])
-
