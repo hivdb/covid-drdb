@@ -1,3 +1,21 @@
+-- for each variant with consensus_availability is TRUE, at least 1 consensus must exist
+DO $$
+  DECLARE row variants%rowtype;
+  BEGIN
+    FOR row in SELECT * FROM variants V
+    WHERE
+      V.var_name != 'B' AND
+      V.consensus_availability IS TRUE AND
+      NOT EXISTS(
+        SELECT 1 FROM variant_consensus C WHERE
+          C.var_name = V.var_name
+        )
+    LOOP
+      RAISE EXCEPTION E'Variant \x1b[1m%\x1b[0m should have at least one variant_consensus record. Use `\x1b[1mmake sync-varcons\x1b[0m` to correct this error.', row.var_name;
+    END LOOP;
+  END
+$$;
+
 -- for each subject there must be at least one record in subject_history
 CREATE FUNCTION hasSubjectHistory(rname varchar, sname varchar) RETURNS boolean AS $$
   SELECT EXISTS (

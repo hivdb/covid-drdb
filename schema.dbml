@@ -313,6 +313,28 @@ Table variants as VAR {
   ]
 }
 
+Enum variant_status_enum {
+  VOC [note: 'Variant of Concern']
+  VOI [note: 'Variant of Interest']
+  VBM [note: 'Variant Being Monitored']
+}
+
+Table variant_status as VStatus {
+  var_name varchar [
+    ref: > VAR.var_name,
+    note: 'Variant name'
+  ]
+  ref_name varchar [
+    ref: > R.ref_name,
+    note: 'Reference name'
+  ]
+  status variant_status_enum
+  
+  indexes {
+    (var_name, ref_name, status) [pk]
+  }
+}
+
 Table variant_consensus as VCons {
 
   var_name varchar [
