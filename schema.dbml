@@ -317,6 +317,7 @@ Enum variant_status_enum {
   VOC [note: 'Variant of Concern']
   VOI [note: 'Variant of Interest']
   VBM [note: 'Variant Being Monitored']
+  VUI [note: 'Variant under Investigation']
 }
 
 Table variant_status as VStatus {
