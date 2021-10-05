@@ -184,6 +184,31 @@ Table subject_history as PtH {
 
 ref: PtH.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 
+Enum antibody_dosage_unit_enum {
+  "mg/kg"
+}
+
+Table subject_treatments as PtRx {
+  ref_name varchar
+  subject_name varchar
+  rx_name varchar
+  start_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  start_date date
+  end_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  dosage numeric(2,0)
+  dosage_unit antibody_dosage_unit_enum
+  end_date date
+}
+
+ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+ref: PtRx.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+
 Table rx_plasma as RxP {
   ref_name varchar
   rx_name varchar
@@ -606,15 +631,8 @@ Table invitro_selection_results as Vitro {
   }
 }
 
-Enum antibody_dosage_unit_enum {
-  "mg/kg"
-}
-
 Table rx_invivo as RxVivo {
   ref_name varchar
-  rx_name varchar
-  dosage numeric(2,0)
-  dosage_unit antibody_dosage_unit_enum
   subject_name varchar [ref: > Pt.subject_name]
   collection_date date
   section varchar [
