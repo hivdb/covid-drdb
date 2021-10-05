@@ -606,26 +606,17 @@ Table invitro_selection_results as Vitro {
   }
 }
 
-Table invivo_selection_results as Vivo {
-  // TODO: refactor to use subjects table
+Enum antibody_dosage_unit_enum {
+  "mg/kg"
+}
+
+Table rx_invivo as RxVivo {
   ref_name varchar
   rx_name varchar
-  dosage varchar
-  host varchar
-  infection_name varchar [ref: > I.iso_name]
-  gene varchar [
-    note: 'Mutation gene'
-  ]
-  position int [
-    note: 'Position of this mutation'
-  ]
-  amino_acid amino_acid_enum [
-    note: 'Amino acid of this mutation'
-  ]
-  subject varchar
-  sampling varchar
-  num_subjects int
-  num_subjects_with_mut int
+  dosage numeric(2,0)
+  dosage_unit antibody_dosage_unit_enum
+  subject_name varchar [ref: > Pt.subject_name]
+  collection_date date
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
@@ -633,12 +624,12 @@ Table invivo_selection_results as Vivo {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, dosage, subject, sampling)
+    (ref_name, rx_name, subject_name)
   }
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: Vivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxVivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {
@@ -994,5 +985,35 @@ Table susc_results as Susc {
   date_added date [not null]
   indexes {
     (rx_name, control_iso_name, iso_name, ref_name, potency_type, assay_name) [pk]
+  }
+}
+
+Table invivo_selection_results {
+  ref_name varchar
+  rx_name varchar
+  infected_var_name varchar [
+    note: 'Variant of the infected isolate'
+  ]
+  timing numeric(4,0)  [note: "time after assumed infection date, Month"]
+  num_subjects int
+  num_subjects_with_mut int
+  severity severity_enum
+  gene varchar [
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+  note varchar
+  date_added date [not null]
+
+  indexes {
+    (ref_name, rx_name, infected_var_name, timing, severity, gene, position, amino_acid) [pk]
   }
 }
