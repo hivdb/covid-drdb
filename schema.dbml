@@ -991,6 +991,8 @@ Table susc_results as Susc {
 Table invivo_selection_results {
   ref_name varchar
   rx_name varchar
+  dosage numeric(2,0)
+  dosage_unit antibody_dosage_unit_enum
   infected_var_name varchar [
     note: 'Variant of the infected isolate'
   ]
@@ -1014,6 +1016,6 @@ Table invivo_selection_results {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, infected_var_name, timing, severity, gene, position, amino_acid) [pk]
+    (ref_name, rx_name, infected_var_name, timing, gene, position, amino_acid) [pk]
   }
 }
