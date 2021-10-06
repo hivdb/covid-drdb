@@ -31,7 +31,7 @@ def autofill_invitros(tables_dir):
 
 
 def autofill_invivos(tables_dir):
-    invivos = tables_dir / 'invivo_selection_results'
+    invivos = tables_dir / 'rx_invivo'
     for invivo in invivos.iterdir():
         if invivo.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(invivo))
@@ -39,14 +39,8 @@ def autofill_invivos(tables_dir):
         rows = load_csv(invivo)
 
         for row in rows:
-            if not row['dosage']:
-                row['dosage'] = 'None'
-            if not row['rx_name']:
-                row['rx_name'] = 'None'
-            if not row['position']:
-                row['position'] = None
-            if not row['amino_acid']:
-                row['amino_acid'] = None
+            if not row['note']:
+                row['note'] = None
 
         click.echo('Write to {}'.format(invivo))
         dump_csv(
@@ -54,17 +48,8 @@ def autofill_invivos(tables_dir):
             records=rows,
             headers=[
                 'ref_name',
-                'rx_name',
-                'dosage',
-                'host',
-                'infection_name',
-                'gene',
-                'position',
-                'amino_acid',
-                'subject',
-                'sampling',
-                'num_subjects',
-                'num_subjects_with_mut',
+                'subject_name',
+                'collection_date',
                 'section',
                 'note',
                 'date_added',
@@ -192,6 +177,7 @@ def autofill_subjects(tables_dir):
     }
 
     rx_plasma = load_multiple_csvs(tables_dir / 'rx_plasma')
+    rx_invivo = load_multiple_csvs(tables_dir / 'rx_invivo');
 
     subjects = sorted(
         unique_everseen([
@@ -213,7 +199,7 @@ def autofill_subjects(tables_dir):
                  .get('num_subjects') or 1
              ),
              }
-            for rx in rx_plasma
+            for rx in rx_plasma + rx_invivo
         ]),
         key=lambda rx: (rx['ref_name'], rx['subject_name'])
     )

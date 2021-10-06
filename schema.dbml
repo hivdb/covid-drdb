@@ -153,8 +153,13 @@ Enum event_enum {
   "3rd dose isolation"
   "infection"
   "isolation"
+  "culture"
 }
 
+// TODO: divide this table into several small ones:
+// subject_infections, subject_vaccinations,
+// subject_isolations (culture is one type of isolation),
+// and subject_treatments (already seprated)
 Table subject_history as PtH {
   ref_name varchar
   subject_name varchar
@@ -633,7 +638,7 @@ Table invitro_selection_results as Vitro {
 
 Table rx_invivo as RxVivo {
   ref_name varchar
-  subject_name varchar [ref: > Pt.subject_name]
+  subject_name varchar
   collection_date date
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
@@ -642,12 +647,12 @@ Table rx_invivo as RxVivo {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, subject_name)
+    (ref_name, subject_name, collection_date) [pk]
   }
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxVivo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+Ref: RxVivo.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {

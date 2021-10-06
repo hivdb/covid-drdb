@@ -59,13 +59,13 @@ copy_csv payload/tables/vaccine_efficacy.csv vaccine_efficacy >> $TARGET_DIR/02_
 ls payload/tables/invitro_selection_results | sort -h | while read filepath; do
     copy_csv payload/tables/invitro_selection_results/$filepath invitro_selection_results >> $TARGET_DIR/02_data_tables.sql
 done
-ls payload/tables/invivo_selection_results | sort -h | while read filepath; do
-    copy_csv payload/tables/invivo_selection_results/$filepath invivo_selection_results >> $TARGET_DIR/02_data_tables.sql
-done
 ls payload/tables/rx_antibodies | sort -h | while read filepath; do
     copy_csv payload/tables/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
 done
 copy_csv payload/tables/subjects.csv subjects >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/rx_invivo | sort -h | while read filepath; do
+    copy_csv payload/tables/rx_invivo/$filepath rx_invivo >> $TARGET_DIR/02_data_tables.sql
+done
 ls payload/tables/rx_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_plasma/$filepath rx_plasma >> $TARGET_DIR/02_data_tables.sql
 done
