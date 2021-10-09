@@ -36,7 +36,6 @@ echo "Written to $TARGET_DIR/01_schema.sql"
 
 copy_csv payload/tables/assays.csv assays > $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/articles.csv articles >> $TARGET_DIR/02_data_tables.sql
-
 copy_csv payload/tables/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
 
 copy_csv payload/tables/antibodies.csv antibodies >> $TARGET_DIR/02_data_tables.sql
@@ -63,8 +62,8 @@ ls payload/tables/rx_antibodies | sort -h | while read filepath; do
     copy_csv payload/tables/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
 done
 copy_csv payload/tables/subjects.csv subjects >> $TARGET_DIR/02_data_tables.sql
-ls payload/tables/rx_invivo | sort -h | while read filepath; do
-    copy_csv payload/tables/rx_invivo/$filepath rx_invivo >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/ref_invivo | sort -h | while read filepath; do
+    copy_csv payload/tables/ref_invivo/$filepath ref_invivo >> $TARGET_DIR/02_data_tables.sql
 done
 ls payload/tables/rx_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/rx_plasma/$filepath rx_plasma >> $TARGET_DIR/02_data_tables.sql

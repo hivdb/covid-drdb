@@ -191,11 +191,15 @@ ref: PtH.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 
 Enum antibody_dosage_unit_enum {
   "mg/kg"
+  "ml"
+  "mg"
 }
 
 Table subject_treatments as PtRx {
   ref_name varchar
-  subject_name varchar
+  subject_name varchar [
+    note: 'Subject who received the treatment (not the CP donor if rx_name is a CP)'
+  ]
   rx_name varchar
   start_date_cmp numeric_cmp_enum [
     default: "=",
@@ -206,9 +210,9 @@ Table subject_treatments as PtRx {
     default: "=",
     note: '"=", ">", or "<"'
   ]
+  end_date date
   dosage numeric(2,0)
   dosage_unit antibody_dosage_unit_enum
-  end_date date
 }
 
 ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
@@ -217,7 +221,9 @@ ref: PtRx.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 Table rx_plasma as RxP {
   ref_name varchar
   rx_name varchar
-  subject_name varchar
+  subject_name varchar [
+    note: 'Subject who is the CP/VP donor (not the subject received CP treatment)'
+  ]
   collection_date date
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
 
@@ -636,7 +642,7 @@ Table invitro_selection_results as Vitro {
   }
 }
 
-Table rx_invivo as RxVivo {
+Table ref_invivo as InVivo {
   ref_name varchar
   subject_name varchar
   collection_date date
@@ -652,7 +658,7 @@ Table rx_invivo as RxVivo {
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxVivo.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+Ref: InVivo.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {

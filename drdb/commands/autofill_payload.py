@@ -31,7 +31,7 @@ def autofill_invitros(tables_dir):
 
 
 def autofill_invivos(tables_dir):
-    invivos = tables_dir / 'rx_invivo'
+    invivos = tables_dir / 'ref_invivo'
     for invivo in invivos.iterdir():
         if invivo.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(invivo))
@@ -177,7 +177,7 @@ def autofill_subjects(tables_dir):
     }
 
     rx_plasma = load_multiple_csvs(tables_dir / 'rx_plasma')
-    rx_invivo = load_multiple_csvs(tables_dir / 'rx_invivo');
+    ref_invivo = load_multiple_csvs(tables_dir / 'ref_invivo')
 
     subjects = sorted(
         unique_everseen([
@@ -199,7 +199,7 @@ def autofill_subjects(tables_dir):
                  .get('num_subjects') or 1
              ),
              }
-            for rx in rx_plasma + rx_invivo
+            for rx in rx_plasma + ref_invivo
         ]),
         key=lambda rx: (rx['ref_name'], rx['subject_name'])
     )
@@ -216,6 +216,37 @@ def autofill_subjects(tables_dir):
         ],
         BOM=True
     )
+
+
+def autofill_sub_treatments(tables_dir):
+    prx_list = tables_dir / 'subject_treatments'
+    for prx in prx_list.iterdir():
+        if prx.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(prx))
+            continue
+        rows = load_csv(prx)
+        for row in rows:
+            if not row.get('start_date_cmp'):
+                row['start_date_cmp'] = '='
+            if not row.get('end_date_cmp'):
+                row['end_date_cmp'] = '='
+        click.echo('Write to {}'.format(prx))
+        dump_csv(
+            prx,
+            records=rows,
+            headers=[
+                'ref_name',
+                'subject_name',
+                'rx_name',
+                'start_date_cmp',
+                'start_date',
+                'end_date_cmp',
+                'end_date',
+                'dosage',
+                'dosage_unit'
+            ],
+            BOM=True
+        )
 
 
 def autofill_sub_history(tables_dir):
@@ -364,6 +395,7 @@ def autofill_payload(payload_dir):
 
     autofill_subjects(tables_dir)
     autofill_sub_history(tables_dir)
+    autofill_sub_treatments(tables_dir)
 
     antibodies = tables_dir / 'antibodies.csv'
     sort_csv(antibodies, 'ab_name')
