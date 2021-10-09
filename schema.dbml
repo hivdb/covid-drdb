@@ -447,6 +447,12 @@ Table isolate_mutations as M {
   amino_acid amino_acid_enum [
     note: 'Amino acid of this mutation'
   ]
+  count int [
+    note: 'When cumulative/NGS data entered, the number of samples/reads carried this mutation'
+  ]
+  total int [
+    note: 'When cumulative/NGS data entered, the number of samples/reads coverage at this position'
+  ]
 
   indexes {
     (iso_name, gene, position, amino_acid) [pk]
