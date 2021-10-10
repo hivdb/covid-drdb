@@ -201,7 +201,7 @@ def autofill_subjects(tables_dir):
              }
             for rx in rx_plasma + ref_invivo
         ]),
-        key=lambda rx: (rx['ref_name'], rx['subject_name'])
+        key=lambda rx: (rx['ref_name'] or '', rx['subject_name'] or '')
     )
     click.echo('Write to {}'.format(tables_dir / 'subjects.csv'))
     dump_csv(
