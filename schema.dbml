@@ -1022,7 +1022,7 @@ Table invivo_selection_results {
   ref_name varchar
   rx_name varchar
   dosage numeric(2,0)
-  dosage_unit antibody_dosage_unit_enum
+  dosage_unit treatment_dosage_unit_enum
   infected_var_name varchar [
     note: 'Variant of the infected isolate'
   ]
