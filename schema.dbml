@@ -189,10 +189,11 @@ Table subject_history as PtH {
 
 ref: PtH.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 
-Enum antibody_dosage_unit_enum {
+Enum treatment_dosage_unit_enum {
   "mg/kg"
   "ml"
   "mg"
+  "unit"
 }
 
 Table subject_treatments as PtRx {
@@ -212,7 +213,7 @@ Table subject_treatments as PtRx {
   ]
   end_date date
   dosage numeric(8,0)
-  dosage_unit antibody_dosage_unit_enum
+  dosage_unit treatment_dosage_unit_enum
 }
 
 ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
