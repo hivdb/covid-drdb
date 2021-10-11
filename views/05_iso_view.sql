@@ -284,3 +284,17 @@ FROM
 WHERE
     iso.var_name IS NULL
 ;
+
+
+CREATE VIEW IF NOT EXISTS isolate_variant_view
+AS
+SELECT
+    iso.*,
+    var.as_wildtype
+FROM
+    isolates iso
+LEFT JOIN
+    variants var
+ON
+    iso.var_name = var.var_name
+;
