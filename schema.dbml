@@ -214,6 +214,10 @@ Table subject_treatments as PtRx {
   end_date date
   dosage numeric(8,0)
   dosage_unit treatment_dosage_unit_enum
+
+  indexes {
+    (ref_name, subject_name, rx_name, start_date, end_date) [pk]
+  }
 }
 
 ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
