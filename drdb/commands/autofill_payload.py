@@ -39,7 +39,7 @@ def autofill_invivos(tables_dir):
         rows = load_csv(invivo)
 
         for row in rows:
-            if not row['note']:
+            if not row.get('note'):
                 row['note'] = None
 
         click.echo('Write to {}'.format(invivo))
