@@ -40,6 +40,16 @@ sync-varcons:
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-variant-consensus payload/
 
+local-release: network docker-envfile
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+		--network=covid-drdb-network \
+		--volume ~/.aws:/root/.aws:ro \
+		--env-file ./docker-envfile \
+   		hivdb/covid-drdb-builder:latest \
+		scripts/export-sqlite.sh local
+
 release: network docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \

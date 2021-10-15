@@ -55,3 +55,21 @@ CREATE FUNCTION array_intersect_count(anyarray, anyarray) RETURNS INTEGER AS $FU
 $FUNCTION$ LANGUAGE PLPGSQL IMMUTABLE;
 
 
+CREATE FUNCTION geomean_weighted(_values DOUBLE PRECISION[], _weights INTEGER[]) RETURNS DOUBLE PRECISION AS $$
+DECLARE
+  _total DOUBLE PRECISION;
+  _sum_weight INTEGER;
+BEGIN
+  _total := 0;
+  _sum_weight := 0;
+  FOR i IN 1 .. ARRAY_LENGTH(_values, 1) LOOP
+    _total := _total + LN(_values[i]) * _weights[i];
+    _sum_weight := _sum_weight + _weights[i];
+  END LOOP;
+  IF _sum_weight > 0 THEN
+    RETURN EXP(_total / _sum_weight);
+  ELSE
+    RETURN NULL;
+  END IF;
+END
+$$ LANGUAGE PLPGSQL IMMUTABLE;

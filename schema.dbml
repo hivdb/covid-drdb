@@ -980,9 +980,24 @@ Table isolate_stats as IStat {
   }
 }
 
+Table unlinked_susc_results as SuscGroup {
+  ref_name varchar
+  rx_name varchar
+  rx_group varchar
+  iso_name varchar
+  assay_name varchar
+  potency_type potency_type_enum
+
+  indexes {
+    (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
+    rx_group
+  }
+}
+
 Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
+  rx_group varchar
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
   section varchar [
@@ -1013,14 +1028,18 @@ Table susc_results as Susc {
   ineffective ineffective_enum [
     note: 'Rx has no effect on control sequence or experimental sequence'
   ]
+  control_cumulative_count int [
+    default: 1
+  ]
   cumulative_count int [
     default: 1,
     note: 'Cumulative count of matching results (when multiple)'
   ]
+  control_assay_name varchar [ref: > A.assay_name]
   assay_name varchar [ref: > A.assay_name]
   date_added date [not null]
   indexes {
-    (rx_name, control_iso_name, iso_name, ref_name, potency_type, assay_name) [pk]
+    (ref_name, rx_group, control_iso_name, iso_name, potency_type, control_assay_name, assay_name) [pk]
   }
 }
 
