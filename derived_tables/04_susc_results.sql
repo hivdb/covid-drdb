@@ -167,6 +167,67 @@ INSERT INTO susc_results
     );
 
 
+INSERT INTO susc_results
+  SELECT
+    ref_name,
+    rx_name,
+    rx_name AS rx_group,
+    control_iso_name,
+    iso_name,
+    section,
+    fold_cmp,
+    fold,
+    potency_type,
+    NULL AS control_potency,
+    NULL AS potency,
+    NULL AS potency_unit,
+    resistance_level,
+    ineffective,
+    NULL AS control_cumulative_count,
+    cumulative_count,
+    assay_name AS control_asasy_name,
+    assay_name,
+    date_added
+  FROM
+    rx_fold;
+
+SELECT
+  ref_name,
+  rx_name,
+  '$$cp$$' ||
+  CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
+  CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
+  CASE WHEN severity IS NULL THEN 'null' ELSE severity::TEXT END || '$$' AS rx_group
+  INTO TEMPORARY TABLE rx_groups
+  FROM rx_conv_plasma;
+
+INSERT INTO rx_groups
+SELECT
+  ref_name,
+  rx_name,
+  '$$vp$$' ||
+  CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
+  CASE WHEN vaccine_name IS NULL THEN 'null' ELSE vaccine_name END || '$$' ||
+  CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
+  CASE WHEN dosage IS NULL THEN 0 ELSE dosage END || '$$' AS rx_group
+  FROM rx_vacc_plasma;
+
+INSERT INTO rx_groups
+SELECT
+  ref_name,
+  rx_name,
+  '$$mab$$' || (
+    SELECT STRING_AGG(ab_name, '+')
+    FROM (
+      SELECT ab_name
+        FROM UNNEST(ARRAY_AGG(rx_antibodies.ab_name)) ab_name
+        GROUP BY ab_name
+        ORDER BY ab_name
+    ) uniqsorted
+  ) || '$$' AS rx_group
+  FROM rx_antibodies
+  GROUP BY ref_name, rx_name;
+
 INSERT INTO unlinked_susc_results
   SELECT
     pot.ref_name,
@@ -177,54 +238,97 @@ INSERT INTO unlinked_susc_results
     pot.potency_type
   FROM
     rx_potency AS pot,
-    (
-      SELECT
-        ref_name,
-        rx_name,
-        '$$cp$$' ||
-        CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
-        CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
-        CASE WHEN severity IS NULL THEN 'null' ELSE severity::TEXT END || '$$' AS rx_group
-        FROM rx_conv_plasma
-      UNION
-      SELECT
-        ref_name,
-        rx_name,
-        '$$vp$$' ||
-        CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
-        CASE WHEN vaccine_name IS NULL THEN 'null' ELSE vaccine_name END || '$$' ||
-        CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
-        CASE WHEN dosage IS NULL THEN 0 ELSE dosage END || '$$' AS rx_group
-        FROM rx_vacc_plasma
-      UNION
-      SELECT
-        ref_name,
-        rx_name,
-        '$$mab$$' || (
-          SELECT STRING_AGG(ab_name, '+')
-          FROM (
-            SELECT ab_name
-              FROM UNNEST(ARRAY_AGG(rx_antibodies.ab_name)) ab_name
-              GROUP BY ab_name
-              ORDER BY ab_name
-          ) uniqsorted
-        ) || '$$' AS rx_group
-        FROM rx_antibodies
-        GROUP BY ref_name, rx_name
-    ) acc
+    rx_groups AS acc
   WHERE
     pot.ref_name = acc.ref_name AND
     pot.rx_name = acc.rx_name AND
-    EXISTS (
-      SELECT 1
-        FROM ref_unpaired_isolates unpair
-        WHERE
-          pot.ref_name = unpair.ref_name AND
-          pot.iso_name = unpair.iso_name
+    NOT EXISTS (
+      SELECT 1 FROM ref_isolate_pairs pair
+      WHERE
+        pot.ref_name = pair.ref_name AND (
+          (
+            pair.control_iso_name = pot.iso_name AND
+            pot.rx_name = ANY (
+              SELECT pot2.rx_name FROM rx_potency pot2
+              WHERE
+                pot.ref_name = pot2.ref_name AND
+                pair.iso_name = pot2.iso_name
+            )
+          ) OR (
+            pair.iso_name = pot.iso_name AND
+            pot.rx_name = ANY (
+              SELECT pot2.rx_name FROM rx_potency pot2
+              WHERE
+                pot.ref_name = pot2.ref_name AND
+                pair.control_iso_name = pot2.iso_name
+            )
+          )
+        )
     );
 
 
-DELETE FROM unlinked_susc_results grp1
+INSERT INTO unlinked_susc_results
+  SELECT
+    pot.ref_name,
+    pot.rx_name,
+    rx_group,
+    pot.iso_name,
+    pot.assay_name,
+    pot.potency_type
+  FROM
+    rx_potency AS pot,
+    rx_groups AS acc
+  WHERE
+    pot.ref_name = acc.ref_name AND
+    pot.rx_name = acc.rx_name AND
+    NOT EXISTS (
+      SELECT 1 FROM unlinked_susc_results u2
+      WHERE
+        u2.ref_name = pot.ref_name AND
+        u2.rx_name = pot.rx_name AND
+        u2.iso_name = pot.iso_name AND
+        u2.assay_name = pot.assay_name AND
+        u2.potency_type = pot.potency_type
+    ) AND
+    EXISTS (
+      SELECT 1 FROM ref_isolate_pairs pair
+      WHERE
+        pot.ref_name = pair.ref_name AND (
+          (
+            pair.control_iso_name = pot.iso_name AND
+            pot.rx_name <> ANY (
+              SELECT u2.rx_name FROM unlinked_susc_results u2
+              WHERE
+                pot.ref_name = u2.ref_name AND
+                pair.iso_name = u2.iso_name
+            )
+          ) OR (
+            pair.iso_name = pot.iso_name AND
+            pot.rx_name <> ANY (
+              SELECT u2.rx_name FROM unlinked_susc_results u2
+              WHERE
+                pot.ref_name = u2.ref_name AND
+                pair.control_iso_name = u2.iso_name
+            )
+          )
+        ) AND NOT EXISTS (
+          SELECT 1 FROM rx_potency pot2
+          WHERE
+            pot2.ref_name = pot.ref_name AND
+            pot2.rx_name = pot.rx_name AND
+            (
+              (
+                pair.control_iso_name = pot.iso_name AND
+                pair.iso_name = pot2.iso_name
+              ) OR (
+                pair.control_iso_name = pot2.iso_name AND
+                pair.iso_name = pot.iso_name
+              )
+            )
+        )
+    );
+
+/*DELETE FROM unlinked_susc_results grp1
   USING unlinked_susc_results grp2, ref_isolate_pairs pair
   WHERE
     grp1.ref_name = grp2.ref_name AND
@@ -238,7 +342,7 @@ DELETE FROM unlinked_susc_results grp1
         pair.control_iso_name = grp2.iso_name AND
         pair.iso_name = grp1.iso_name
       )
-    );
+    );*/
 
 
 INSERT INTO susc_results
@@ -262,7 +366,7 @@ INSERT INTO susc_results
         ) uniqmerged
     ) AS section,
     '=' AS fold_cmp,
-    NULL AS fold,
+    1 AS fold,
     tgt.potency_type AS potency_type,
     NULL AS control_potency,
     NULL AS potency,
@@ -497,28 +601,3 @@ UPDATE susc_results SET
     END
   WHERE
     rx_name IS NULL;
-
-
-INSERT INTO susc_results
-  SELECT
-    ref_name,
-    rx_name,
-    rx_name AS rx_group,
-    control_iso_name,
-    iso_name,
-    section,
-    fold_cmp,
-    fold,
-    potency_type,
-    NULL AS control_potency,
-    NULL AS potency,
-    NULL AS potency_unit,
-    resistance_level,
-    ineffective,
-    NULL AS control_cumulative_count,
-    cumulative_count,
-    assay_name AS control_asasy_name,
-    assay_name,
-    date_added
-  FROM
-    rx_fold;

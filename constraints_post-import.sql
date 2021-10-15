@@ -43,11 +43,12 @@ CREATE FUNCTION isIsolateReferred(rname varchar, iname varchar) RETURNS boolean 
     WHERE rname = P.ref_name AND (
       iname = P.control_iso_name OR
       iname = P.iso_name
-    ) OR EXISTS (
-      SELECT 1 FROM ref_unpaired_isolates P2
-      WHERE rname = P2.ref_name AND
-        iname = P2.iso_name
     )
+  ) OR EXISTS (
+    SELECT 1 FROM ref_unpaired_isolates UP
+    WHERE
+      rname = UP.ref_name AND
+      iname = UP.iso_name
   )
 $$ LANGUAGE SQL;
 
@@ -70,11 +71,23 @@ CREATE FUNCTION isSuscRecordDerived(ref varchar, rx varchar, iso varchar) RETURN
       rx = R.rx_name AND (
         iso = R.control_iso_name OR
         iso = R.iso_name
-      ) OR EXISTS (
-        SELECT 1 FROM ref_unpaired_isolates P2
-        WHERE ref = P2.ref_name AND
-          iso = P2.iso_name
       )
+  ) OR EXISTS (
+    SELECT 1 FROM susc_results R, unlinked_susc_results UR
+    WHERE
+      ref = UR.ref_name AND
+      rx = UR.rx_name AND
+      iso = UR.iso_name AND
+      ref = R.ref_name AND
+      R.rx_group = UR.rx_group AND (
+        iso = R.control_iso_name OR
+        iso = R.iso_name
+      )
+  ) OR EXISTS (
+    SELECT 1 FROM ref_unpaired_isolates UP
+    WHERE
+      ref = UP.ref_name AND
+      iso = UP.iso_name
   )
 $$ LANGUAGE SQL;
 
