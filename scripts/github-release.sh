@@ -33,6 +33,7 @@ if [[ "$known_tag" == "$VERSION" ]]; then
   fi
   exit 3
 fi
+builder_local_commit=$(git rev-parse HEAD)
 
 if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
   title="Pre-release $VERSION"
@@ -45,15 +46,27 @@ sqlite3 covid-drdb-$VERSION.db\n
 Once the SQLite shell prompts, type \`.tables\` to list all tables.\n\n
 You can also use any SQLite viewer to open the database, e.g.:\n\n
 - https://inloop.github.io/sqlite-viewer/\n
-- https://sqlitebrowser.org/\n"
+- https://sqlitebrowser.org/\n\n
+Built with hivdb/covid-drdb@${builder_local_commit}\n"
 else
+  builder_remote_commit=$(git rev-parse HEAD --branches=origin/master)
   remote_commit=$($GIT rev-parse HEAD --branches=origin/master)
   local_commit=$($GIT rev-parse HEAD)
+  if [[ "$builder_remote_commit" != "$builder_local_commit" ]]; then
+    echo "Release abort: the local repository covid-drdb seems not up-to-date.  Forgot running 'git pull --rebase' and 'git push'?" 1>&2
+    exit 1
+  fi
   if [[ "$remote_commit" != "$local_commit" ]]; then
-    echo "Release abort: the local repository payload/ seems not up-to-date. Forgot running 'git pull --rebase' and 'git push'?" 1>&2
+    echo "Release abort: the local repository covid-drdb-payload seems not up-to-date. Forgot running 'git pull --rebase' and 'git push'?" 1>&2
     exit 1
   fi
   
+  if [ -n "$(git status -s .)" ]; then
+    git status
+    echo "Release abort: uncommitted changes are found. Please submit them & run 'git push' first." 1>&2
+    exit 1
+  fi
+
   if [ -n "$($GIT status -s .)" ]; then
     $GIT status
     echo "Release abort: uncommitted changes are found under payload/ directory. Please submit them & run 'git push' first." 1>&2
@@ -77,7 +90,8 @@ sqlite3 covid-drdb-$VERSION.db\n
 Once the SQLite shell prompts, type \`.tables\` to list all tables.\n\n
 You can also use any SQLite viewer to open the database, e.g.:\n\n
 - https://inloop.github.io/sqlite-viewer/\n
-- https://sqlitebrowser.org/\n"
+- https://sqlitebrowser.org/\n\n
+Built with hivdb/covid-drdb@${builder_local_commit}\n"
   fi
 fi
 
@@ -92,6 +106,8 @@ if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
   echo "Release abort: file 'build/covid-drdb-$VERSION-slim.db' is not found. Something wrong, please contact Philip." 1>&2
   exit 2
 fi
+
+echo -e $description
 
 echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
