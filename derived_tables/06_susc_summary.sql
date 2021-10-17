@@ -369,14 +369,14 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           COUNT(DISTINCT S.ref_name) AS num_studies,
           unique_sum(
             ARRAY_AGG((
-              S.ref_name || '$##$' || S.rx_name,
+              S.ref_name || '$##$' || S.rx_group,
               S.cumulative_count
             )::unique_sum_type)
           ) AS num_samples,
           unique_sum(
             ARRAY_AGG((
               S.ref_name || '$##$' ||
-              S.rx_name || '$##$' ||
+              S.rx_group || '$##$' ||
               S.control_iso_name || '$##$' ||
               S.iso_name || '$##$' ||
               S.potency_type,
@@ -405,14 +405,38 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         LEFT JOIN rx_antibodies rxab ON
-          S.ref_name = rxab.ref_name AND
-          S.rx_name = rxab.rx_name
+          S.ref_name = rxab.ref_name AND (
+            S.rx_name = rxab.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rxab.rx_name
+            )
+          )
         LEFT JOIN rx_conv_plasma rxcp ON
-          S.ref_name = rxcp.ref_name AND
-          S.rx_name = rxcp.rx_name
+          S.ref_name = rxcp.ref_name AND (
+            S.rx_name = rxcp.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rxcp.rx_name
+            )
+          )
         LEFT JOIN rx_vacc_plasma rxvp ON
-          S.ref_name = rxvp.ref_name AND
-          S.rx_name = rxvp.rx_name
+          S.ref_name = rxvp.ref_name AND (
+            S.rx_name = rxvp.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rxvp.rx_name
+            )
+          )
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rx_type');
     END IF;
@@ -436,8 +460,16 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_antibodies rxab ON
-          S.ref_name = rxab.ref_name AND
-          S.rx_name = rxab.rx_name
+          S.ref_name = rxab.ref_name AND (
+            S.rx_name = rxab.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rxab.rx_name
+            )
+          )
         JOIN antibodies ab ON rxab.ab_name = ab.ab_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
@@ -459,8 +491,16 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_antibody_names ab ON
-          S.ref_name = ab.ref_name AND
-          S.rx_name = ab.rx_name
+          S.ref_name = ab.ref_name AND (
+            S.rx_name = ab.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = ab.rx_name
+            )
+          )
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         ab.antibody_names,
@@ -488,8 +528,16 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_vacc_plasma rxvp ON
-          S.ref_name = rxvp.ref_name AND
-          S.rx_name = rxvp.rx_name
+          S.ref_name = rxvp.ref_name AND (
+            S.rx_name = rxvp.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rxvp.rx_name
+            )
+          )
         JOIN vaccines v ON
           rxvp.vaccine_name = v.vaccine_name
         JOIN subjects sbj ON
@@ -529,8 +577,16 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_conv_plasma rx ON
-          S.ref_name = rx.ref_name AND
-          S.rx_name = rx.rx_name
+          S.ref_name = rx.ref_name AND (
+            S.rx_name = rx.rx_name OR
+            EXISTS (
+              SELECT 1 FROM unlinked_susc_results usr
+              WHERE
+                S.ref_name = usr.ref_name AND
+                S.rx_group = usr.rx_group AND
+                usr.rx_name = rx.rx_name
+            )
+          )
         JOIN subjects sbj ON
           S.ref_name = sbj.ref_name AND
           rx.subject_name = sbj.subject_name
@@ -572,8 +628,16 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         $X$);
         _ext_joins := ARRAY_APPEND(_ext_joins, $X$
           LEFT JOIN rx_plasma rxp ON
-            S.ref_name = rxp.ref_name AND
-            S.rx_name = rxp.rx_name
+            S.ref_name = rxp.ref_name AND (
+              S.rx_name = rxp.rx_name OR
+              EXISTS (
+                SELECT 1 FROM unlinked_susc_results usr
+                WHERE
+                  S.ref_name = usr.ref_name AND
+                  S.rx_group = usr.rx_group AND
+                  usr.rx_name = rxp.rx_name
+              )
+            )
           LEFT JOIN subjects sbj ON
             S.ref_name = sbj.ref_name AND
             rxp.subject_name = sbj.subject_name

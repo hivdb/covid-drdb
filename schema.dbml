@@ -109,6 +109,7 @@ Table rx_antibodies as RxMAb {
 
   indexes {
     (ref_name, rx_name, ab_name) [pk]
+    rx_name
   }
 }
 
@@ -236,6 +237,7 @@ Table rx_plasma as RxP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    rx_name
   }
 }
 ref: RxP.(ref_name, subject_name) > Pt.(ref_name, subject_name)
@@ -915,6 +917,7 @@ Table rx_conv_plasma as RxCP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    rx_name
   }
 }
 
@@ -942,6 +945,7 @@ Table rx_vacc_plasma as RxVP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    rx_name
   }
 }
 
@@ -993,7 +997,8 @@ Table unlinked_susc_results as SuscGroup {
 
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
-    rx_group
+    (ref_name, rx_group)
+    rx_name
   }
 }
 
@@ -1043,6 +1048,7 @@ Table susc_results as Susc {
   date_added date [not null]
   indexes {
     (ref_name, rx_group, control_iso_name, iso_name, potency_type, control_assay_name, assay_name) [pk]
+    rx_name
   }
 }
 
