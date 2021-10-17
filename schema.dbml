@@ -987,6 +987,9 @@ Table unlinked_susc_results as SuscGroup {
   iso_name varchar
   assay_name varchar
   potency_type potency_type_enum
+  potency numeric(10,3)
+  cumulative_count int
+  ineffective boolean
 
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]

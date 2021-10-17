@@ -185,3 +185,57 @@ DO $$
     END LOOP;
   END
 $$ LANGUAGE PLPGSQL;
+
+DO $$
+  DECLARE _ref_with_unused_rx_plasma VARCHAR;
+  DECLARE _unused_rx_plasma VARCHAR;
+  BEGIN
+    FOR _ref_with_unused_rx_plasma in SELECT DISTINCT RXP.ref_name
+    FROM rx_plasma RXP
+    WHERE
+      NOT EXISTS (
+        SELECT 1 FROM susc_results S WHERE
+          RXP.ref_name = S.ref_name AND
+          RXP.rx_name = S.rx_name
+      ) AND NOT EXISTS (
+        SELECT 1 FROM unlinked_susc_results UnS WHERE
+          RXP.ref_name = UnS.ref_name AND
+          RXP.rx_name = UnS.rx_name
+      ) AND NOT EXISTS (
+        SELECT 1 FROM subject_treatments SbjRx WHERE
+          RXP.ref_name = SbjRx.ref_name AND
+          RXP.rx_name = SbjRx.rx_name
+      ) AND NOT EXISTS (
+        SELECT 1 FROM invitro_selection_results IVRx WHERE
+          RXP.ref_name = IVRx.ref_name AND
+          RXP.rx_name = IVRx.rx_name
+      )
+    LOOP
+      _unused_rx_plasma := (
+        SELECT STRING_AGG(rx_name, ', ')
+        FROM rx_plasma RXP
+        WHERE
+          NOT EXISTS (
+            SELECT 1 FROM susc_results S WHERE
+              RXP.ref_name = S.ref_name AND
+              RXP.rx_name = S.rx_name
+          ) AND NOT EXISTS (
+            SELECT 1 FROM unlinked_susc_results UnS WHERE
+              RXP.ref_name = UnS.ref_name AND
+              RXP.rx_name = UnS.rx_name
+          ) AND NOT EXISTS (
+            SELECT 1 FROM subject_treatments SbjRx WHERE
+              RXP.ref_name = SbjRx.ref_name AND
+              RXP.rx_name = SbjRx.rx_name
+          ) AND NOT EXISTS (
+            SELECT 1 FROM invitro_selection_results IVRx WHERE
+              RXP.ref_name = IVRx.ref_name AND
+              RXP.rx_name = IVRx.rx_name
+          ) AND RXP.ref_name = _ref_with_unused_rx_plasma
+      );
+      RAISE WARNING E'Following rx_plasma are not used by reference \x1b[1m%\x1b[0m: \x1b[1m%\x1b[0m', _ref_with_unused_rx_plasma, _unused_rx_plasma;
+    END LOOP;
+  END
+$$ LANGUAGE PLPGSQL;
+
+

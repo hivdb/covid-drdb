@@ -235,7 +235,14 @@ INSERT INTO unlinked_susc_results
     rx_group,
     pot.iso_name,
     pot.assay_name,
-    pot.potency_type
+    pot.potency_type,
+    pot.potency,
+    pot.cumulative_count,
+    CASE WHEN pot.potency_type::TEXT LIKE 'NT%' THEN
+      pot.potency <= pot.potency_lower_limit
+    ELSE
+      pot.potency >= pot.potency_lower_limit
+    END AS ineffective
   FROM
     rx_potency AS pot,
     rx_groups AS acc
