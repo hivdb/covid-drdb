@@ -107,8 +107,6 @@ if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
   exit 2
 fi
 
-echo -e $description
-
 echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
