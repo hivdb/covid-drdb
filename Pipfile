@@ -9,8 +9,8 @@ verify_ssl = true
 click = "*"
 more-itertools = "*"
 db-to-sqlite = "*"
-psycopg2-binary = "*"
 requests = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.9"

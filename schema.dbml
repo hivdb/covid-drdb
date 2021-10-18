@@ -687,6 +687,16 @@ Table ref_amino_acid as RefAA {
   }
 }
 
+Table amino_acid_prevalence as AAPcnt {
+  ref_name varchar [ref: > R.ref_name]
+  gene varchar [ref: > G.gene]
+  position int
+  amino_acid amino_acid_enum
+  count int
+  proportion numeric(7,6)
+  date_updated date
+}
+
 Table dms_ace2_binding as Binding {
   gene varchar [
     ref: > G.gene,

@@ -55,6 +55,9 @@ copy_csv payload/tables/isolate_mutations.csv isolate_mutations >> $TARGET_DIR/0
 copy_csv payload/tables/ref_amino_acid.csv ref_amino_acid >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/vaccines.csv vaccines >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/vaccine_efficacy.csv vaccine_efficacy >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/amino_acid_prevalence | sort -h | while read filepath; do
+    copy_csv payload/tables/amino_acid_prevalence/$filepath amino_acid_prevalence >> $TARGET_DIR/02_data_tables.sql
+done
 ls payload/tables/invitro_selection_results | sort -h | while read filepath; do
     copy_csv payload/tables/invitro_selection_results/$filepath invitro_selection_results >> $TARGET_DIR/02_data_tables.sql
 done
