@@ -11,6 +11,7 @@ more-itertools = "*"
 db-to-sqlite = "*"
 requests = "*"
 lxml = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.9"
