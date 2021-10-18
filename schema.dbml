@@ -242,18 +242,7 @@ Table rx_plasma as RxP {
 }
 ref: RxP.(ref_name, subject_name) > Pt.(ref_name, subject_name)
 
-Table rx_dms as RxDMS {
-  ref_name varchar
-  rx_name varchar
-  ab_name varchar [ref: > MAb.ab_name]
-
-  indexes {
-    (ref_name, rx_name, ab_name) [pk]
-  }
-}
-
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxDMS.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 Ref: RxP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table antibodies as MAb {

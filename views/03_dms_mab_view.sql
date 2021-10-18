@@ -13,7 +13,7 @@ SELECT
     mab.institute,
     mab.origin
 FROM
-    rx_dms rx,
+    rx_antibodies rx,
     single_mab_view mab
 WHERE
     rx.ab_name = mab.ab_name
@@ -60,7 +60,7 @@ FROM
         ab.institute,
         ab.origin
     FROM
-        rx_dms rx,
+        rx_antibodies rx,
         antibodies ab
     WHERE
         rx.ab_name = ab.ab_name
@@ -71,7 +71,7 @@ FROM
         ab.institute,
         ab.origin
     FROM
-        rx_dms rx,
+        rx_antibodies rx,
         antibodies ab
     WHERE
         rx.ab_name = ab.ab_name

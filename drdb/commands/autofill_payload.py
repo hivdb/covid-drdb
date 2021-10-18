@@ -72,15 +72,10 @@ def autofill_rx(tables_dir):
     if file_path.exists():
         unclassified_rx = load_csv(file_path)
 
-    rxdms = []
-    file_path = tables_dir / 'dms' / 'rx_dms.csv'
-    if file_path.exists():
-        rxdms = load_csv(file_path)
-
     treatments = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxps + unclassified_rx + invitro + rxdms
+        for rx in rxmabs + rxps + unclassified_rx + invitro
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
