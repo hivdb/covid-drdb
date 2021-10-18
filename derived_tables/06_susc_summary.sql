@@ -405,16 +405,8 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         LEFT JOIN rx_antibodies rxab ON
-          S.ref_name = rxab.ref_name AND (
-            S.rx_name = rxab.rx_name OR
-            EXISTS (
-              SELECT 1 FROM unlinked_susc_results usr
-              WHERE
-                S.ref_name = usr.ref_name AND
-                S.rx_group = usr.rx_group AND
-                usr.rx_name = rxab.rx_name
-            )
-          )
+          S.ref_name = rxab.ref_name AND
+          S.rx_name = rxab.rx_name
         LEFT JOIN rx_conv_plasma rxcp ON
           S.ref_name = rxcp.ref_name AND (
             S.rx_name = rxcp.rx_name OR
@@ -460,16 +452,8 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_antibodies rxab ON
-          S.ref_name = rxab.ref_name AND (
-            S.rx_name = rxab.rx_name OR
-            EXISTS (
-              SELECT 1 FROM unlinked_susc_results usr
-              WHERE
-                S.ref_name = usr.ref_name AND
-                S.rx_group = usr.rx_group AND
-                usr.rx_name = rxab.rx_name
-            )
-          )
+          S.ref_name = rxab.ref_name AND
+          S.rx_name = rxab.rx_name
         JOIN antibodies ab ON rxab.ab_name = ab.ab_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
@@ -491,16 +475,8 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN rx_antibody_names ab ON
-          S.ref_name = ab.ref_name AND (
-            S.rx_name = ab.rx_name OR
-            EXISTS (
-              SELECT 1 FROM unlinked_susc_results usr
-              WHERE
-                S.ref_name = usr.ref_name AND
-                S.rx_group = usr.rx_group AND
-                usr.rx_name = ab.rx_name
-            )
-          )
+          S.ref_name = ab.ref_name AND
+          S.rx_name = ab.rx_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         ab.antibody_names,

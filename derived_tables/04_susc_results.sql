@@ -212,6 +212,10 @@ SELECT
   CASE WHEN dosage IS NULL THEN 0 ELSE dosage END || '$$' AS rx_group
   FROM rx_vacc_plasma;
 
+/*
+For mAbs, susc_results should always be linked.
+The below query should never be executed.
+
 INSERT INTO rx_groups
 SELECT
   ref_name,
@@ -226,7 +230,7 @@ SELECT
     ) uniqsorted
   ) || '$$' AS rx_group
   FROM rx_antibodies
-  GROUP BY ref_name, rx_name;
+  GROUP BY ref_name, rx_name; */
 
 INSERT INTO unlinked_susc_results
   SELECT
@@ -281,7 +285,14 @@ INSERT INTO unlinked_susc_results
     rx_group,
     pot.iso_name,
     pot.assay_name,
-    pot.potency_type
+    pot.potency_type,
+    pot.potency,
+    pot.cumulative_count,
+    CASE WHEN pot.potency_type::TEXT LIKE 'NT%' THEN
+      pot.potency <= pot.potency_lower_limit
+    ELSE
+      pot.potency >= pot.potency_lower_limit
+    END AS ineffective
   FROM
     rx_potency AS pot,
     rx_groups AS acc
@@ -334,23 +345,6 @@ INSERT INTO unlinked_susc_results
             )
         )
     );
-
-/*DELETE FROM unlinked_susc_results grp1
-  USING unlinked_susc_results grp2, ref_isolate_pairs pair
-  WHERE
-    grp1.ref_name = grp2.ref_name AND
-    grp1.rx_name = grp2.rx_name AND
-    (
-      (
-        pair.control_iso_name = grp1.iso_name AND
-        pair.iso_name = grp2.iso_name
-      ) OR
-      (
-        pair.control_iso_name = grp2.iso_name AND
-        pair.iso_name = grp1.iso_name
-      )
-    );*/
-
 
 INSERT INTO susc_results
   SELECT
