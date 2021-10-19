@@ -1,9 +1,58 @@
+CREATE VIEW IF NOT EXISTS susc_results_view
+AS
+SELECT *
+FROM
+    (
+        SELECT *
+        FROM susc_results
+        WHERE rx_name IS NOT NULL
+
+        UNION
+
+        SELECT
+            susc.ref_name,
+            unlink.rx_name,
+            susc.rx_group,
+            susc.control_iso_name,
+            susc.iso_name,
+            susc.section,
+            susc.fold_cmp,
+            susc.fold,
+            susc.potency_type,
+            susc.control_potency,
+            unlink.potency,
+            susc.potency_unit,
+            susc.resistance_level,
+            susc.ineffective,
+            susc.control_cumulative_count,
+            unlink.cumulative_count,
+            susc.control_assay_name,
+            unlink.assay_name,
+            susc.date_added
+        FROM
+            susc_results susc,
+            unlinked_susc_results unlink
+        WHERE
+            susc.ref_name = unlink.ref_name
+            AND
+            susc.rx_group = unlink.rx_group
+            AND
+            susc.iso_name = unlink.iso_name
+            AND
+            susc.assay_name = unlink.assay_name
+            AND
+            susc.potency_type = unlink.potency_type
+            AND
+            susc.rx_name IS NULL
+    )
+;
+
 CREATE VIEW IF NOT EXISTS susc_results_50_view
 AS
 SELECT
     *
 FROM
-    susc_results
+    susc_results_view
 WHERE
     potency_type IN ('IC50', 'NT50')
 ;
@@ -13,7 +62,7 @@ AS
 SELECT
     *
 FROM
-    susc_results susc,
+    susc_results_view susc,
     isolate_wildtype_view wt
 WHERE
     susc.control_iso_name = wt.iso_name
@@ -80,11 +129,11 @@ AS
 SELECT
     *
 FROM
-    susc_results a
+    susc_results_view a
 WHERE
     EXISTS (
         SELECT 1
-        FROM susc_results b
+        FROM susc_results_view b
         WHERE
             a.ref_name = b.ref_name
             AND
@@ -136,11 +185,11 @@ AS
 SELECT
     *
 FROM
-    susc_results a
+    susc_results_view a
 WHERE
     NOT EXISTS (
         SELECT 1
-        FROM susc_results b
+        FROM susc_results_view b
         WHERE
             a.ref_name = b.ref_name
             AND
