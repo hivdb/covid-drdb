@@ -18,11 +18,10 @@ DELETE FROM dms_escape_results AS d WHERE NOT EXISTS (
     d.gene = p.gene AND
     d.position = p.position AND
     d.amino_acid = p.amino_acid
-);
+) OR escape_score < 0.1;
 DELETE FROM dms_ace2_binding AS d WHERE NOT EXISTS (
-  SELECT 1 FROM amino_acid_prevalence p
+  SELECT 1 FROM dms_escape_results p
   WHERE
-    proportion > 0.00001 AND
     d.gene = p.gene AND
     d.position = p.position AND
     d.amino_acid = p.amino_acid

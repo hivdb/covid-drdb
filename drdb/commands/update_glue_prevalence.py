@@ -140,7 +140,7 @@ def update_glue_prevalence(payload_dir):
     prev_dir.mkdir(exist_ok=True)
     glue_csv = prev_dir / 'glue.csv'
     genes = load_csv(payload_dir / 'tables' / 'genes.csv')
-    genes = {g['gene']: g['gene_order'] for g in genes}
+    genes = {g['gene']: int(g['gene_order']) for g in genes}
     rows = sorted(
         fetch_mutations(min_prop_list='1E-05'),
         key=lambda r: (
