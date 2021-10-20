@@ -686,6 +686,11 @@ Table amino_acid_prevalence as AAPcnt {
   count int
   proportion numeric(7,6)
   date_updated date
+
+  indexes {
+    (ref_name, gene, position, amino_acid) [pk]
+    (gene, position, amino_acid)
+  }
 }
 
 Table dms_ace2_binding as Binding {
@@ -724,6 +729,7 @@ Table dms_escape_results as DMSEscape {
 
   indexes {
     (ref_name, rx_name, gene, position, amino_acid) [pk]
+    (gene, position, amino_acid)
   }
 }
 

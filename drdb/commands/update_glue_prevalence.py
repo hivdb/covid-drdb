@@ -66,7 +66,7 @@ def convert_mut_row(row):
         'position': pos,
         'amino_acid': aa,
         'count': count,
-        'proportion': '{:f}'.format(proportion),
+        'proportion': proportion,
         'date_updated': date_updated
     }
 
@@ -119,10 +119,24 @@ def fetch_mutations(
             'refreshTable': 'Refresh Table'
         }
     )
+    rows = {}
     for row in parse_response(resp, '//table[@id="mutTable"][1]'):
         row = convert_mut_row(row)
-        if row:
-            yield row
+        key = (row['gene'], row['position'], row['amino_acid'])
+        rows.setdefault(key, {
+            'ref_name': row['ref_name'],
+            'gene': row['gene'],
+            'position': row['position'],
+            'amino_acid': row['amino_acid'],
+            'count': 0,
+            'proportion': .0,
+            'date_updated': row['date_updated']
+        })
+        rows[key]['count'] += row['count']
+        rows[key]['proportion'] += row['proportion']
+    for row in rows.values():
+        row['proportion'] = '{:f}'.format(row['proportion'])
+        yield row
 
 
 @cli.command()

@@ -8,6 +8,7 @@ DELETE FROM rx_potency;
 DELETE FROM rx_fold;
 DELETE FROM treatments;
 DELETE FROM subject_history;
+DELETE FROM ref_invivo;
 DELETE FROM ref_isolate_pairs;
 DELETE FROM ref_unpaired_isolates;
 DELETE FROM antibody_articles;
@@ -27,5 +28,7 @@ DELETE FROM dms_ace2_binding AS d WHERE NOT EXISTS (
     d.amino_acid = p.amino_acid
 );
 DELETE FROM amino_acid_prevalence;
+DELETE FROM isolate_mutations WHERE gene != 'S';
+DELETE FROM invivo_selection_results WHERE gene != 'S';
 VACUUM
 EOF
