@@ -77,7 +77,7 @@ ALTER TABLE rx_potency
     ) OR
     (
       -- case 3
-      potency_type IN ('inhibition') AND
+      potency_type IN ('inhibition20') AND
       potency_lower_limit IS NOT NULL AND
       potency_unit IS NOT NULL
     )

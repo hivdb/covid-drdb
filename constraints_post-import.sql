@@ -136,8 +136,8 @@ DO $$
       END IF;
     END LOOP;
     FOR row IN SELECT * FROM rx_potency pot JOIN rx_plasma plasma ON pot.ref_name = plasma.ref_name AND pot.rx_name = plasma.rx_name LOOP
-      IF (row.potency_type::text NOT LIKE 'NT%' AND row.potency_type::text != 'inhibition') THEN
-        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX/inhibition as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      IF (row.potency_type::text NOT LIKE 'NT%' AND row.potency_type::text NOT LIKE 'inhibition%') THEN
+        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX/inhibitionXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
       END IF;
     END LOOP;
   END
@@ -152,8 +152,8 @@ DO $$
       END IF;
     END LOOP;
     FOR row IN SELECT * FROM rx_fold fold JOIN rx_plasma plasma ON fold.ref_name = plasma.ref_name AND fold.rx_name = plasma.rx_name LOOP
-      IF (row.potency_type::text NOT LIKE 'NT%' AND row.potency_type::text != 'inhibition') THEN
-        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX/inhibition as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
+      IF (row.potency_type::text NOT LIKE 'NT%' AND row.potency_type::text NOT LIKE 'inhibition%') THEN
+        RAISE EXCEPTION E'An experiment record of plasma antibody must use NT50/NT80/NTXX/inhibitionXX as its `potency_type`. However, ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m has potency_type=\x1b[1m%\x1b[0m.', row.ref_name, row.rx_name, row.iso_name, row.potency_type;
       END IF;
     END LOOP;
   END
