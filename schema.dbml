@@ -1055,16 +1055,12 @@ Table susc_results as Susc {
 
 Table invivo_selection_results {
   ref_name varchar
-  rx_name varchar
-  dosage numeric(2,0)
-  dosage_unit treatment_dosage_unit_enum
+  subject_name varchar [
+    note: 'Subject who received the treatment (not the CP donor if rx_name is a CP)'
+  ]
   infected_var_name varchar [
     note: 'Variant of the infected isolate'
   ]
-  timing numeric(4,0)  [note: "time after assumed infection date, Month"]
-  num_subjects int
-  num_subjects_with_mut int
-  severity severity_enum
   gene varchar [
     note: 'Mutation gene'
   ]
@@ -1074,13 +1070,18 @@ Table invivo_selection_results {
   amino_acid amino_acid_enum [
     note: 'Amino acid of this mutation'
   ]
-  section varchar [
-    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
-  ]
-  note varchar
-  date_added date [not null]
+  count int
+  total int
+  infection_date date
+  appearance_date date
+  severity severity_enum
+  // section varchar [
+  //   note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  // ]
+  // note varchar
+  // date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, infected_var_name, timing, gene, position, amino_acid) [pk]
+    (ref_name, subject_name, infected_var_name, gene, position, amino_acid) [pk]
   }
 }
