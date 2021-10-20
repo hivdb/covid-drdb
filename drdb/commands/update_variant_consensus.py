@@ -19,7 +19,7 @@ PANGO_LINEAGE_PATTERN = re.compile(r"""
 GENE_PATTERN = re.compile(r'^([^:]+):')
 DIGIT_PATTERN = re.compile(r'(\d+)')
 MUTAA_PATTERN = re.compile(r'([A-Z]|ins|del|stop)$')
-WILDTYPES = ['B']
+WILDTYPES = ['A']
 
 QUERY_URL = 'https://api.outbreak.info/genomics/lineage-mutations'
 ORDERED_GENES = [
@@ -116,7 +116,8 @@ def read_outbreak_mutations(muts):
 def fetch_consensus(variant_maps, consensus_availability):
     pangos = {pango for _, pango, _, _ in variant_maps}
     resp = requests.get(QUERY_URL, params={
-        'pangolin_lineage': ','.join(pangos)
+        'pangolin_lineage': ','.join(pangos),
+        'frequency': '0.75'
     })
     results = resp.json()
     all_muts_lookup = {}
@@ -125,6 +126,13 @@ def fetch_consensus(variant_maps, consensus_availability):
     for var_name, pango, mod, extra_muts in variant_maps:
         muts = all_muts_lookup.get(pango)
         if not muts:
+            if var_name == 'A':
+                yield {
+                    'var_name': 'A',
+                    'gene': 'ORF8',
+                    'position': 84,
+                    'amino_acid': 'S'
+                }
             if var_name not in WILDTYPES:
                 consensus_availability[var_name] = 'FALSE'
                 click.echo(
@@ -137,6 +145,15 @@ def fetch_consensus(variant_maps, consensus_availability):
             muts = muts + extra_muts
         elif mod == ' w/o ':
             muts = set(muts) - set(extra_muts)
+        muts = set(muts)
+
+        # it seems outbreak.info switched to use WA1, which has S at ORF8:84
+        if any(gene == 'ORF8' and pos == 84 for gene, pos, _ in muts):
+            if ('ORF8', 84, 'L') in muts:
+                muts.remove(('ORF8', 84, 'L'))
+        else:
+            muts.add(('ORF8', 84, 'S'))
+
         muts = sorted(muts, key=mutation_sort_key)
         for gene, pos, aa in muts:
             yield {
