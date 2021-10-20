@@ -16,7 +16,7 @@ INSERT INTO susc_results
             ORDER BY merged.section
         ) uniqmerged
     ) AS section,
-    CASE WHEN ctl.potency_type::text LIKE 'NT%' THEN
+    CASE WHEN (ctl.potency_type::text LIKE 'NT%' OR ctl.potency_type::text = 'inhibition') THEN
       CASE
         WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
         WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '>'::numeric_cmp_enum
@@ -32,7 +32,7 @@ INSERT INTO susc_results
       END
     END AS fold_cmp,
 
-    CASE WHEN ctl.potency_type::text LIKE 'NT%' THEN
+    CASE WHEN (ctl.potency_type::text LIKE 'NT%' OR ctl.potency_type::text = 'inhibition') THEN
       ctl.potency / tgt.potency
     ELSE
       tgt.potency / ctl.potency
@@ -45,7 +45,7 @@ INSERT INTO susc_results
 
     NULL AS resistance_level,
 
-    CASE WHEN ctl.potency_type::text LIKE 'NT%' THEN
+    CASE WHEN (ctl.potency_type::text LIKE 'NT%' OR ctl.potency_type::text = 'inhibition') THEN
       CASE
         WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'both'::ineffective_enum
         WHEN (ctl.potency > ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN 'experimental'::ineffective_enum
@@ -129,7 +129,7 @@ INSERT INTO susc_results
                   infected.var_name = strict_ctl_iso.var_name
                 )
             )
-            
+
           )
       )
     ) AND (
@@ -242,7 +242,7 @@ INSERT INTO unlinked_susc_results
     pot.potency_type,
     pot.potency,
     pot.cumulative_count,
-    CASE WHEN pot.potency_type::TEXT LIKE 'NT%' THEN
+    CASE WHEN (pot.potency_type::text LIKE 'NT%' OR pot.potency_type::text = 'inhibition') THEN
       pot.potency <= pot.potency_lower_limit
     ELSE
       pot.potency >= pot.potency_lower_limit
@@ -288,7 +288,7 @@ INSERT INTO unlinked_susc_results
     pot.potency_type,
     pot.potency,
     pot.cumulative_count,
-    CASE WHEN pot.potency_type::TEXT LIKE 'NT%' THEN
+    CASE WHEN (pot.potency_type::text LIKE 'NT%' OR pot.potency_type::text = 'inhibition') THEN
       pot.potency <= pot.potency_lower_limit
     ELSE
       pot.potency >= pot.potency_lower_limit
@@ -452,7 +452,7 @@ INSERT INTO susc_results
                   infected.var_name = strict_ctl_iso.var_name
                 )
             )
-            
+
           )
       )
     ) AND (
@@ -595,7 +595,7 @@ UPDATE susc_results R SET
 
 UPDATE susc_results SET
   fold = CASE
-    WHEN potency_type::text LIKE 'NT%' THEN
+    WHEN (potency_type::text LIKE 'NT%' OR potency_type::text = 'inhibition') THEN
       control_potency / potency
     ELSE
       potency / control_potency

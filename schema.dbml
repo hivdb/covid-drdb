@@ -364,7 +364,7 @@ Table variant_status as VStatus {
     note: 'Reference name'
   ]
   status variant_status_enum
-  
+
   indexes {
     (var_name, ref_name, status) [pk]
   }
@@ -515,12 +515,14 @@ Enum potency_type_enum {
   "IC80"
   "IC90"
   "IC100"
+  "inhibition"
 }
 
 Enum potency_unit_enum {
   "ng/ml"
   "µM"
   "pM"
+  "percent"
 }
 
 Enum virus_type_enum {
