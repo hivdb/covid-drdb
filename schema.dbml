@@ -515,7 +515,8 @@ Enum potency_type_enum {
   "IC80"
   "IC90"
   "IC100"
-  "inhibition20"
+  "NC20"
+  "NC" // neutralization capacity
 }
 
 Enum potency_unit_enum {
