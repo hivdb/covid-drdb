@@ -28,6 +28,8 @@ INSERT INTO invivo_selection_results
         JOIN isolate_mutations PREV_IM ON
           PREV_PTH.iso_name = PREV_IM.iso_name
         WHERE
+          PREV_PTH.ref_name = PTH.ref_name AND
+          PREV_PTH.subject_name = PTH.subject_name AND
           PREV_PTH.event IN ('infection', 'isolation') AND
           PREV_PTH.event_date < PTH.event_date AND
           PREV_IM.gene = IM.gene AND
