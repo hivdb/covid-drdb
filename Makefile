@@ -40,6 +40,13 @@ sync-varcons:
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-variant-consensus payload/
 
+sync-glue:
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+   		hivdb/covid-drdb-builder:latest \
+		pipenv run python -m drdb.entry update-glue-prevalence payload/
+
 local-release: network docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
