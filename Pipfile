@@ -4,6 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+mypy = "*"
+types-requests = "*"
+lxml-stubs = "*"
 
 [packages]
 click = "*"

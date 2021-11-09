@@ -2,12 +2,22 @@ import click
 from pathlib import Path
 from more_itertools import unique_everseen
 from operator import itemgetter
+from typing import List, Dict, Optional, Tuple
+
 from ..cli import cli
-from ..utils.csvv import load_csv, dump_csv, load_multiple_csvs
+from ..utils.csvv import (
+    load_csv,
+    dump_csv,
+    load_multiple_csvs,
+    CSVReaderRow,
+    CSVWriterRow
+)
 
 
-def autofill_invitros(tables_dir):
-    invitros = tables_dir / 'invitro_selection_results'
+def autofill_invitros(tables_dir: Path) -> None:
+    rows: List[CSVReaderRow]
+    invitro: Path
+    invitros: Path = tables_dir / 'invitro_selection_results'
     for invitro in invitros.iterdir():
         if invitro.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(invitro))
@@ -30,8 +40,11 @@ def autofill_invitros(tables_dir):
         )
 
 
-def autofill_invivos(tables_dir):
-    invivos = tables_dir / 'ref_invivo'
+def autofill_invivos(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    invivo: Path
+    invivos: Path = tables_dir / 'ref_invivo'
     for invivo in invivos.iterdir():
         if invivo.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(invivo))
@@ -58,21 +71,25 @@ def autofill_invivos(tables_dir):
         )
 
 
-def autofill_rx(tables_dir):
-    rxmabs = load_multiple_csvs(tables_dir / 'rx_antibodies')
-    rxps = load_multiple_csvs(tables_dir / 'rx_plasma')
+def autofill_rx(tables_dir: Path) -> None:
+    file_path: Path
+    rxmabs: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'rx_antibodies')
+    rxps: List[
+        Dict[str, Optional[str]]
+    ] = load_multiple_csvs(tables_dir / 'rx_plasma')
 
-    invitro = []
+    invitro: List[CSVReaderRow] = []
     file_path = tables_dir / 'invitro_selection_results'
     if file_path.exists():
         invitro = load_multiple_csvs(file_path)
 
-    unclassified_rx = []
+    unclassified_rx: List[CSVReaderRow] = []
     file_path = tables_dir / 'unclassified-rx.csv'
     if file_path.exists():
         unclassified_rx = load_csv(file_path)
 
-    treatments = list(unique_everseen([
+    treatments: List[CSVWriterRow] = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
         for rx in rxmabs + rxps + unclassified_rx + invitro
@@ -86,8 +103,10 @@ def autofill_rx(tables_dir):
     )
 
 
-def autofill_rx_plasma(tables_dir):
-    rxcps = tables_dir / 'rx_plasma'
+def autofill_rx_plasma(tables_dir: Path) -> None:
+    rows: List[CSVReaderRow]
+    rxcp: Path
+    rxcps: Path = tables_dir / 'rx_plasma'
     for rxcp in rxcps.iterdir():
         if rxcp.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(rxcp))
@@ -111,9 +130,10 @@ def autofill_rx_plasma(tables_dir):
         )
 
 
-def autofill_dms(tables_dir):
-    ace2_binding = tables_dir / 'dms' / 'dms_ace2_binding.csv'
-    rows = load_csv(ace2_binding)
+def autofill_dms(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    ace2_binding: Path = tables_dir / 'dms' / 'dms_ace2_binding.csv'
+    rows: List[CSVReaderRow] = load_csv(ace2_binding)
 
     for row in rows:
         if not row['ace2_binding']:
@@ -136,7 +156,7 @@ def autofill_dms(tables_dir):
         BOM=True,
     )
 
-    escape_score = tables_dir / 'dms' / 'dms_escape_results.csv'
+    escape_score: Path = tables_dir / 'dms' / 'dms_escape_results.csv'
     rows = load_csv(escape_score)
 
     for row in rows:
@@ -159,22 +179,26 @@ def autofill_dms(tables_dir):
     )
 
 
-def sort_csv(file_path, *key_list):
-    records = load_csv(file_path)
+def sort_csv(file_path: Path, *key_list: str) -> None:
+    records: List[CSVReaderRow] = load_csv(file_path)
     records.sort(key=itemgetter(*key_list))
     dump_csv(file_path, records)
 
 
-def autofill_subjects(tables_dir):
-    known_subjects = {
+def autofill_subjects(tables_dir: Path) -> None:
+    known_subjects: Dict[Tuple[str, str], CSVReaderRow] = {
         (r['ref_name'], r['subject_name']): r
         for r in load_csv(tables_dir / 'subjects.csv')
+        if r['ref_name'] is not None and
+        r['subject_name'] is not None
     }
 
-    rx_plasma = load_multiple_csvs(tables_dir / 'rx_plasma')
-    ref_invivo = load_multiple_csvs(tables_dir / 'ref_invivo')
+    rx_plasma: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'rx_plasma')
+    ref_invivo: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'ref_invivo')
 
-    subjects = sorted(
+    subjects: List[CSVWriterRow] = sorted(
         unique_everseen([
             {'ref_name': rx['ref_name'],
              'subject_name': rx['subject_name'],
@@ -195,6 +219,9 @@ def autofill_subjects(tables_dir):
              ),
              }
             for rx in rx_plasma + ref_invivo
+            if rx['ref_name'] is not None and
+            rx['subject_name'] is not None
+
         ]),
         key=lambda rx: (rx['ref_name'] or '', rx['subject_name'] or '')
     )
@@ -213,8 +240,11 @@ def autofill_subjects(tables_dir):
     )
 
 
-def autofill_sub_treatments(tables_dir):
-    prx_list = tables_dir / 'subject_treatments'
+def autofill_sub_treatments(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    prx: Path
+    prx_list: Path = tables_dir / 'subject_treatments'
     for prx in prx_list.iterdir():
         if prx.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(prx))
@@ -244,8 +274,11 @@ def autofill_sub_treatments(tables_dir):
         )
 
 
-def autofill_sub_history(tables_dir):
-    pth_list = tables_dir / 'subject_history'
+def autofill_sub_history(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'subject_history'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(pth))
@@ -281,8 +314,11 @@ def autofill_sub_history(tables_dir):
         )
 
 
-def autofill_rx_potency(tables_dir):
-    pth_list = tables_dir / 'rx_potency'
+def autofill_rx_potency(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'rx_potency'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(pth))
@@ -290,7 +326,7 @@ def autofill_rx_potency(tables_dir):
         rows = load_csv(pth)
         for row in rows:
             row['potency_type'] = row.get('potency_type') or 'NT50'
-            row['cumulative_count'] = row.get('cumulative_count') or 1
+            row['cumulative_count'] = row.get('cumulative_count') or '1'
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -313,8 +349,11 @@ def autofill_rx_potency(tables_dir):
         )
 
 
-def autofill_rx_fold(tables_dir):
-    suscs = tables_dir / 'rx_fold'
+def autofill_rx_fold(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    susc: Path
+    suscs: Path = tables_dir / 'rx_fold'
     for susc in suscs.iterdir():
         if susc.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(susc))
@@ -327,7 +366,7 @@ def autofill_rx_fold(tables_dir):
             elif not row.get('fold_cmp'):
                 row['fold_cmp'] = '='
             if not row.get('cumulative_count'):
-                row['cumulative_count'] = 1
+                row['cumulative_count'] = '1'
             if not row.get('resistance_level'):
                 row['resistance_level'] = None
             if not row.get('assay_name'):
@@ -377,9 +416,11 @@ def autofill_rx_fold(tables_dir):
         file_okay=False
     )
 )
-def autofill_payload(payload_dir):
-    payload_dir = Path(payload_dir)
-    tables_dir = payload_dir / 'tables'
+def autofill_payload(payload_dir: str) -> None:
+    payload_dir_path = Path(payload_dir)
+    tables_dir: Path = payload_dir_path / 'tables'
+    antibodies: Path = tables_dir / 'antibodies.csv'
+    antibody_targets: Path = tables_dir / 'antibody_targets.csv'
     autofill_rx(tables_dir)
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
@@ -392,7 +433,5 @@ def autofill_payload(payload_dir):
     autofill_sub_history(tables_dir)
     autofill_sub_treatments(tables_dir)
 
-    antibodies = tables_dir / 'antibodies.csv'
     sort_csv(antibodies, 'ab_name')
-    antibody_targets = tables_dir / 'antibody_targets.csv'
     sort_csv(antibody_targets, 'ab_name')
