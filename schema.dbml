@@ -111,6 +111,7 @@ Table rx_antibodies as RxMAb {
   indexes {
     (ref_name, rx_name, ab_name) [pk]
     rx_name
+    ab_name
   }
 }
 
@@ -238,6 +239,7 @@ Table rx_plasma as RxP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    (ref_name, subject_name)
     rx_name
   }
 }
@@ -538,6 +540,10 @@ Enum virus_type_enum {
 Table assays as A {
   assay_name varchar [pk]
   virus_type virus_type_enum
+
+  indexes {
+    virus_type
+  }
 }
 
 Table rx_fold as RxF {
@@ -601,6 +607,8 @@ Table rx_potency as RxPo {
   date_added date [not null]
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
+    iso_name
+    assay_name
   }
 }
 
@@ -611,6 +619,8 @@ Table ref_isolate_pairs as RxIsoPair {
 
   indexes {
     (ref_name, control_iso_name, iso_name) [pk]
+    control_iso_name
+    iso_name
   }
 }
 
@@ -786,6 +796,7 @@ Table isolate_pairs as IPair {
 
   indexes {
     (control_iso_name, iso_name) [pk]
+    iso_aggkey
   }
 }
 
@@ -927,6 +938,8 @@ Table rx_conv_plasma as RxCP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    (ref_name, subject_name)
+    infected_iso_name
     rx_name
   }
 }
@@ -955,6 +968,9 @@ Table rx_vacc_plasma as RxVP {
 
   indexes {
     (ref_name, rx_name) [pk]
+    (ref_name, subject_name)
+    infected_iso_name
+    vaccine_name
     rx_name
   }
 }
@@ -1008,6 +1024,7 @@ Table unlinked_susc_results as SuscGroup {
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
     (ref_name, rx_group)
+    iso_name
     rx_name
   }
 }
@@ -1059,6 +1076,8 @@ Table susc_results as Susc {
   indexes {
     (ref_name, rx_group, control_iso_name, iso_name, potency_type, control_assay_name, assay_name) [pk]
     rx_name
+    control_iso_name
+    iso_name
   }
 }
 

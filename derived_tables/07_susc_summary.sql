@@ -1,3 +1,9 @@
+-- for debuging functions, see https://dba.stackexchange.com/a/23357
+-- LOAD 'auto_explain';
+-- SET auto_explain.log_min_duration = 15000;
+-- SET auto_explain.log_nested_statements = ON;
+
+
 CREATE TYPE mutation_type AS (
   gene VARCHAR,
   pos INTEGER,
@@ -239,6 +245,8 @@ SELECT
 INTO TABLE isolate_displays
 FROM isolates;
 
+CREATE INDEX ON isolate_displays (iso_name);
+
 
 CREATE FUNCTION get_isolate_agg_var_name(_iso_aggkey VARCHAR) RETURNS VARCHAR AS $$
   SELECT var_name
@@ -311,6 +319,8 @@ SELECT DISTINCT
   get_isolate_agg_var_name(iso_aggkey) AS var_name
 INTO TABLE isolate_aggkeys
 FROM isolate_pairs;
+
+CREATE INDEX ON isolate_aggkeys (iso_aggkey);
 
 SELECT
   ref_name,
@@ -398,37 +408,40 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       _ext_col_names := ARRAY_APPEND(_ext_col_names, 'rx_type');
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
         CASE
-          WHEN rxab.rx_name IS NOT NULL THEN 'antibody'
-          WHEN rxcp.rx_name IS NOT NULL THEN 'conv-plasma'
-          WHEN rxvp.rx_name IS NOT NULL THEN 'vacc-plasma'
+          WHEN EXISTS (
+            SELECT 1 FROM rx_antibodies rxab WHERE
+            S.ref_name = rxab.ref_name AND
+            S.rx_name = rxab.rx_name
+          ) THEN 'antibody'
+          WHEN EXISTS (
+            SELECT 1 FROM rx_conv_plasma rxcp WHERE
+            S.ref_name = rxcp.ref_name AND (
+              S.rx_name = rxcp.rx_name OR
+              EXISTS (
+                SELECT 1 FROM unlinked_susc_results usr
+                WHERE
+                  S.ref_name = usr.ref_name AND
+                  S.rx_group = usr.rx_group AND
+                  rxcp.ref_name = usr.ref_name AND
+                  rxcp.rx_name = usr.rx_name
+              )
+            )
+          ) THEN 'conv-plasma'
+          WHEN EXISTS (
+            SELECT 1 FROM rx_vacc_plasma rxvp WHERE
+            S.ref_name = rxvp.ref_name AND (
+              S.rx_name = rxvp.rx_name OR
+              EXISTS (
+                SELECT 1 FROM unlinked_susc_results usr
+                WHERE
+                  S.ref_name = usr.ref_name AND
+                  S.rx_group = usr.rx_group AND
+                  rxvp.ref_name = usr.ref_name AND
+                  rxvp.rx_name = usr.rx_name
+              )
+            )
+          ) THEN 'vacc-plasma'
         END::rx_type_enum AS rx_type
-      $X$);
-      _ext_joins := ARRAY_APPEND(_ext_joins, $X$
-        LEFT JOIN rx_antibodies rxab ON
-          S.ref_name = rxab.ref_name AND
-          S.rx_name = rxab.rx_name
-        LEFT JOIN rx_conv_plasma rxcp ON
-          S.ref_name = rxcp.ref_name AND (
-            S.rx_name = rxcp.rx_name OR
-            EXISTS (
-              SELECT 1 FROM unlinked_susc_results usr
-              WHERE
-                S.ref_name = usr.ref_name AND
-                S.rx_group = usr.rx_group AND
-                usr.rx_name = rxcp.rx_name
-            )
-          )
-        LEFT JOIN rx_vacc_plasma rxvp ON
-          S.ref_name = rxvp.ref_name AND (
-            S.rx_name = rxvp.rx_name OR
-            EXISTS (
-              SELECT 1 FROM unlinked_susc_results usr
-              WHERE
-                S.ref_name = usr.ref_name AND
-                S.rx_group = usr.rx_group AND
-                usr.rx_name = rxvp.rx_name
-            )
-          )
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rx_type');
     END IF;
@@ -564,7 +577,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
             )
           )
         JOIN subjects sbj ON
-          S.ref_name = sbj.ref_name AND
+          rx.ref_name = sbj.ref_name AND
           rx.subject_name = sbj.subject_name
         LEFT JOIN isolates iso_infected ON
           rx.infected_iso_name = iso_infected.iso_name
@@ -615,7 +628,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
               )
             )
           LEFT JOIN subjects sbj ON
-            S.ref_name = sbj.ref_name AND
+            rxp.ref_name = sbj.ref_name AND
             rxp.subject_name = sbj.subject_name
         $X$);
       END IF;

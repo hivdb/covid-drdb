@@ -102,8 +102,10 @@ devdb: network
 		-e POSTGRES_HOST_AUTH_METHOD=trust \
 		-p 127.0.0.1:6543:5432 \
 		--network=covid-drdb-network \
+		--volume=$(shell pwd)/postgresql.conf:/etc/postgresql/postgresql.conf \
 		--volume=$(shell pwd)/local/sqls:/docker-entrypoint-initdb.d \
-		postgres:13.1
+		postgres:13.1 \
+		-c 'config_file=/etc/postgresql/postgresql.conf'
 
 log-devdb:
 	@docker logs -f covid-drdb-devdb
