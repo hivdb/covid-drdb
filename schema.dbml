@@ -532,6 +532,7 @@ Enum virus_type_enum {
   "pseudovirus"
   "chimeric-virus"
   "surrogate"
+  "binding"
 }
 
 Table assays as A {
