@@ -183,7 +183,7 @@ INSERT INTO susc_results
     NULL AS potency_unit,
     resistance_level,
     ineffective,
-    NULL AS control_cumulative_count,
+    cumulative_count AS control_cumulative_count,
     cumulative_count,
     assay_name AS control_asasy_name,
     assay_name,
