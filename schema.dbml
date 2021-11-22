@@ -685,6 +685,9 @@ Table ref_amino_acid as RefAA {
   amino_acid amino_acid_enum [
     note: 'Amino acid'
   ]
+  codon char(3) [
+    note: 'Codon'
+  ]
 
   indexes {
     (gene, position, amino_acid) [pk]

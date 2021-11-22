@@ -15,6 +15,7 @@ db-to-sqlite = "*"
 requests = "*"
 lxml = "*"
 psycopg2-binary = "*"
+tqdm = "*"
 
 [requires]
 python_version = "3.9"
