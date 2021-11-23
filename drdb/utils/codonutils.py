@@ -1,13 +1,32 @@
 from typing import Dict, List, Set
 
-CodonText = bytes
-AAChar = int
-MultiAAText = bytes
-NAChar = int
-MultiNAText = bytes
+
+AMINO_ACID_LIST: List[int] = [
+    ord(b'A'),
+    ord(b'C'),
+    ord(b'D'),
+    ord(b'E'),
+    ord(b'F'),
+    ord(b'G'),
+    ord(b'H'),
+    ord(b'I'),
+    ord(b'K'),
+    ord(b'L'),
+    ord(b'M'),
+    ord(b'N'),
+    ord(b'P'),
+    ord(b'Q'),
+    ord(b'R'),
+    ord(b'S'),
+    ord(b'T'),
+    ord(b'V'),
+    ord(b'W'),
+    ord(b'Y'),
+    ord(b'*')
+]
 
 
-CODON_TABLE: Dict[CodonText, MultiAAText] = {
+CODON_TABLE: Dict[bytes, bytes] = {
     b'TTT': b'F',
     b'TTC': b'F',
     b'TTA': b'L',
@@ -90,12 +109,12 @@ CODON_TABLE: Dict[CodonText, MultiAAText] = {
     b'TAG': b'*',
 }
 
-REVERSE_CODON_TABLE: Dict[AAChar, List[CodonText]] = {}
+REVERSE_CODON_TABLE: Dict[int, List[bytes]] = {}
 for codon, aa in CODON_TABLE.items():
     REVERSE_CODON_TABLE.setdefault(aa[0], []).append(codon)
 
 
-AMBIGUOUS_NAS: Dict[NAChar, MultiNAText] = {
+AMBIGUOUS_NAS: Dict[int, bytes] = {
     ord(b'W'): b'AT',
     ord(b'S'): b'CG',
     ord(b'M'): b'AC',
@@ -110,11 +129,11 @@ AMBIGUOUS_NAS: Dict[NAChar, MultiNAText] = {
 }
 
 
-def expand_ambiguous_na(na: NAChar) -> MultiNAText:
+def expand_ambiguous_na(na: int) -> bytes:
     return AMBIGUOUS_NAS.get(na, bytes([na]))
 
 
-def translate_codon(nas: MultiNAText) -> MultiAAText:
+def translate_codon(nas: bytes) -> bytes:
     aas_text: bytes
     nas = nas.replace(b'-', b'N')[:3]
     if nas in CODON_TABLE:

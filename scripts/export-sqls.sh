@@ -53,6 +53,8 @@ copy_csv payload/tables/variant_consensus.csv variant_consensus >> $TARGET_DIR/0
 copy_csv payload/tables/isolates.csv isolates >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/isolate_mutations.csv isolate_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/ref_amino_acid.csv ref_amino_acid >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/mutation_distance.csv mutation_distance >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/blosum62.csv blosum62 >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/vaccines.csv vaccines >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/vaccine_efficacy.csv vaccine_efficacy >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/amino_acid_prevalence | sort -h | while read filepath; do

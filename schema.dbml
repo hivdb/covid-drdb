@@ -694,6 +694,27 @@ Table ref_amino_acid as RefAA {
   }
 }
 
+Table mutation_distance {
+  source_codon char(3) [note: 'Source codon']
+  dest_amino_acid amino_acid_enum [note: 'Mutated amino acid']
+  min_bp_changes smallint [note: 'Minimal basepair changes for this mutation to occur']
+  max_bp_changes smallint [note: 'Maximum basepair changes for this mutation to occur']
+
+  indexes {
+    (source_codon, dest_amino_acid) [pk]
+  }
+}
+
+Table blosum62 {
+  source_amino_acid amino_acid_enum [note: 'Source amino acid']
+  dest_amino_acid amino_acid_enum [note: 'Mutated amino acid']
+  score smallint [note: 'BLOSUM62 score']
+
+  indexes {
+    (source_amino_acid, dest_amino_acid) [pk]
+  }
+}
+
 Table amino_acid_prevalence as AAPcnt {
   ref_name varchar [ref: > R.ref_name]
   gene varchar [ref: > G.gene]
