@@ -1,3 +1,4 @@
+-- susc_results from rx_potency (main source)
 INSERT INTO susc_results
   SELECT
     pair.ref_name AS ref_name,
@@ -88,6 +89,7 @@ INSERT INTO susc_results
     ) AND
     ctl.potency_type = tgt.potency_type AND
     CASE WHEN EXISTS (
+      -- check if there's a target strictly matched control's assay
       SELECT 1 FROM rx_potency strict_tgt
       WHERE
         tgt.ref_name = strict_tgt.ref_name AND
@@ -95,9 +97,20 @@ INSERT INTO susc_results
         tgt.iso_name = strict_tgt.iso_name AND
         tgt.potency_type = strict_tgt.potency_type AND
         ctl.assay_name = strict_tgt.assay_name
+    ) OR EXISTS (
+      -- check if there's a control strictly matched target's assay
+      SELECT 1 FROM rx_potency strict_ctl
+      WHERE
+        ctl.ref_name = strict_ctl.ref_name AND
+        ctl.rx_name = strict_ctl.rx_name AND
+        ctl.iso_name = strict_ctl.iso_name AND
+        ctl.potency_type = strict_ctl.potency_type AND
+        tgt.assay_name = strict_ctl.assay_name
     ) THEN
+      -- if either strict array match exists, apply strict assay match
       ctl.assay_name = tgt.assay_name
     ELSE
+      -- if no strict array match exists, apply loose assay match
       ctl_assay.virus_type = tgt_assay.virus_type
     END AND (
       NOT EXISTS (
@@ -167,6 +180,7 @@ INSERT INTO susc_results
     );
 
 
+-- susc_results from rx_fold
 INSERT INTO susc_results
   SELECT
     ref_name,
@@ -191,6 +205,7 @@ INSERT INTO susc_results
   FROM
     rx_fold;
 
+-- unlinked potency data group information: CP
 SELECT
   ref_name,
   rx_name,
@@ -201,6 +216,7 @@ SELECT
   INTO TEMPORARY TABLE rx_groups
   FROM rx_conv_plasma;
 
+-- unlinked potency data group information: VP
 INSERT INTO rx_groups
 SELECT
   ref_name,
@@ -232,6 +248,8 @@ SELECT
   FROM rx_antibodies
   GROUP BY ref_name, rx_name; */
 
+-- individual data of grouped susc_results: cannot find an isolate_pair
+-- that current rx_name matches both control and target
 INSERT INTO unlinked_susc_results
   SELECT
     pot.ref_name,
@@ -278,6 +296,7 @@ INSERT INTO unlinked_susc_results
     );
 
 
+-- individual data of grouped susc_results: orphan records
 INSERT INTO unlinked_susc_results
   SELECT
     pot.ref_name,
@@ -346,6 +365,8 @@ INSERT INTO unlinked_susc_results
         )
     );
 
+-- grouped susc_results
+-- (individual ones are available in unlinnked_susc_results)
 INSERT INTO susc_results
   SELECT
     pair.ref_name AS ref_name,
@@ -411,6 +432,7 @@ INSERT INTO susc_results
     ) AND
     ctl.potency_type = tgt.potency_type AND
     CASE WHEN EXISTS (
+      -- check if there's a target strictly matched control's assay
       SELECT 1 FROM rx_potency strict_tgt
       WHERE
         tgt.ref_name = strict_tgt.ref_name AND
@@ -418,9 +440,20 @@ INSERT INTO susc_results
         tgt.iso_name = strict_tgt.iso_name AND
         tgt.potency_type = strict_tgt.potency_type AND
         ctl.assay_name = strict_tgt.assay_name
+    ) OR EXISTS (
+      -- check if there's a control strictly matched target's assay
+      SELECT 1 FROM rx_potency strict_ctl
+      WHERE
+        ctl.ref_name = strict_ctl.ref_name AND
+        ctl.rx_name = strict_ctl.rx_name AND
+        ctl.iso_name = strict_ctl.iso_name AND
+        ctl.potency_type = strict_ctl.potency_type AND
+        tgt.assay_name = strict_ctl.assay_name
     ) THEN
+      -- if either strict array match exists, apply strict assay match
       ctl.assay_name = tgt.assay_name
     ELSE
+      -- if no strict array match exists, apply loose assay match
       ctl_assay.virus_type = tgt_assay.virus_type
     END AND (
       NOT EXISTS (
@@ -499,6 +532,7 @@ INSERT INTO susc_results
       tgt.assay_name;
 
 
+-- fill in control_potency values for grouped susc_results
 UPDATE susc_results R SET
   control_potency = acc_pot.potency,
   control_cumulative_count = acc_pot.cumulative_count
@@ -546,6 +580,7 @@ UPDATE susc_results R SET
       R.potency_unit = acc_pot.potency_unit
     );
 
+-- fill in potency values for grouped susc_results
 UPDATE susc_results R SET
   potency = acc_pot.potency,
   cumulative_count = acc_pot.cumulative_count
@@ -593,6 +628,7 @@ UPDATE susc_results R SET
       R.potency_unit = acc_pot.potency_unit
     );
 
+-- fill in fold values for grouped susc_results
 UPDATE susc_results SET
   fold = CASE
     WHEN (potency_type::text LIKE 'NT%' OR potency_type::text LIKE 'NC%') THEN
