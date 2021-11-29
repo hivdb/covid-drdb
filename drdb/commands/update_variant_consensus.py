@@ -3,15 +3,21 @@ import click
 import requests
 from pathlib import Path
 from collections import defaultdict
+from typing import List, Tuple, Optional, Dict, Any, Generator
+
 from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv
 
-PANGO_LINEAGE_PATTERN = re.compile(r"""
+PANGO_LINEAGE_PATTERN: re.Pattern = re.compile(r"""
     ^
     (?P<pango>[A-Z]+(?:\.\d+)*)
     (?:
-        (?P<mod>/|\sw/o\s)
-        (?P<muts>[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+
+        /
+        (?P<withmuts>[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+
+    )?
+    (?:
+        \sw/o\s
+        (?P<womuts>[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+
     )?
     $
 """, re.VERBOSE)
@@ -30,30 +36,36 @@ ORDERED_GENES = [
 ]
 
 
-def parse_mutations(muts):
-    muts = muts.split('+')
-    results = []
-    for mut in muts:
-        gene = GENE_PATTERN.search(mut)
-        if gene:
-            gene = gene.group(1)
+def parse_mutations(muts: str) -> List[Tuple[str, int, str]]:
+    gene: str
+    mutlist: List[str] = muts.split('+')
+    results: List[Tuple[str, int, str]] = []
+    for mut in mutlist:
+        gene_match: Optional[re.Match] = GENE_PATTERN.search(mut)
+        if gene_match:
+            gene = gene_match.group(1)
         else:
             gene = 'S'
+        pos_match: Optional[re.Match] = DIGIT_PATTERN.search(mut)
+        mutaa_match: Optional[re.Match] = MUTAA_PATTERN.search(mut)
+        if not pos_match or not mutaa_match:
+            click.echo(f'Unable to parse mutation {mut}', err=True)
+            raise click.Abort()
         results.append((
             gene,
-            int(DIGIT_PATTERN.search(mut).group(1)),
-            MUTAA_PATTERN.search(mut).group(1)
+            int(pos_match.group(1)),
+            mutaa_match.group(1)
         ))
     return results
 
 
-def mutation_sort_key(mut):
+def mutation_sort_key(mut: Tuple[str, int, str]) -> Tuple[int, int, str]:
     gene, pos, aa = mut
     gene_idx = ORDERED_GENES.index(gene)
     return (gene_idx, pos, aa)
 
 
-def translate_gene_position(gene, pos):
+def translate_gene_position(gene: str, pos: int) -> Tuple[str, int]:
     if gene == 'ORF1a':
         if pos <= 180:
             return 'nsp1', pos
@@ -91,7 +103,9 @@ def translate_gene_position(gene, pos):
     return gene, pos
 
 
-def read_outbreak_mutations(muts):
+def read_outbreak_mutations(
+    muts: List[Dict[str, Any]]
+) -> List[Tuple[str, int, str]]:
     results = []
     for mut in muts:
         gene = mut['gene']
@@ -113,7 +127,15 @@ def read_outbreak_mutations(muts):
     return results
 
 
-def fetch_consensus(variant_maps, consensus_availability):
+def fetch_consensus(
+    variant_maps: List[Tuple[
+        str,
+        str,
+        List[Tuple[str, int, str]],
+        List[Tuple[str, int, str]]
+    ]],
+    consensus_availability: Dict[str, str]
+) -> Generator[Dict[str, Any], None, None]:
     pangos = {pango for _, pango, _, _ in variant_maps}
     resp = requests.get(QUERY_URL, params={
         'pangolin_lineage': ','.join(pangos),
@@ -123,7 +145,7 @@ def fetch_consensus(variant_maps, consensus_availability):
     all_muts_lookup = {}
     for pango, muts in results['results'].items():
         all_muts_lookup[pango] = read_outbreak_mutations(muts)
-    for var_name, pango, mod, extra_muts in variant_maps:
+    for var_name, pango, withmuts, womuts in variant_maps:
         muts = all_muts_lookup.get(pango)
         if not muts:
             if var_name == 'A':
@@ -141,10 +163,10 @@ def fetch_consensus(variant_maps, consensus_availability):
                     err=True
                 )
             continue
-        if mod == '/':
-            muts = muts + extra_muts
-        elif mod == ' w/o ':
-            muts = set(muts) - set(extra_muts)
+        if withmuts:
+            muts = muts + withmuts
+        if womuts:
+            muts = set(muts) - set(womuts)
         muts = set(muts)
 
         # it seems outbreak.info switched to use WA1, which has S at ORF8:84
@@ -173,36 +195,54 @@ def fetch_consensus(variant_maps, consensus_availability):
         file_okay=False
     )
 )
-def update_variant_consensus(payload_dir):
-    payload_dir = Path(payload_dir)
-    variants_csv = payload_dir / 'tables' / 'variants.csv'
+def update_variant_consensus(payload_dir: str) -> None:
+    payload_dir_path: Path = Path(payload_dir)
+    variants_csv = payload_dir_path / 'tables' / 'variants.csv'
     variants = load_csv(variants_csv)
-    variant_synonyms = load_csv(payload_dir / 'tables/variant_synonyms.csv')
+    variant_synonyms = load_csv(
+        payload_dir_path / 'tables/variant_synonyms.csv')
     synonym_lookup = defaultdict(list)
     cons_avail = {}
-    variant_maps = []
+    variant_maps: List[Tuple[
+        str,
+        str,
+        List[Tuple[str, int, str]],
+        List[Tuple[str, int, str]]
+    ]] = []
     for synonym in variant_synonyms:
         synonym_lookup[synonym['var_name']].append(synonym['synonym'])
     for variant in variants:
         var_name = variant['var_name']
-        synonyms = synonym_lookup[var_name]
+        synonyms: List[str] = []
+        if not var_name:
+            click.echo(
+                'Empty var_name found in variants.csv',
+                err=True
+            )
+            raise click.Abort()
+        for syn in synonym_lookup[var_name]:
+            if not syn:
+                click.echo(
+                    'Empty synonym found in synonyms.csv',
+                    err=True
+                )
+                raise click.Abort()
+            synonyms.append(syn)
         for name in [var_name] + synonyms:
             match = PANGO_LINEAGE_PATTERN.match(name)
             if not match:
                 continue
             result = match.groupdict()
             pango = result['pango']
-            mod = result['mod']
-            muts = result['muts']
-            if mod:
-                muts = parse_mutations(muts)
-            else:
-                muts = []
+            withmuts = result['withmuts']
+            womuts = result['womuts']
+            withmuts = parse_mutations(withmuts) if withmuts else []
+            womuts = parse_mutations(womuts) if womuts else []
             variant_maps.append((
                 var_name,
                 pango,
-                mod,
-                muts
+                withmuts,
+                womuts
             ))
             break
         else:
@@ -212,14 +252,16 @@ def update_variant_consensus(payload_dir):
                 'primary name or ont of its synonyms'.format(var_name),
                 err=True
             )
-    target = payload_dir / 'tables' / 'variant_consensus.csv'
+    target = payload_dir_path / 'tables' / 'variant_consensus.csv'
     dump_csv(
         target,
         fetch_consensus(variant_maps, cons_avail),
         ['var_name', 'gene', 'position', 'amino_acid'])
     dump_csv(
         variants_csv,
-        [{**var,
-          'consensus_availability': cons_avail.get(var['var_name'], 'TRUE')}
-         for var in variants],
+        [{
+            **var,
+            'consensus_availability':
+            cons_avail.get(var['var_name'] or 'Unknown', 'TRUE')
+        } for var in variants],
         ['var_name', 'as_wildtype', 'consensus_availability'])
