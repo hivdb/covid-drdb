@@ -116,4 +116,7 @@ log-devdb:
 psql-devdb:
 	@docker exec -it covid-drdb-devdb psql -U postgres
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release sync-to-s3 update-builder
+psql-devdb-no-docker:
+	@psql -U postgres -h localhost -p 6543
+
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release sync-* update-builder
