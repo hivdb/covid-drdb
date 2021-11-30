@@ -6,17 +6,18 @@ INSERT INTO susc_results
     ctl.rx_name AS rx_group,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
-    (
-      SELECT STRING_AGG(uniqmerged.section, '; ')
-        FROM (
-          SELECT merged.section
-            FROM (
-              SELECT ctl.section UNION SELECT tgt.section
-            ) AS merged
-            GROUP BY merged.section
-            ORDER BY merged.section
-        ) uniqmerged
-    ) AS section,
+    -- (
+    --   SELECT STRING_AGG(uniqmerged.section, '; ')
+    --     FROM (
+    --       SELECT merged.section
+    --         FROM (
+    --           SELECT ctl.section UNION SELECT tgt.section
+    --         ) AS merged
+    --         GROUP BY merged.section
+    --         ORDER BY merged.section
+    --     ) uniqmerged
+    -- ) AS section,
+    tgt.section AS section,
     CASE WHEN (ctl.potency_type::text LIKE 'NT%' OR ctl.potency_type::text LIKE 'NC%') THEN
       CASE
         WHEN (ctl.potency <= ctl.potency_lower_limit AND tgt.potency <= tgt.potency_lower_limit) THEN '='::numeric_cmp_enum
@@ -374,18 +375,26 @@ INSERT INTO susc_results
     ctl_rx_grp.rx_group AS rx_group,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
+    -- (
+    --   SELECT STRING_AGG(uniqmerged.section, '; ')
+    --     FROM (
+    --       SELECT merged.section
+    --         FROM (
+    --           SELECT section FROM UNNEST(ARRAY_AGG(ctl.section)) section
+    --           UNION
+    --           SELECT section FROM UNNEST(ARRAY_AGG(tgt.section)) section
+    --         ) AS merged
+    --         GROUP BY merged.section
+    --         ORDER BY merged.section
+    --     ) uniqmerged
+    -- ) AS section,
     (
-      SELECT STRING_AGG(uniqmerged.section, '; ')
+      SELECT STRING_AGG(uniqsec.section, '; ')
         FROM (
-          SELECT merged.section
-            FROM (
-              SELECT section FROM UNNEST(ARRAY_AGG(ctl.section)) section
-              UNION
-              SELECT section FROM UNNEST(ARRAY_AGG(tgt.section)) section
-            ) AS merged
-            GROUP BY merged.section
-            ORDER BY merged.section
-        ) uniqmerged
+          SELECT section FROM UNNEST(ARRAY_AGG(tgt.section)) section
+          GROUP BY section
+          ORDER BY section
+        ) uniqsec
     ) AS section,
     '=' AS fold_cmp,
     1 AS fold,

@@ -246,10 +246,10 @@ def update_variant_consensus(payload_dir: str) -> None:
             ))
             break
         else:
-            cons_avail[var_name] = 'FALSE'
+            cons_avail[var_name] = variant['consensus_availability'] or 'FALSE'
             click.echo(
                 'Variant {} does not have a valid Pango lineage used as its '
-                'primary name or ont of its synonyms'.format(var_name),
+                'primary name or one of its synonyms'.format(var_name),
                 err=True
             )
     target = payload_dir_path / 'tables' / 'variant_consensus.csv'
