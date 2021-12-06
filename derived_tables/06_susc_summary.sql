@@ -385,11 +385,15 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           ) AS num_samples,
           unique_sum(
             ARRAY_AGG((
+              -- XXX: This uniqkey list must be identical to the primary keys
+              -- of table susc_results
               S.ref_name || '$##$' ||
               S.rx_group || '$##$' ||
               S.control_iso_name || '$##$' ||
               S.iso_name || '$##$' ||
-              S.potency_type,
+              S.potency_type || '$##$' ||
+              S.control_assay_name || '$##$' ||
+              S.assay_name,
               S.cumulative_count
             )::unique_sum_type)
           ) AS num_experiments,

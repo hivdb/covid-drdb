@@ -1098,6 +1098,17 @@ Table susc_results as Susc {
   assay_name varchar [ref: > A.assay_name]
   date_added date [not null]
   indexes {
+    // XXX: if you add new keys to this list, don't forget to update 
+    // the uniqkey of 06_susc_summary.sql function summarize_susc_results.
+    // This is how it currently (Dec 2021) looks like:
+    // 
+    // S.ref_name || '$##$' ||
+    // S.rx_group || '$##$' ||
+    // S.control_iso_name || '$##$' ||
+    // S.iso_name || '$##$' ||
+    // S.potency_type || '$##$' ||
+    // S.control_assay_name || '$##$' ||
+    // S.assay_name
     (ref_name, rx_group, control_iso_name, iso_name, potency_type, control_assay_name, assay_name) [pk]
     rx_name
     control_iso_name
