@@ -274,14 +274,14 @@ CREATE FUNCTION get_isolate_agg_mutobjs(_iso_aggkey VARCHAR) RETURNS mutation_ty
     mut.gene = 'S' AND
     pair.iso_aggkey = _iso_aggkey AND
     mut.iso_name = pair.iso_name AND
-    NOT EXISTS (
+    /*NOT EXISTS (
       SELECT 1 FROM isolate_mutations ctl_mut
       WHERE
         ctl_mut.iso_name = pair.control_iso_name AND
         ctl_mut.gene = mut.gene AND
         ctl_mut.position = mut.position AND
         ctl_mut.amino_acid = mut.amino_acid
-    ) AND
+    ) AND*/
     NOT EXISTS (
       SELECT 1 FROM ignore_mutations igm
       WHERE
