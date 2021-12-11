@@ -8,6 +8,9 @@ from typing import List, Tuple, Optional, Dict, Any, Generator
 from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv
 
+OUTBREAK_TOKEN: str = (
+    '0ed52bbfb6c79d1fd8e9c6f267f9b6311c885a4c4c6f037d6ab7b3a40d586ad0'
+)
 PANGO_LINEAGE_PATTERN: re.Pattern = re.compile(r"""
     ^
     (?P<pango>[A-Z]+(?:\.\d+)*)
@@ -140,6 +143,8 @@ def fetch_consensus(
     resp = requests.get(QUERY_URL, params={
         'pangolin_lineage': ','.join(pangos),
         'frequency': '0.75'
+    }, headers={
+        'authorization': f'Bearer {OUTBREAK_TOKEN}'
     })
     results = resp.json()
     all_muts_lookup = {}
