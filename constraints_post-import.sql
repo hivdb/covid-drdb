@@ -1,3 +1,6 @@
+-- rx_type must not be NULL
+ALTER TABLE susc_results ALTER COLUMN rx_type SET NOT NULL;
+
 -- for each variant with consensus_availability is TRUE, at least 1 consensus must exist
 DO $$
   DECLARE row variants%rowtype;

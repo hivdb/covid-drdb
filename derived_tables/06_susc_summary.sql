@@ -410,44 +410,8 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
 
     IF 'rx_type' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, 'rx_type');
-      _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
-        CASE
-          WHEN EXISTS (
-            SELECT 1 FROM rx_antibodies rxab WHERE
-            S.ref_name = rxab.ref_name AND
-            S.rx_name = rxab.rx_name
-          ) THEN 'antibody'
-          WHEN EXISTS (
-            SELECT 1 FROM rx_conv_plasma rxcp WHERE
-            S.ref_name = rxcp.ref_name AND (
-              S.rx_name = rxcp.rx_name OR
-              EXISTS (
-                SELECT 1 FROM unlinked_susc_results usr
-                WHERE
-                  S.ref_name = usr.ref_name AND
-                  S.rx_group = usr.rx_group AND
-                  rxcp.ref_name = usr.ref_name AND
-                  rxcp.rx_name = usr.rx_name
-              )
-            )
-          ) THEN 'conv-plasma'
-          WHEN EXISTS (
-            SELECT 1 FROM rx_vacc_plasma rxvp WHERE
-            S.ref_name = rxvp.ref_name AND (
-              S.rx_name = rxvp.rx_name OR
-              EXISTS (
-                SELECT 1 FROM unlinked_susc_results usr
-                WHERE
-                  S.ref_name = usr.ref_name AND
-                  S.rx_group = usr.rx_group AND
-                  rxvp.ref_name = usr.ref_name AND
-                  rxvp.rx_name = usr.rx_name
-              )
-            )
-          ) THEN 'vacc-plasma'
-        END::rx_type_enum AS rx_type
-      $X$);
-      _ext_group_by := ARRAY_APPEND(_ext_group_by, 'rx_type');
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, 'S.rx_type');
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, 'S.rx_type');
     END IF;
 
     IF 'article' = ANY(_agg_by) THEN

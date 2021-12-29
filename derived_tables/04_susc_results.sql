@@ -4,6 +4,7 @@ INSERT INTO susc_results
     pair.ref_name AS ref_name,
     ctl.rx_name AS rx_name,
     ctl.rx_name AS rx_group,
+    NULL AS rx_type,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
     -- (
@@ -187,6 +188,7 @@ INSERT INTO susc_results
     ref_name,
     rx_name,
     rx_name AS rx_group,
+    NULL AS rx_type,
     control_iso_name,
     iso_name,
     section,
@@ -373,6 +375,7 @@ INSERT INTO susc_results
     pair.ref_name AS ref_name,
     NULL AS rx_name,
     ctl_rx_grp.rx_group AS rx_group,
+    NULL AS rx_type,
     pair.control_iso_name AS control_iso_name,
     pair.iso_name AS iso_name,
     -- (
@@ -647,3 +650,41 @@ UPDATE susc_results SET
     END
   WHERE
     rx_name IS NULL;
+
+
+UPDATE susc_results S SET
+  rx_type = CASE
+    WHEN EXISTS (
+      SELECT 1 FROM rx_antibodies rxab WHERE
+      S.ref_name = rxab.ref_name AND
+      S.rx_name = rxab.rx_name
+    ) THEN 'antibody'
+    WHEN EXISTS (
+      SELECT 1 FROM rx_conv_plasma rxcp WHERE
+      S.ref_name = rxcp.ref_name AND (
+        S.rx_name = rxcp.rx_name OR
+        EXISTS (
+          SELECT 1 FROM unlinked_susc_results usr
+          WHERE
+            S.ref_name = usr.ref_name AND
+            S.rx_group = usr.rx_group AND
+            rxcp.ref_name = usr.ref_name AND
+            rxcp.rx_name = usr.rx_name
+        )
+      )
+    ) THEN 'conv-plasma'
+    WHEN EXISTS (
+      SELECT 1 FROM rx_vacc_plasma rxvp WHERE
+      S.ref_name = rxvp.ref_name AND (
+        S.rx_name = rxvp.rx_name OR
+        EXISTS (
+          SELECT 1 FROM unlinked_susc_results usr
+          WHERE
+            S.ref_name = usr.ref_name AND
+            S.rx_group = usr.rx_group AND
+            rxvp.ref_name = usr.ref_name AND
+            rxvp.rx_name = usr.rx_name
+        )
+      )
+    ) THEN 'vacc-plasma'
+  END::rx_type_enum;

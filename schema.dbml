@@ -1057,6 +1057,7 @@ Table susc_results as Susc {
   ref_name varchar
   rx_name varchar
   rx_group varchar
+  rx_type rx_type_enum
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
   section varchar [
@@ -1111,6 +1112,7 @@ Table susc_results as Susc {
     // S.assay_name
     (ref_name, rx_group, control_iso_name, iso_name, potency_type, control_assay_name, assay_name) [pk]
     rx_name
+    rx_type
     control_iso_name
     iso_name
   }
