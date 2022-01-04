@@ -536,6 +536,7 @@ Enum virus_type_enum {
   "chimeric-virus"
   "surrogate"
   "binding"
+  "VLP"
 }
 
 Table assays as A {
