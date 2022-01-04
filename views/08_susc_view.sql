@@ -3,7 +3,26 @@ AS
 SELECT *
 FROM
     (
-        SELECT *
+        SELECT
+            ref_name,
+            rx_name,
+            rx_group,
+            control_iso_name,
+            iso_name,
+            section,
+            fold_cmp,
+            fold,
+            potency_type,
+            control_potency,
+            potency,
+            potency_unit,
+            resistance_level,
+            ineffective,
+            control_cumulative_count,
+            cumulative_count,
+            control_assay_name,
+            assay_name,
+            date_added
         FROM susc_results
         WHERE rx_name IS NOT NULL
 
