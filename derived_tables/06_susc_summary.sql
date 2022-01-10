@@ -328,11 +328,62 @@ SELECT
   csv_agg(ab.ab_name ORDER BY ab.priority)::VARCHAR AS antibody_names,
   BOOL_AND(ab.visibility) AS visibility,
   MAX(ab.priority) * 10 + COUNT(ab.ab_name) AS antibody_order
-INTO TABLE rx_antibody_names
+INTO TABLE rx_antibody_names_all
 FROM rx_antibodies rxab, antibodies ab
 WHERE
   rxab.ab_name = ab.ab_name
 GROUP BY ref_name, rx_name;
+
+SELECT
+  ref_name,
+  rx_name,
+  csv_agg(ab.ab_name ORDER BY ab.priority)::VARCHAR AS antibody_names,
+  BOOL_AND(ab.visibility) AS visibility,
+  MAX(ab.priority) * 10 + COUNT(ab.ab_name) AS antibody_order,
+  COUNT(ab.ab_name) AS num_antibodies
+INTO TABLE rx_antibody_names_any
+FROM rx_antibodies rxab, antibodies ab
+WHERE
+  rxab.ab_name = ab.ab_name
+GROUP BY ref_name, rx_name;
+
+ALTER TABLE rx_antibody_names_any
+ADD CONSTRAINT PK_rx_antibody_names_any PRIMARY KEY (ref_name, rx_name, antibody_names);
+
+SELECT
+  DISTINCT
+  antibody_names,
+  ab_name,
+  visibility,
+  antibody_order,
+  num_antibodies
+INTO TABLE tmp_antibody_names
+FROM rx_antibody_names_any, rx_antibodies rxab
+WHERE
+  rx_antibody_names_any.ref_name = rxab.ref_name AND
+  rx_antibody_names_any.rx_name = rxab.rx_name AND
+  num_antibodies > 1;
+
+INSERT INTO rx_antibody_names_any (
+  ref_name,
+  rx_name,
+  antibody_names,
+  visibility,
+  antibody_order,
+  num_antibodies
+) SELECT
+  DISTINCT
+  ref_name,
+  rx_name,
+  antibody_names,
+  visibility,
+  antibody_order,
+  num_antibodies
+FROM rx_antibodies rxab, tmp_antibody_names abns
+WHERE
+  rxab.ab_name = abns.ab_name
+ON CONFLICT DO NOTHING;
+
 
 CREATE TYPE susc_summary_agg_key AS ENUM (
   'rx_type',
@@ -340,6 +391,7 @@ CREATE TYPE susc_summary_agg_key AS ENUM (
   'infected_variant',
   'vaccine',
   'antibody',
+  'antibody:any',
   'antibody:indiv',
   'variant',
   'isolate_agg',
@@ -443,6 +495,28 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
     END IF;
 
+    IF 'antibody:any' = ANY(_agg_by) THEN
+      _ext_col_names := ARRAY_APPEND(_ext_col_names, $X$
+        rx_type,
+        antibody_names,
+        antibody_order
+      $X$);
+      _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
+        'antibody' AS rx_type,
+        ab.antibody_names AS antibody_names,
+        ab.antibody_order AS antibody_order
+      $X$);
+      _ext_joins := ARRAY_APPEND(_ext_joins, $X$
+        JOIN rx_antibody_names_any ab ON
+          S.ref_name = ab.ref_name AND
+          S.rx_name = ab.rx_name
+      $X$);
+      _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
+        ab.antibody_names,
+        ab.antibody_order
+      $X$);
+    END IF;
+
     IF 'antibody' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, $X$
         rx_type,
@@ -455,7 +529,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         ab.antibody_order AS antibody_order
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
-        JOIN rx_antibody_names ab ON
+        JOIN rx_antibody_names_all ab ON
           S.ref_name = ab.ref_name AND
           S.rx_name = ab.rx_name
       $X$);
@@ -817,6 +891,7 @@ DO $$
       'infected_variant',
       'vaccine',
       'antibody',
+      'antibody:any',
       'antibody:indiv',
       'variant',
       'isolate_agg',
@@ -826,6 +901,7 @@ DO $$
     _rx_agg_by := ARRAY[
       'rx_type',
       'antibody',
+      'antibody:any',
       'antibody:indiv',
       'vaccine',
       'infected_variant'
@@ -998,7 +1074,9 @@ $$ LANGUAGE PLPGSQL;
 
 DROP TABLE isolate_displays;
 DROP TABLE isolate_aggkeys;
-DROP TABLE rx_antibody_names;
+DROP TABLE tmp_antibody_names;
+DROP TABLE rx_antibody_names_any;
+DROP TABLE rx_antibody_names_all;
 DROP FUNCTION get_isolate_aggkey;
 DROP FUNCTION get_isolate_mutobjs;
 DROP FUNCTION get_indiv_mut_position;
