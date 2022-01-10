@@ -688,3 +688,9 @@ UPDATE susc_results S SET
       )
     ) THEN 'vacc-plasma'
   END::rx_type_enum;
+
+
+-- remove all mAbs that don't neutralize control virus
+DELETE FROM susc_results S WHERE
+  S.rx_type = 'antibody' AND
+  S.ineffective IN ('both', 'control');
