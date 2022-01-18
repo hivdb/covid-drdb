@@ -298,3 +298,62 @@ LEFT JOIN
 ON
     iso.var_name = var.var_name
 ;
+
+
+CREATE VIEW IF NOT EXISTS _isolate_mutations_spike_raw_mut_view
+AS
+SELECT
+    *
+FROM
+    _isolate_mutations_spike_merged_del_view
+
+UNION
+
+SELECT
+    *
+FROM
+    isolate_mutations_spike_view
+WHERE
+    amino_acid != '∆'
+;
+
+
+CREATE VIEW IF NOT EXISTS _isolate_mutations_variant_raw_s_mut_view
+AS
+SELECT
+    *
+FROM
+    _isolate_mutations_spike_raw_mut_view a
+WHERE
+    EXISTS (
+        SELECT
+            1
+        FROM
+            isolates b
+        WHERE
+            a.iso_name = b.iso_name
+            AND
+            b.var_name IS NOT NULL
+
+    )
+;
+
+
+CREATE VIEW IF NOT EXISTS isolate_mutations_variant_raw_s_mut_view
+AS
+SELECT
+    iso.iso_name,
+    iso.var_name,
+    '' domain,
+    GROUP_CONCAT(muts.single_mut_name, '+') pattern
+FROM
+    _isolate_mutations_variant_raw_s_mut_view muts,
+    isolates iso
+WHERE
+    muts.iso_name = iso.iso_name
+GROUP BY
+    iso.iso_name
+ORDER BY
+    iso.iso_name,
+    muts.position
+;
