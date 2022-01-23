@@ -1,3 +1,27 @@
+-- B.1.177.75, B.1.160 and D.2 can only be used as infected variants
+-- The reason: Each has only D614G + one Spike mutation which can be mixed
+-- with a single mutation isolate
+DO $$
+  DECLARE row isolates%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM isolates iso WHERE
+      var_name IN ('B.1.177.75', 'B.1.160', 'D.2') AND (
+        EXISTS (
+          SELECT 1 FROM rx_potency pot WHERE
+            pot.iso_name=iso.iso_name
+        ) OR
+        EXISTS (
+          SELECT 1 FROM rx_fold f WHERE
+            f.control_iso_name=iso.iso_name OR
+            f.iso_name=iso.iso_name
+        )
+      )
+    LOOP
+      RAISE EXCEPTION E'Isolate of variant \x1b[1m%\x1b[0m can be only used as an infected isolate in subject_history. Unlink \x1b[1m%\x1b[0m from \x1b[1m%\x1b[0m to be used in rx_potency or rx_fold.', row.var_name, row.iso_name, row.var_name;
+    END LOOP;
+  END
+$$;
+
 -- rx_type must not be NULL
 ALTER TABLE susc_results ALTER COLUMN rx_type SET NOT NULL;
 
