@@ -142,7 +142,7 @@ def fetch_consensus(
     pangos = {pango for _, pango, _, _ in variant_maps}
     resp = requests.get(QUERY_URL, params={
         'pangolin_lineage': ','.join(pangos),
-        'frequency': '0.75'
+        'frequency': '0.5'
     }, headers={
         'authorization': f'Bearer {OUTBREAK_TOKEN}'
     })
