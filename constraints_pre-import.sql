@@ -61,6 +61,13 @@ ALTER TABLE subject_history
     severity IS NULL
   );
 
+-- iso_name must not be NULL for infection and isolation event
+ALTER TABLE subject_history
+  ADD CONSTRAINT chk_severity CHECK (
+    event IN ('infection', 'isolation') AND
+    iso_name IS NOT NULL
+  );
+
 ALTER TABLE rx_potency
   ADD CONSTRAINT chk_potency_limit_and_unit CHECK (
     (
