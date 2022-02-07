@@ -61,10 +61,10 @@ ALTER TABLE subject_history
     severity IS NULL
   );
 
--- iso_name must not be NULL for infection and isolation event
+-- iso_name must not be NULL for infection event
 ALTER TABLE subject_history
   ADD CONSTRAINT chk_severity CHECK (
-    event IN ('infection', 'isolation') AND
+    event IN 'infection' AND
     iso_name IS NOT NULL
   );
 
