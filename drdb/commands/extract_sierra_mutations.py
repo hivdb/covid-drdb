@@ -22,7 +22,10 @@ def remove_mixtures(rows: Iterable[Dict[str, str]]) -> List[Dict[str, str]]:
     for (gene, pos), part in groupby(
         rows, lambda r: (r['Gene'], r['Position'])
     ):
-        partlst = [r for r in part if r['RefAA'] != r['MutAA']]
+        partlst = [
+            r for r in part
+            if r['RefAA'] != r['MutAA'] and
+            r['MutAA'] != 'X']
         if len(partlst) > 1:
             continue
         results.extend(partlst)
