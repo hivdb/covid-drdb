@@ -2,7 +2,8 @@ import os
 import csv
 import click
 from tqdm import tqdm  # type: ignore
-from typing import TextIO, Dict, List
+from typing import TextIO, Dict, List, Iterable
+from itertools import groupby
 
 from ..cli import cli
 
@@ -14,6 +15,18 @@ HEADER: List[str] = [
     'count',
     'total'
 ]
+
+
+def remove_mixtures(rows: Iterable[Dict[str, str]]) -> List[Dict[str, str]]:
+    results: List[Dict[str, str]] = []
+    for (gene, pos), part in groupby(
+        rows, lambda r: (r['Gene'], r['Position'])
+    ):
+        partlst = [r for r in part if r['RefAA'] != r['MutAA']]
+        if len(partlst) > 1:
+            continue
+        results.extend(partlst)
+    return results
 
 
 @cli.command()
@@ -31,6 +44,7 @@ def extract_sierra_mutations(
 ) -> None:
     fp: TextIO
     mutlist: str
+    rows: List[Dict[str, str]]
     row: Dict[str, str]
 
     reader: csv.DictReader
@@ -47,7 +61,8 @@ def extract_sierra_mutations(
         mutlist = os.path.join(sierra_mutation_list_dir, mutlist)
         with open(mutlist, encoding='UTF-8-sig') as fp:
             reader = csv.DictReader(fp)
-            for row in reader:
+            rows = remove_mixtures(reader)
+            for row in rows:
                 writer.writerow({
                     'iso_name': row['Sequence Name'],
                     'gene': row['Gene'],
