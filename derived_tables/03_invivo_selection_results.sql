@@ -19,8 +19,8 @@ INSERT INTO invivo_selection_results
     IM.gene,
     IM.position,
     IM.amino_acid,
-    CASE WHEN IM.count IS NULL THEN 0 ELSE IM.count END,
-    CASE WHEN IM.total IS NULL THEN 0 ELSE IM.total END,
+    CASE WHEN IM.count IS NULL THEN 1 ELSE IM.count END,
+    CASE WHEN IM.total IS NULL THEN 1 ELSE IM.total END,
     PTH_INF.event_date AS infection_date,
     PTH.event_date AS appearance_date,
     PTH_INF.severity AS severity
