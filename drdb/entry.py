@@ -6,6 +6,7 @@ from .commands import update_glue_prevalence
 from .commands import extract_gisaid_mutations
 from .commands import gen_mutation_distance
 from .commands import fetch_iedb_epitopes
+from .commands import extract_sierra_mutations
 
 __all__ = [
     'cli',
@@ -14,6 +15,7 @@ __all__ = [
     'update_ref_amino_acid',
     'update_glue_prevalence',
     'extract_gisaid_mutations',
+    'extract_sierra_mutations',
     'gen_mutation_distance',
     'fetch_iedb_epitopes'
 ]
