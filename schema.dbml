@@ -133,11 +133,19 @@ Enum subject_species_enum {
   "HyperIG" // Hyperimmune immunoglobulin TODO: this should be another type of Rx
 }
 
+Enum immune_status_enum {
+  "HIV"
+  "Medical" // The subject received medical that could suppress their immuno system
+  "Unknown" // The immune status is not indicated by the study
+  "None"    // the subject is not immunosuppressed
+}
+
 Table subjects as Pt {
   ref_name varchar [ref: > R.ref_name]
   subject_name varchar
   subject_species subject_species_enum
   birth_year numeric(4)
+  immune_status immune_status_enum
   num_subjects int [
     note: "Indicates if this record is for an individual subject (=1) or a group of subjects (>1)."
   ]

@@ -212,6 +212,11 @@ def autofill_subjects(tables_dir: Path) -> None:
                  .get((rx['ref_name'], rx['subject_name']), {})
                  .get('birth_year') or 'NULL'
              ),
+             'immune_status': (
+                 known_subjects
+                 .get((rx['ref_name'], rx['subject_name']), {})
+                 .get('immune_status') or 'NULL'
+             ),
              'num_subjects': (
                  known_subjects
                  .get((rx['ref_name'], rx['subject_name']), {})
@@ -234,6 +239,7 @@ def autofill_subjects(tables_dir: Path) -> None:
             'subject_name',
             'subject_species',
             'birth_year',
+            'immune_status',
             'num_subjects'
         ],
         BOM=True
