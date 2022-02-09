@@ -80,6 +80,16 @@ pre-release: update-builder network docker-envfile
    		hivdb/covid-drdb-builder:latest \
 		scripts/github-release.sh --pre-release
 
+debug-export-sqlite: update-builder network docker-envfile
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+		--network=covid-drdb-network \
+		--volume ~/.aws:/root/.aws:ro \
+		--env-file ./docker-envfile \
+   		hivdb/covid-drdb-builder:latest \
+		scripts/export-sqlite.sh debug
+
 sync-to-s3: update-builder docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
@@ -119,4 +129,4 @@ psql-devdb:
 psql-devdb-no-docker:
 	@psql -U postgres -h localhost -p 6543
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release sync-* update-builder
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder
