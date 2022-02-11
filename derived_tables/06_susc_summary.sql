@@ -423,8 +423,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           aggregate_by,
           num_studies,
           num_samples,
-          num_experiments,
-          all_studies
+          num_experiments
           %1s
         ) SELECT
           $1 AS aggregate_by,
@@ -448,8 +447,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
               S.assay_name,
               S.cumulative_count
             )::unique_sum_type)
-          ) AS num_experiments,
-          csv_agg(DISTINCT S.ref_name ORDER BY S.ref_name) AS all_studies
+          ) AS num_experiments
           %2s
         FROM
           susc_results S %3s
@@ -723,18 +721,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
 
     IF 'potency_type' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, $X$
-        potency_type,
-        all_fold
+        potency_type
       $X$);
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
-        S.potency_type AS potency_type,
-        csv_agg(
-          CASE WHEN S.cumulative_count > 1 THEN
-            S.fold::TEXT || ':' || S.cumulative_count::TEXT
-          ELSE
-            S.fold::TEXT
-          END
-        ) AS all_fold
+        S.potency_type AS potency_type
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         S.potency_type
@@ -743,26 +733,10 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
 
     IF 'potency_unit' = ANY(_agg_by) THEN
       _ext_col_names := ARRAY_APPEND(_ext_col_names, $X$
-        potency_unit,
-        all_control_potency,
-        all_potency
+        potency_unit
       $X$);
       _ext_col_values := ARRAY_APPEND(_ext_col_values, $X$
-        S.potency_unit AS potency_unit,
-        csv_agg(
-          CASE WHEN S.cumulative_count > 1 THEN
-            S.control_potency::TEXT || ':' || S.cumulative_count::TEXT
-          ELSE
-            S.control_potency::TEXT
-          END
-        ) AS all_control_potency,
-        csv_agg(
-          CASE WHEN S.cumulative_count > 1 THEN
-            S.potency::TEXT || ':' || S.cumulative_count::TEXT
-          ELSE
-            S.potency::TEXT
-          END
-        ) AS all_potency
+        S.potency_unit AS potency_unit
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
         S.potency_unit

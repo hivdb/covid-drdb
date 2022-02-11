@@ -917,18 +917,6 @@ Table susc_summary as SSmry {
   num_experiments integer [
     note: 'Number of experiments; count of ref_name/rx_name/iso_name/potency_type pairs'
   ]
-  all_studies varchar [
-    note: 'All study/article name'
-  ]
-  all_control_potency text [
-    note: 'Comma separated control potency of all matched experiments'
-  ]
-  all_potency text [
-    note: 'Comma separated potency of all matched experiments'
-  ]
-  all_fold text [
-    note: 'Comma separated fold changes of all matched experiments'
-  ]
 
   indexes {
     aggregate_by
