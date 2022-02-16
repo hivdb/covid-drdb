@@ -164,7 +164,6 @@ Enum event_enum {
   "3rd dose isolation"
   "infection"
   "isolation"
-  "culture"
 }
 
 // TODO: divide this table into several small ones:

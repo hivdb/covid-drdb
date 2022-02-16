@@ -7,9 +7,14 @@ SELECT
     WHEN '<' THEN event_date - 1
     WHEN '>' THEN event_date + 1
     ELSE event_date
-  END cmparable_event_date
+  END comparable_event_date
 INTO dup_subject_history
 FROM subject_history;
+
+CREATE INDEX ON dup_subject_history (iso_name);
+CREATE INDEX ON dup_subject_history (ref_name, subject_name);
+CREATE INDEX ON dup_subject_history (event);
+CREATE INDEX ON dup_subject_history (comparable_event_date);
 
 INSERT INTO invivo_selection_results
   SELECT
@@ -42,8 +47,8 @@ INSERT INTO invivo_selection_results
           PREV_PTH.ref_name = PTH.ref_name AND
           PREV_PTH.subject_name = PTH.subject_name AND
           PREV_PTH.event IN ('infection', 'isolation') AND
-          -- use cmparable_event_date to take into account of the event_date_cmp
-          PREV_PTH.cmparable_event_date < PTH.cmparable_event_date
+          -- use comparable_event_date to take into account of the event_date_cmp
+          PREV_PTH.comparable_event_date < PTH.comparable_event_date
     ) AND
     NOT EXISTS (
       SELECT 1
@@ -54,8 +59,8 @@ INSERT INTO invivo_selection_results
           PREV_PTH.ref_name = PTH.ref_name AND
           PREV_PTH.subject_name = PTH.subject_name AND
           PREV_PTH.event IN ('infection', 'isolation') AND
-          -- use cmparable_event_date to take into account of the event_date_cmp
-          PREV_PTH.cmparable_event_date < PTH.cmparable_event_date AND
+          -- use comparable_event_date to take into account of the event_date_cmp
+          PREV_PTH.comparable_event_date < PTH.comparable_event_date AND
           PREV_IM.gene = IM.gene AND
           PREV_IM.position = IM.position AND
           PREV_IM.amino_acid = IM.amino_acid

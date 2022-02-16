@@ -334,6 +334,8 @@ WHERE
   rxab.ab_name = ab.ab_name
 GROUP BY ref_name, rx_name;
 
+CREATE INDEX ON rx_antibody_names_all (ref_name, rx_name);
+
 SELECT
   ref_name,
   rx_name,
