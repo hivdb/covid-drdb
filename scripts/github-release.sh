@@ -60,7 +60,7 @@ else
     echo "Release abort: the local repository covid-drdb-payload seems not up-to-date. Forgot running 'git pull --rebase' and 'git push'?" 1>&2
     exit 1
   fi
-  
+
   if [ -n "$(git status -s .)" ]; then
     git status
     echo "Release abort: uncommitted changes are found. Please submit them & run 'git push' first." 1>&2
@@ -72,13 +72,13 @@ else
     echo "Release abort: uncommitted changes are found under payload/ directory. Please submit them & run 'git push' first." 1>&2
     exit 1
   fi
-  
+
   prev_tag=$(echo "$info" | jq -r '.Releases | map(select(.prerelease == false)) | .[0].tag_name')
   prev_commit=$(echo "$info" | jq -r ".Tags | map(select(.name == \"$prev_tag\")) | .[0].commit.sha")
 
   title="COVID-DRDB $VERSION"
   description="Release date: $TODAY"
-  
+
   if [[ "$prev_commit" != "null" ]]; then
     description="Release date $TODAY\n\nChanges since previous release ($prev_tag):\n
 $($GIT log --pretty=format:'- %s (%H, by %an)\n' --abbrev-commit $prev_commit..$local_commit)\n\n
@@ -108,6 +108,7 @@ if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
 fi
 
 echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
+# sleep 10 # Please uncomment this statement if github-release can't get the tag when uploading db files.
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
 
