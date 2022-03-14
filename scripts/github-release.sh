@@ -108,7 +108,7 @@ if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
 fi
 
 echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
-# sleep 10 # Please uncomment this statement if github-release can't get the tag when uploading db files.
+sleep 10
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
 
