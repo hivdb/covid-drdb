@@ -7,7 +7,6 @@ DELETE FROM rx_plasma;
 DELETE FROM rx_potency;
 DELETE FROM rx_fold;
 DELETE FROM treatments;
-DELETE FROM subject_history;
 DELETE FROM ref_invivo;
 DELETE FROM ref_isolate_pairs;
 DELETE FROM ref_unpaired_isolates;
