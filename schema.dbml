@@ -345,6 +345,10 @@ Table antibody_epitopes as MAbEpi {
   position int [
     note: 'Epitope position'
   ]
+
+  indexes {
+    (ab_name, position) [pk]
+  }
 }
 
 Table variants as VAR {
@@ -832,6 +836,7 @@ Table isolate_pairs as IPair {
   indexes {
     (control_iso_name, iso_name) [pk]
     iso_aggkey
+    num_mutations
   }
 }
 
@@ -921,6 +926,12 @@ Table susc_summary as SSmry {
 
   indexes {
     aggregate_by
+    ref_name
+    antibody_names
+    vaccine_name
+    infected_var_name
+    iso_aggkey
+    position
   }
 }
 
@@ -1046,8 +1057,9 @@ Table unlinked_susc_results as SuscGroup {
 
   indexes {
     (ref_name, rx_name, iso_name, assay_name, potency_type) [pk]
-    (ref_name, rx_group)
+    (ref_name, rx_group, potency_type)
     iso_name
+    assay_name
     rx_name
   }
 }
