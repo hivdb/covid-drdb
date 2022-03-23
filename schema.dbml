@@ -589,6 +589,7 @@ Table rx_fold as RxF {
     (rx_name, control_iso_name, iso_name, ref_name, assay_name, potency_type) [pk]
   }
 }
+Ref: RxF.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table rx_potency as RxPo {
   ref_name varchar
@@ -620,6 +621,7 @@ Table rx_potency as RxPo {
     assay_name
   }
 }
+Ref: RxPo.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_isolate_pairs as RxIsoPair {
   ref_name varchar

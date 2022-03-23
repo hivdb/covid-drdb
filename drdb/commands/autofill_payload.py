@@ -73,26 +73,27 @@ def autofill_invivos(tables_dir: Path) -> None:
 
 def autofill_rx(tables_dir: Path) -> None:
     file_path: Path
+
     rxmabs: List[CSVReaderRow] = load_multiple_csvs(
         tables_dir / 'rx_antibodies')
+
     rxps: List[
         Dict[str, Optional[str]]
     ] = load_multiple_csvs(tables_dir / 'rx_plasma')
-
-    invitro: List[CSVReaderRow] = []
-    file_path = tables_dir / 'invitro_selection_results'
-    if file_path.exists():
-        invitro = load_multiple_csvs(file_path)
 
     unclassified_rx: List[CSVReaderRow] = []
     file_path = tables_dir / 'unclassified-rx.csv'
     if file_path.exists():
         unclassified_rx = load_csv(file_path)
 
+    # warning: do not add rx_names from invitro, invivo, or DMS tables
+    # Only the rx_antibodies, rx_plasma and unclassified_rx should be the
+    # source of treatments table.
+
     treatments: List[CSVWriterRow] = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxps + unclassified_rx + invitro
+        for rx in rxmabs + rxps + unclassified_rx
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
