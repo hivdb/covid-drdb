@@ -537,6 +537,7 @@ Enum potency_unit_enum {
   "ng/ml"
   "µM"
   "pM"
+  "nM"
   "percent"
   "IU/ml"
 }
