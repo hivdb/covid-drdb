@@ -297,27 +297,21 @@ def autofill_sbj_infections(tables_dir: Path) -> None:
     row: CSVReaderRow
     rows: List[CSVReaderRow]
     pth: Path
-    pth_list: Path = tables_dir / 'subject_history'
+    pth_list: Path = tables_dir / 'subject_infections'
     for pth in pth_list.iterdir():
         if pth.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(pth))
             continue
         rows = load_csv(pth)
         for row in rows:
-            if not row.get('iso_name'):
-                row['iso_name'] = None
-            if not row.get('cycle_threshold_cmp'):
-                row['cycle_threshold_cmp'] = None
-            if not row.get('cycle_threshold'):
-                row['cycle_threshold'] = None
-            if not row.get('severity'):
-                row['severity'] = None
-            if not row.get('vaccine_name'):
-                row['vaccine_name'] = None
-            if row['event'] not in ('1st dose', '2nd dose', '3rd dose'):
-                row['vaccine_name'] = None
-            if not row.get('event_date_cmp'):
-                row['event_date_cmp'] = '='
+            if not row.get('infection_date_cmp'):
+                row['infection_date_cmp'] = '='
+            if not row.get('infected_var_name'):
+                row['infected_var_name'] = 'Unknown variant'
+            if not row.get('location'):
+                row['location'] = None
+            if not row.get('section'):
+                row['section'] = None
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -325,15 +319,121 @@ def autofill_sbj_infections(tables_dir: Path) -> None:
             headers=[
                 'ref_name',
                 'subject_name',
-                'event',
-                'event_date_cmp',
-                'event_date',
+                'infection_date_cmp',
+                'infection_date',
+                'infected_var_name',
                 'location',
+                'section'
+            ],
+            BOM=True
+        )
+
+
+def autofill_sbj_isolates(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'subject_isolates'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('collection_date_cmp'):
+                row['collection_date_cmp'] = '='
+            if not row.get('iso_source'):
+                row['iso_source'] = None
+            if not row.get('iso_culture'):
+                row['iso_culture'] = None
+            if not row.get('location'):
+                row['location'] = None
+            if not row.get('section'):
+                row['section'] = None
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'subject_name',
+                'collection_date_cmp',
+                'collection_date',
                 'iso_name',
-                'cycle_threshold_cmp',
-                'cycle_threshold',
+                'iso_source',
+                'iso_culture',
+                'location',
+                'section'
+            ],
+            BOM=True
+        )
+
+
+def autofill_sbj_vaccines(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'subject_vaccines'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('vaccination_date_cmp'):
+                row['vaccination_date_cmp'] = '='
+            if not row.get('location'):
+                row['location'] = None
+            if not row.get('section'):
+                row['section'] = None
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'subject_name',
+                'vaccination_date_cmp',
+                'vaccination_date',
                 'vaccine_name',
+                'dosage',
+                'location',
+                'section'
+            ],
+            BOM=True
+        )
+
+
+def autofill_sbj_severity(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'subject_severity'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('start_date_cmp'):
+                row['start_date_cmp'] = '='
+            if not row.get('end_date_cmp'):
+                row['end_date_cmp'] = '='
+            if not row.get('section'):
+                row['section'] = None
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'subject_name',
+                'start_date_cmp',
+                'start_date',
+                'end_date_cmp',
+                'end_date',
                 'severity',
+                'section'
             ],
             BOM=True
         )
@@ -501,8 +601,11 @@ def autofill_payload(payload_dir: str) -> None:
     autofill_rx_potency(tables_dir)
 
     autofill_subjects(tables_dir)
-    # autofill_sub_history(tables_dir)
+    autofill_sbj_infections(tables_dir)
+    autofill_sbj_isolates(tables_dir)
+    autofill_sbj_vaccines(tables_dir)
     autofill_sbj_treatments(tables_dir)
+    autofill_sbj_severity(tables_dir)
 
     sort_csv(antibodies, 'ab_name')
     sort_csv(antibody_targets, 'ab_name')
