@@ -285,8 +285,9 @@ def refactor_sbj_history_core(tables_dir, var_lookup):
 def refactor_sbj_history(payload_dir):
     payload_dir = Path(payload_dir)
     var_lookup = load_isolate_variant_lookup(payload_dir / 'tables')
-    click.echo('Refactoring tables...')
-    refactor_sbj_history_core(payload_dir / 'tables', var_lookup)
+    # no longer needed
+    # click.echo('Refactoring tables...')
+    # refactor_sbj_history_core(payload_dir / 'tables', var_lookup)
 
     click.echo('Refactoring excludes...')
     refactor_sbj_history_core(payload_dir / 'excluded', var_lookup)
