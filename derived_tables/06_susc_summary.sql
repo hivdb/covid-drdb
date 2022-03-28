@@ -658,20 +658,20 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
           ) AS num_subjects
         $X$);
         _ext_joins := ARRAY_APPEND(_ext_joins, $X$
-          LEFT JOIN rx_plasma rxp ON
-            S.ref_name = rxp.ref_name AND (
-              S.rx_name = rxp.rx_name OR
+          LEFT JOIN subject_plasma sbjp ON
+            S.ref_name = sbjp.ref_name AND (
+              S.rx_name = sbjp.rx_name OR
               EXISTS (
                 SELECT 1 FROM unlinked_susc_results usr
                 WHERE
                   S.ref_name = usr.ref_name AND
                   S.rx_group = usr.rx_group AND
-                  usr.rx_name = rxp.rx_name
+                  usr.rx_name = sbjp.rx_name
               )
             )
           LEFT JOIN subjects sbj ON
-            rxp.ref_name = sbj.ref_name AND
-            rxp.subject_name = sbj.subject_name
+            sbjp.ref_name = sbj.ref_name AND
+            sbjp.subject_name = sbj.subject_name
         $X$);
       END IF;
     END IF;

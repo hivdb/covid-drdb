@@ -5,7 +5,7 @@ INSERT INTO rx_conv_plasma
     SbjP.subject_name,
     SbjInf.infected_var_name,
     SbjP.location,
-    GREATEST(ROUND((SbjP.event_date - SbjInf.event_date) / 30.), 1) AS timing,
+    GREATEST(ROUND((SbjP.collection_date - SbjInf.infection_date) / 30.), 1) AS timing,
     SbjInf.severity,
     SbjP.collection_date,
     SbjP.cumulative_group

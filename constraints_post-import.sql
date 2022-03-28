@@ -43,8 +43,7 @@ DO $$
   END
 $$;
 
--- for each subject there must be at least one record in subject_plasma or subject_isolates
-CREATE FUNCTION hasSubjectPlasmaOrIsolates(rname varchar, sname varchar) RETURNS boolean AS $$
+CREATE FUNCTION hasPlasmaOrIsolate(rname varchar, sname varchar) RETURNS boolean AS $$
   SELECT EXISTS (
     SELECT 1 FROM subject_plasma SbjP
     WHERE rname = SbjP.ref_name AND sname = SbjP.subject_name
@@ -54,16 +53,96 @@ CREATE FUNCTION hasSubjectPlasmaOrIsolates(rname varchar, sname varchar) RETURNS
   )
 $$ LANGUAGE SQL;
 
+CREATE FUNCTION hasPreviousInfection(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_infections
+    WHERE rname = ref_name AND sname = subject_name AND event_date >= infection_date
+  )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION hasPreviousVaccine(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_vaccines
+    WHERE rname = ref_name AND sname = subject_name AND event_date >= vaccination_date
+  )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION hasFollowingPlasma(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_plasma
+    WHERE rname = ref_name AND sname = subject_name AND event_date <= collection_date
+  )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION hasFollowingIsolate(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_isolates
+    WHERE rname = ref_name AND sname = subject_name AND event_date <= collection_date
+  )
+$$ LANGUAGE SQL;
+
+-- for each subject there must be at least one record in subject_plasma or subject_isolates
 DO $$
   DECLARE row subjects%rowtype;
   BEGIN
     FOR row IN SELECT * FROM subjects LOOP
-      IF NOT hasSubjectPlasmaOrIsolates(row.ref_name, row.subject_name) THEN
+      IF NOT hasPlasmaOrIsolate(row.ref_name, row.subject_name) THEN
         RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` or `subject_isolates`', row.ref_name, row.subject_name;
       END IF;
     END LOOP;
   END
 $$;
+
+-- for each subject_plasma there must be at least one previous record in subject_infections or subject_vaccines
+DO $$
+  DECLARE row subjects%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM subject_plasma LOOP
+      IF NOT hasPreviousInfection(row.ref_name, row.subject_name, row.collection_date) AND
+         NOT hasPreviousVaccine(row.ref_name, row.subject_name, row.collection_date) THEN
+        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_infections` or `subject_vaccines` dated before a plasma collection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.collection_date;
+      END IF;
+    END LOOP;
+  END
+$$
+
+
+-- for each subject_isolates there must be at least one previous record in subject_infections
+DO $$
+  DECLARE row subjects%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM subject_isolates LOOP
+      IF NOT hasPreviousInfection(row.ref_name, row.subject_name, row.collection_date) THEN
+        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_infections` dated before an insolate collection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.collection_date;
+      END IF;
+    END LOOP;
+  END
+$$
+
+-- for each subject_infections there must be at least one following record in subject_plasma or subject_isolates
+DO $$
+  DECLARE row subjects%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM subject_infections LOOP
+      IF NOT hasFollwingPlasma(row.ref_name, row.subject_name, row.infection_date) AND
+         NOT hasFollwingIsolate(row.ref_name, row.subject_name, row.infection_date) THEN
+        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` or `subject_isolates` dated after the infection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.infection_date;
+      END IF;
+    END LOOP;
+  END
+$$
+
+-- for each subject_vaccines there must be at least one following record in subject_plasma
+DO $$
+  DECLARE row subjects%rowtype;
+  BEGIN
+    FOR row IN SELECT * FROM subject_vaccines LOOP
+      IF NOT hasFollwingPlasma(row.ref_name, row.subject_name, row.vaccination_date) THEN
+        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` dated after the vaccination date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.vaccination_date;
+      END IF;
+    END LOOP;
+  END
+$$
 
 -- for each iso_name in rx_potency, it must exist in ref_isolate_pairs either as
 -- control_iso_name or as iso_name
