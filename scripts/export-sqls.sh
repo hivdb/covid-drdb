@@ -31,6 +31,11 @@ fi
 mkdir -p $TARGET_DIR
 
 dbml2sql --postgres schema.dbml > $TARGET_DIR/01_schema.sql
+
+cat >> $TARGET_DIR/01_schema.sql <<EOF
+CREATE EXTENSION btree_gist;
+EOF
+
 cat constraints_pre-import.sql >> $TARGET_DIR/01_schema.sql
 echo "Written to $TARGET_DIR/01_schema.sql"
 

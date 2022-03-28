@@ -168,7 +168,8 @@ Table subject_infections as SbjInf {
   infection_date date
   infected_var_name varchar [
     not null,
-    ref: > VAR.var_name
+    ref: > VAR.var_name,
+    note: "Infected variant name"
   ]
   location varchar [
     note: "Location of where this person was infected"
@@ -198,7 +199,7 @@ Table subject_isolates as SbjIso {
   iso_name varchar [
     not null,
     ref: > isolates.iso_name,
-    note: "Infected isolate name"
+    note: "Collected isolate name"
   ]
   iso_source varchar
   iso_culture boolean
@@ -241,7 +242,7 @@ Table subject_vaccines as SbjVacc {
 
   indexes {
     (ref_name, subject_name, vaccination_date, vaccine_name) [pk]
-    (ref_name, subject_name, nth_dose) [unique]
+    (ref_name, subject_name, dosage) [unique]
     vaccination_date
     vaccine_name
   }
@@ -1056,7 +1057,7 @@ Table rx_conv_plasma as RxCP {
   ref_name varchar
   rx_name varchar
   subject_name varchar [not null]
-  infected_var_name varchar [ref: > Var.var_name]
+  infected_var_name varchar [ref: > VAR.var_name]
   location varchar
   timing numeric(4,0) [note: "time from symptom on set, Month"]
   severity severity_enum
@@ -1084,7 +1085,7 @@ Table rx_vacc_plasma as RxVP {
   ref_name varchar
   rx_name varchar
   subject_name varchar
-  infected_var_name varchar [ref: > Var.var_name]
+  infected_var_name varchar [ref: > VAR.var_name]
   vaccine_name varchar [ref: > V.vaccine_name]
   location varchar
   timing numeric(4,0)  [note: "time after vaccination, Month"]
@@ -1228,7 +1229,7 @@ Table invivo_selection_results {
     note: 'Subject who received the treatment (not the CP donor if rx_name is a CP)'
   ]
   infected_var_name varchar [
-    ref: > Var.var_name,
+    ref: > VAR.var_name,
     note: 'Variant of the infected isolate'
   ]
   gene varchar [

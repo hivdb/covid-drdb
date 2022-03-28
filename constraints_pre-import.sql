@@ -16,7 +16,7 @@ ALTER TABLE susc_results
   );
 
 -- In rx_potency, potency must be greater than 0
-CREATE FUNCTION check_potency_nonzero(
+CREATE FUNCTION checkPotencyNonzero(
   potency NUMERIC(10,3),
   ref_name VARCHAR,
   rx_name VARCHAR,
@@ -45,7 +45,7 @@ END;
 $$ LANGUAGE PLPGSQL IMMUTABLE;
 
 ALTER TABLE rx_potency
-  ADD CONSTRAINT chk_potency_nonzero CHECK (check_potency_nonzero(potency, ref_name, rx_name, iso_name, potency_type::text, potency_lower_limit, potency_upper_limit));
+  ADD CONSTRAINT chk_potency_nonzero CHECK (checkPotencyNonzero(potency, ref_name, rx_name, iso_name, potency_type::text, potency_lower_limit, potency_upper_limit));
 
 
 ALTER TABLE rx_potency
@@ -71,11 +71,24 @@ ALTER TABLE rx_potency
   );
 
 -- In subject_vaccines, infection_date of later dose must be later than eariler dose
+CREATE FUNCTION checkVaccineDosageOrder(
+  rname VARCHAR,
+  sname VARCHAR,
+  dose INT,
+  vacc_date DATE
+) RETURNS BOOLEAN
+AS $$
+  SELECT NOT EXISTS (
+    SELECT 1 FROM subject_vaccines
+    WHERE rname = ref_name AND sname = subject_name AND (
+      (dose > dosage AND vacc_date <= vaccination_date) OR
+      (dose < dosage AND vacc_date >= vaccination_date)
+    )
+  )
+$$ LANGUAGE SQL;
+
 ALTER TABLE subject_vaccines
-  ADD CONSTRAINT chk_vaccine_dosage_order EXCLUDE USING GIST (
-    dosage WITH >,
-    vaccination_date with <=
-  );
+  ADD CONSTRAINT chk_vaccine_dosage_order CHECK (checkVaccineDosageOrder(ref_name, subject_name, dosage, vaccination_date));
 
 -- In subject_severity, start date must be not greater than end date
 ALTER TABLE subject_severity
@@ -89,7 +102,7 @@ ALTER TABLE subject_severity
   ADD CONSTRAINT chk_severity_time_range_overlapping EXCLUDE USING GIST (
     ref_name WITH =,
     subject_name WITH =,
-    TSTZRANGE(start_date, end_date) WITH &&
+    TSRANGE(start_date, end_date) WITH &&
   );
 
 -- In subject_treatments, start date must be not greater than end date
