@@ -89,6 +89,10 @@ ls payload/tables/subject_infections | sort -h | while read filepath; do
     copy_csv payload/tables/subject_infections/$filepath subject_infections >> $TARGET_DIR/02_data_tables.sql
 done
 
+ls payload/tables/subject_vaccines | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_vaccines/$filepath subject_vaccines >> $TARGET_DIR/02_data_tables.sql
+done
+
 ls payload/tables/subject_isolates | sort -h | while read filepath; do
     copy_csv payload/tables/subject_isolates/$filepath subject_isolates >> $TARGET_DIR/02_data_tables.sql
 done
@@ -103,10 +107,6 @@ done
 
 ls payload/tables/subject_treatments | sort -h | while read filepath; do
     copy_csv payload/tables/subject_treatments/$filepath subject_treatments >> $TARGET_DIR/02_data_tables.sql
-done
-
-ls payload/tables/subject_vaccines | sort -h | while read filepath; do
-    copy_csv payload/tables/subject_vaccines/$filepath subject_vaccines >> $TARGET_DIR/02_data_tables.sql
 done
 
 ls payload/tables/rx_fold | sort -h | while read filepath; do

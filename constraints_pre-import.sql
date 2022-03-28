@@ -110,3 +110,28 @@ ALTER TABLE subject_treatments
   ADD CONSTRAINT chk_sbjrx_time_range CHECK (
     start_date <= end_date
   );
+
+CREATE FUNCTION hasPreviousInfection(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_infections
+    WHERE rname = ref_name AND sname = subject_name AND event_date >= infection_date
+  )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION hasPreviousVaccine(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM subject_vaccines
+    WHERE rname = ref_name AND sname = subject_name AND event_date >= vaccination_date
+  )
+$$ LANGUAGE SQL;
+
+ALTER TABLE subject_plasma
+  ADD CONSTRAINT chk_previous_infection_or_vaccine CHECK (
+    hasPreviousInfection(ref_name, subject_name, collection_date) OR
+    hasPreviousVaccine(ref_name, subject_name, collection_date)
+  );
+
+ALTER TABLE subject_isolates
+  ADD CONSTRAINT chk_previous_infection CHECK (
+    hasPreviousInfection(ref_name, subject_name, collection_date)
+  );

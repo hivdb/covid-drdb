@@ -36,7 +36,9 @@ def pth_to_infection(row, var_lookup):
         'subject_name': row['subject_name'],
         'infection_date_cmp': row['event_date_cmp'],
         'infection_date': row['event_date'],
-        'infected_var_name': var_lookup.get(row['iso_name']),
+        'infected_var_name': (
+            var_lookup.get(row['iso_name']) or row['iso_name']
+        ),
         'location': row['location'],
         'section': None
     }

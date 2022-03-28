@@ -11,7 +11,6 @@ INSERT INTO rx_vacc_plasma
         SV.ref_name=SbjP.ref_name AND
         SV.subject_name=SbjP.subject_name AND
         SV.vaccination_date<SbjP.collection_date
-        ORDER BY vaccination_date
     ) AS vaccine_name,
     SbjP.location,
     GREATEST(ROUND((SbjP.collection_date - SbjVacc.vaccination_date) / 30.), 1) AS timing,
@@ -19,8 +18,11 @@ INSERT INTO rx_vacc_plasma
     SbjP.collection_date,
     SbjP.cumulative_group
   FROM
-    subject_plasma SbjP,
-    subject_vaccines SbjVacc
+    subject_plasma SbjP
+  JOIN subject_vaccines SbjVacc ON
+    SbjVacc.ref_name = SbjP.ref_name AND
+    SbjVacc.subject_name = SbjP.subject_name AND
+    SbjP.collection_date > SbjVacc.vaccination_date
   LEFT JOIN subject_infections SbjInf ON
     SbjInf.ref_name = SbjP.ref_name AND
     SbjInf.subject_name = SbjP.subject_name AND
@@ -34,9 +36,6 @@ INSERT INTO rx_vacc_plasma
         SbjInf.infection_date < SbjInfNext.infection_date
     )
   WHERE
-    SbjVacc.ref_name = SbjP.ref_name AND
-    SbjVacc.subject_name = SbjP.subject_name AND
-    SbjP.collection_date > SbjVacc.vaccination_date AND
     NOT EXISTS (
       SELECT 1 FROM subject_vaccines SbjVaccNext
       WHERE
@@ -44,6 +43,6 @@ INSERT INTO rx_vacc_plasma
         SbjVaccNext.subject_name = SbjP.subject_name AND
         SbjP.collection_date > SbjVaccNext.vaccination_date AND
         SbjVaccNext.vaccination_date > SbjVacc.vaccination_date
-    )
+    );
 
 UPDATE rx_vacc_plasma SET timing=NULL WHERE timing=0;

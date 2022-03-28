@@ -211,7 +211,8 @@ Table subject_isolates as SbjIso {
   ]
 
   indexes {
-    (ref_name, subject_name, collection_date, iso_source, iso_culture) [pk]
+    // TODO: iso_source and iso_culture should be add to pk once they are not null
+    (ref_name, subject_name, collection_date) [pk]
     collection_date
     iso_name
   }

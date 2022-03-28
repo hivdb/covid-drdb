@@ -121,18 +121,14 @@ INSERT INTO susc_results
           rxcp.ref_name = ctl.ref_name AND
           rxcp.rx_name = ctl.rx_name
       ) OR EXISTS (
-        SELECT 1
-        FROM
-          rx_conv_plasma rxcp
-          LEFT JOIN isolates infected ON
-            rxcp.infected_iso_name = infected.iso_name
+        SELECT 1 FROM rx_conv_plasma rxcp
         WHERE
           rxcp.ref_name = ctl.ref_name AND
           rxcp.rx_name = ctl.rx_name AND (
             -- require control.var_name must be wild-type
             ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-            -- unless infected.var_name is the same as control.var_name
-            infected.var_name = ctl_iso.var_name OR
+            -- unless rxcp.infected_var_name is the same as control.var_name
+            rxcp.infected_var_name = ctl_iso.var_name OR
             -- or the expected control.var_name hasn't been tested
             NOT EXISTS (
               SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
@@ -141,7 +137,7 @@ INSERT INTO susc_results
                 rxcp.rx_name = strict_ctl.rx_name AND
                 strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
                   strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-                  infected.var_name = strict_ctl_iso.var_name
+                  rxcp.infected_var_name = strict_ctl_iso.var_name
                 )
             )
 
@@ -154,18 +150,14 @@ INSERT INTO susc_results
           rxvp.ref_name = ctl.ref_name AND
           rxvp.rx_name = ctl.rx_name
       ) OR EXISTS (
-        SELECT 1
-        FROM
-          rx_vacc_plasma rxvp
-          LEFT JOIN isolates infected ON
-            rxvp.infected_iso_name = infected.iso_name
+        SELECT 1 FROM rx_vacc_plasma rxvp
         WHERE
           rxvp.ref_name = ctl.ref_name AND
           rxvp.rx_name = ctl.rx_name AND (
             -- require control.var_name must be wild-type
             ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-            -- unless infected.var_name is the same as control.var_name
-            infected.var_name = ctl_iso.var_name OR
+            -- unless rxvp.infected_var_name is the same as control.var_name
+            rxvp.infected_var_name = ctl_iso.var_name OR
             -- or the expected control.var_name hasn't been tested
             NOT EXISTS (
               SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
@@ -174,7 +166,7 @@ INSERT INTO susc_results
                 rxvp.rx_name = strict_ctl.rx_name AND
                 strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
                   strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-                  infected.var_name = strict_ctl_iso.var_name
+                  rxvp.infected_var_name = strict_ctl_iso.var_name
                 )
             )
           )
@@ -213,7 +205,7 @@ SELECT
   ref_name,
   rx_name,
   '$$cp$$' ||
-  CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
+  CASE WHEN infected_var_name IS NULL THEN 'null' ELSE infected_var_name END || '$$' ||
   CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
   CASE WHEN severity IS NULL THEN 'null' ELSE severity::TEXT END || '$$' AS rx_group
   INTO TEMPORARY TABLE rx_groups
@@ -225,7 +217,7 @@ SELECT
   ref_name,
   rx_name,
   '$$vp$$' ||
-  CASE WHEN infected_iso_name IS NULL THEN 'null' ELSE infected_iso_name END || '$$' ||
+  CASE WHEN infected_var_name IS NULL THEN 'null' ELSE infected_var_name END || '$$' ||
   CASE WHEN vaccine_name IS NULL THEN 'null' ELSE vaccine_name END || '$$' ||
   CASE WHEN timing IS NULL THEN 0 ELSE timing END || '$$' ||
   CASE WHEN dosage IS NULL THEN 0 ELSE dosage END || '$$' AS rx_group
@@ -474,18 +466,14 @@ INSERT INTO susc_results
           rxcp.ref_name = ctl.ref_name AND
           rxcp.rx_name = ctl.rx_name
       ) OR EXISTS (
-        SELECT 1
-        FROM
-          rx_conv_plasma rxcp
-          LEFT JOIN isolates infected ON
-            rxcp.infected_iso_name = infected.iso_name
+        SELECT 1 FROM rx_conv_plasma rxcp
         WHERE
           rxcp.ref_name = ctl.ref_name AND
           rxcp.rx_name = ctl.rx_name AND (
             -- require control.var_name must be wild-type
             ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-            -- unless infected.var_name is the same as control.var_name
-            infected.var_name = ctl_iso.var_name OR
+            -- unless rxcp.infected_var_name is the same as control.var_name
+            rxcp.infected_var_name = ctl_iso.var_name OR
             -- or the expected control.var_name hasn't been tested
             NOT EXISTS (
               SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
@@ -494,7 +482,7 @@ INSERT INTO susc_results
                 rxcp.rx_name = strict_ctl.rx_name AND
                 strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
                   strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-                  infected.var_name = strict_ctl_iso.var_name
+                  rxcp.infected_var_name = strict_ctl_iso.var_name
                 )
             )
 
@@ -507,18 +495,14 @@ INSERT INTO susc_results
           rxvp.ref_name = ctl.ref_name AND
           rxvp.rx_name = ctl.rx_name
       ) OR EXISTS (
-        SELECT 1
-        FROM
-          rx_vacc_plasma rxvp
-          LEFT JOIN isolates infected ON
-            rxvp.infected_iso_name = infected.iso_name
+        SELECT 1 FROM rx_vacc_plasma rxvp
         WHERE
           rxvp.ref_name = ctl.ref_name AND
           rxvp.rx_name = ctl.rx_name AND (
             -- require control.var_name must be wild-type
             ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-            -- unless infected.var_name is the same as control.var_name
-            infected.var_name = ctl_iso.var_name OR
+            -- unless rxvp.infected_var_name is the same as control.var_name
+            rxvp.infected_var_name = ctl_iso.var_name OR
             -- or the expected control.var_name hasn't been tested
             NOT EXISTS (
               SELECT 1 FROM rx_potency strict_ctl, isolates strict_ctl_iso
@@ -527,7 +511,7 @@ INSERT INTO susc_results
                 rxvp.rx_name = strict_ctl.rx_name AND
                 strict_ctl.iso_name = strict_ctl_iso.iso_name AND (
                   strict_ctl_iso.var_name IN (SELECT var_name FROM variants WHERE as_wildtype IS TRUE) OR
-                  infected.var_name = strict_ctl_iso.var_name
+                  rxvp.infected_var_name = strict_ctl_iso.var_name
                 )
             )
           )
@@ -724,7 +708,7 @@ DO $$
   BEGIN
     FOR row IN SELECT * FROM rx_potency LOOP
       IF NOT isSuscRecordDerived(row.ref_name, row.rx_name, row.iso_name) THEN
-        RAISE EXCEPTION E'Derived `susc_results` is not found for `rx_potency` ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m; check if the paired control/exp isolate for this rx_name exists, if their potency_type and potency_unit are matched, and if the infected_iso_name matches the control_iso_name presented in the table ref_isolate_pairs', row.ref_name, row.rx_name, row.iso_name;
+        RAISE EXCEPTION E'Derived `susc_results` is not found for `rx_potency` ref_name=\x1b[1m%\x1b[0m rx_name=\x1b[1m%\x1b[0m iso_name=\x1b[1m%\x1b[0m; check if the paired control/exp isolate for this rx_name exists, if their potency_type and potency_unit are matched, and if the infected_var_name matches the variant of control_iso_name presented in the table ref_isolate_pairs', row.ref_name, row.rx_name, row.iso_name;
       END IF;
     END LOOP;
   END

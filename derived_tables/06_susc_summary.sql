@@ -621,13 +621,12 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
         JOIN subjects sbj ON
           rx.ref_name = sbj.ref_name AND
           rx.subject_name = sbj.subject_name
-        LEFT JOIN isolates iso_infected ON
-          rx.infected_iso_name = iso_infected.iso_name
         LEFT JOIN variants infected ON
-          iso_infected.var_name = infected.var_name
+          rx.infected_var_name = infected.var_name
       $X$);
       _ext_group_by := ARRAY_APPEND(_ext_group_by, $X$
-        infected_var_name
+        infected.as_wildtype,
+        infected.var_name
       $X$);
     END IF;
 

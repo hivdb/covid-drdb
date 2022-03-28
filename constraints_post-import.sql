@@ -5,7 +5,7 @@ DO $$
   DECLARE row isolates%rowtype;
   BEGIN
     FOR row IN SELECT * FROM isolates iso WHERE
-      var_name IN ('B.1.177.75', 'B.1.160', 'D.2') AND (
+      var_name IN ('B.1.177.75', 'B.1.160', 'D.2', 'L452R variants', 'Unknown variant') AND (
         EXISTS (
           SELECT 1 FROM rx_potency pot WHERE
             pot.iso_name=iso.iso_name
@@ -53,28 +53,14 @@ CREATE FUNCTION hasPlasmaOrIsolate(rname varchar, sname varchar) RETURNS boolean
   )
 $$ LANGUAGE SQL;
 
-CREATE FUNCTION hasPreviousInfection(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM subject_infections
-    WHERE rname = ref_name AND sname = subject_name AND event_date >= infection_date
-  )
-$$ LANGUAGE SQL;
-
-CREATE FUNCTION hasPreviousVaccine(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM subject_vaccines
-    WHERE rname = ref_name AND sname = subject_name AND event_date >= vaccination_date
-  )
-$$ LANGUAGE SQL;
-
-CREATE FUNCTION hasFollowingPlasma(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+CREATE FUNCTION hasSubsequentPlasma(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
   SELECT EXISTS (
     SELECT 1 FROM subject_plasma
     WHERE rname = ref_name AND sname = subject_name AND event_date <= collection_date
   )
 $$ LANGUAGE SQL;
 
-CREATE FUNCTION hasFollowingIsolate(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
+CREATE FUNCTION hasSubsequentIsolate(rname varchar, sname varchar, event_date date) RETURNS boolean AS $$
   SELECT EXISTS (
     SELECT 1 FROM subject_isolates
     WHERE rname = ref_name AND sname = subject_name AND event_date <= collection_date
@@ -93,56 +79,31 @@ DO $$
   END
 $$;
 
--- for each subject_plasma there must be at least one previous record in subject_infections or subject_vaccines
+-- for each subject_infections there must be at least one Subsequent record in subject_plasma or subject_isolates
 DO $$
-  DECLARE row subjects%rowtype;
-  BEGIN
-    FOR row IN SELECT * FROM subject_plasma LOOP
-      IF NOT hasPreviousInfection(row.ref_name, row.subject_name, row.collection_date) AND
-         NOT hasPreviousVaccine(row.ref_name, row.subject_name, row.collection_date) THEN
-        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_infections` or `subject_vaccines` dated before a plasma collection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.collection_date;
-      END IF;
-    END LOOP;
-  END
-$$
-
-
--- for each subject_isolates there must be at least one previous record in subject_infections
-DO $$
-  DECLARE row subjects%rowtype;
-  BEGIN
-    FOR row IN SELECT * FROM subject_isolates LOOP
-      IF NOT hasPreviousInfection(row.ref_name, row.subject_name, row.collection_date) THEN
-        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_infections` dated before an insolate collection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.collection_date;
-      END IF;
-    END LOOP;
-  END
-$$
-
--- for each subject_infections there must be at least one following record in subject_plasma or subject_isolates
-DO $$
-  DECLARE row subjects%rowtype;
+  DECLARE row subject_infections%rowtype;
   BEGIN
     FOR row IN SELECT * FROM subject_infections LOOP
-      IF NOT hasFollwingPlasma(row.ref_name, row.subject_name, row.infection_date) AND
-         NOT hasFollwingIsolate(row.ref_name, row.subject_name, row.infection_date) THEN
+      IF NOT hasSubsequentPlasma(row.ref_name, row.subject_name, row.infection_date) AND
+         NOT hasSubsequentIsolate(row.ref_name, row.subject_name, row.infection_date) THEN
         RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` or `subject_isolates` dated after the infection date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.infection_date;
       END IF;
     END LOOP;
   END
-$$
+$$;
 
--- for each subject_vaccines there must be at least one following record in subject_plasma
+-- for each subject_vaccines there must be at least one Subsequent record in subject_plasma or subject_isolates
 DO $$
-  DECLARE row subjects%rowtype;
+  DECLARE row subject_vaccines%rowtype;
   BEGIN
     FOR row IN SELECT * FROM subject_vaccines LOOP
-      IF NOT hasFollwingPlasma(row.ref_name, row.subject_name, row.vaccination_date) THEN
-        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` dated after the vaccination date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.vaccination_date;
+      IF NOT hasSubsequentPlasma(row.ref_name, row.subject_name, row.vaccination_date) AND
+         NOT hasSubsequentIsolate(row.ref_name, row.subject_name, row.vaccination_date) THEN
+        RAISE EXCEPTION E'Subject ref_name=\x1b[1m%\x1b[0m subject_name=\x1b[1m%\x1b[0m doesn''t have any `subject_plasma` or `subject_isolates` dated after the vaccination date \x1b[1m%\x1b[0m', row.ref_name, row.subject_name, row.vaccination_date;
       END IF;
     END LOOP;
   END
-$$
+$$;
 
 -- for each iso_name in rx_potency, it must exist in ref_isolate_pairs either as
 -- control_iso_name or as iso_name
@@ -231,7 +192,7 @@ DO $$
       _iso_names := (
         SELECT ARRAY_AGG(DISTINCT iso_name) FROM isolate_pairs WHERE iso_aggkey = _iso_aggkey
       );
-      RAISE WARNING E'Following isolates are identical at Spike mutation level but were assigned different var_name: \x1b[1m%\x1b[0m', ARRAY_TO_STRING(_iso_names, ', ');
+      RAISE WARNING E'Subsequent isolates are identical at Spike mutation level but were assigned different var_name: \x1b[1m%\x1b[0m', ARRAY_TO_STRING(_iso_names, ', ');
     END LOOP;
   END
 $$ LANGUAGE PLPGSQL;
@@ -283,7 +244,7 @@ DO $$
               SbjP.rx_name = IVRx.rx_name
           ) AND SbjP.ref_name = _ref_with_unused_subject_plasma
       );
-      RAISE WARNING E'Following subject_plasma are not used by reference \x1b[1m%\x1b[0m: \x1b[1m%\x1b[0m', _ref_with_unused_subject_plasma, _unused_subject_plasma;
+      RAISE WARNING E'Subsequent subject_plasma are not used by reference \x1b[1m%\x1b[0m: \x1b[1m%\x1b[0m', _ref_with_unused_subject_plasma, _unused_subject_plasma;
     END LOOP;
   END
 $$ LANGUAGE PLPGSQL;

@@ -79,16 +79,16 @@ def autofill_rx(tables_dir: Path) -> None:
 
     rxps: List[
         Dict[str, Optional[str]]
-    ] = load_multiple_csvs(tables_dir / 'rx_plasma')
+    ] = load_multiple_csvs(tables_dir / 'subject_plasma')
 
     unclassified_rx: List[CSVReaderRow] = []
     file_path = tables_dir / 'unclassified-rx.csv'
     if file_path.exists():
         unclassified_rx = load_csv(file_path)
 
-    # warning: do not add rx_names from invitro, invivo, or DMS tables
-    # Only the rx_antibodies, rx_plasma and unclassified_rx should be the
-    # source of treatments table.
+    # warning: do not add rx_names from invitro, invivo, or DMS tables Only the
+    # rx_antibodies, subject_plasma and unclassified_rx should be the source of
+    # treatments table.
 
     treatments: List[CSVWriterRow] = list(unique_everseen([
         {'ref_name': rx['ref_name'],
@@ -104,28 +104,37 @@ def autofill_rx(tables_dir: Path) -> None:
     )
 
 
-def autofill_rx_plasma(tables_dir: Path) -> None:
+def autofill_sbj_plasma(tables_dir: Path) -> None:
     rows: List[CSVReaderRow]
     rxcp: Path
-    rxcps: Path = tables_dir / 'rx_plasma'
+    rxcps: Path = tables_dir / 'subject_plasma'
     for rxcp in rxcps.iterdir():
         if rxcp.suffix.lower() != '.csv':
             click.echo('Skip {}'.format(rxcp))
             continue
         rows = load_csv(rxcp)
         for row in rows:
-            if row.get('subject_name') is None:
+            if not row.get('collection_date_cmp'):
+                row['collection_date_cmp'] = '='
+            if not row.get('subject_name'):
                 row['subject_name'] = row['rx_name']
+            if not row.get('location'):
+                row['location'] = None
+            if not row.get('section'):
+                row['section'] = None
         click.echo('Write to {}'.format(rxcp))
         dump_csv(
             rxcp,
             records=rows,
             headers=[
                 'ref_name',
-                'rx_name',
                 'subject_name',
+                'rx_name',
+                'collection_date_cmp',
                 'collection_date',
+                'location',
                 'cumulative_group',
+                'section'
             ],
             BOM=True
         )
@@ -194,8 +203,8 @@ def autofill_subjects(tables_dir: Path) -> None:
         r['subject_name'] is not None
     }
 
-    rx_plasma: List[CSVReaderRow] = load_multiple_csvs(
-        tables_dir / 'rx_plasma')
+    sbj_plasma: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'subject_plasma')
     ref_invivo: List[CSVReaderRow] = load_multiple_csvs(
         tables_dir / 'ref_invivo')
 
@@ -224,7 +233,7 @@ def autofill_subjects(tables_dir: Path) -> None:
                  .get('num_subjects') or 1
              ),
              }
-            for rx in rx_plasma + ref_invivo
+            for rx in sbj_plasma + ref_invivo
             if rx['ref_name'] is not None and
             rx['subject_name'] is not None
 
@@ -247,7 +256,7 @@ def autofill_subjects(tables_dir: Path) -> None:
     )
 
 
-def autofill_sub_treatments(tables_dir: Path) -> None:
+def autofill_sbj_treatments(tables_dir: Path) -> None:
     row: CSVReaderRow
     rows: List[CSVReaderRow]
     prx: Path
@@ -262,6 +271,8 @@ def autofill_sub_treatments(tables_dir: Path) -> None:
                 row['start_date_cmp'] = '='
             if not row.get('end_date_cmp'):
                 row['end_date_cmp'] = '='
+            if not row.get('section'):
+                row['section'] = None
         click.echo('Write to {}'.format(prx))
         dump_csv(
             prx,
@@ -275,7 +286,54 @@ def autofill_sub_treatments(tables_dir: Path) -> None:
                 'end_date_cmp',
                 'end_date',
                 'dosage',
-                'dosage_unit'
+                'dosage_unit',
+                'section'
+            ],
+            BOM=True
+        )
+
+
+def autofill_sbj_infections(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    pth: Path
+    pth_list: Path = tables_dir / 'subject_history'
+    for pth in pth_list.iterdir():
+        if pth.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(pth))
+            continue
+        rows = load_csv(pth)
+        for row in rows:
+            if not row.get('iso_name'):
+                row['iso_name'] = None
+            if not row.get('cycle_threshold_cmp'):
+                row['cycle_threshold_cmp'] = None
+            if not row.get('cycle_threshold'):
+                row['cycle_threshold'] = None
+            if not row.get('severity'):
+                row['severity'] = None
+            if not row.get('vaccine_name'):
+                row['vaccine_name'] = None
+            if row['event'] not in ('1st dose', '2nd dose', '3rd dose'):
+                row['vaccine_name'] = None
+            if not row.get('event_date_cmp'):
+                row['event_date_cmp'] = '='
+        click.echo('Write to {}'.format(pth))
+        dump_csv(
+            pth,
+            records=rows,
+            headers=[
+                'ref_name',
+                'subject_name',
+                'event',
+                'event_date_cmp',
+                'event_date',
+                'location',
+                'iso_name',
+                'cycle_threshold_cmp',
+                'cycle_threshold',
+                'vaccine_name',
+                'severity',
             ],
             BOM=True
         )
@@ -437,14 +495,14 @@ def autofill_payload(payload_dir: str) -> None:
     autofill_rx(tables_dir)
     autofill_invitros(tables_dir)
     autofill_invivos(tables_dir)
-    autofill_rx_plasma(tables_dir)
+    autofill_sbj_plasma(tables_dir)
     autofill_dms(tables_dir)
     autofill_rx_fold(tables_dir)
     autofill_rx_potency(tables_dir)
 
     autofill_subjects(tables_dir)
-    autofill_sub_history(tables_dir)
-    autofill_sub_treatments(tables_dir)
+    # autofill_sub_history(tables_dir)
+    autofill_sbj_treatments(tables_dir)
 
     sort_csv(antibodies, 'ab_name')
     sort_csv(antibody_targets, 'ab_name')
