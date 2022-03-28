@@ -70,6 +70,12 @@ ALTER TABLE rx_potency
     )
   );
 
+-- In subject_vaccines, infection_date of later dose must be later than eariler dose
+ALTER TABLE subject_vaccines
+  ADD CONSTRAINT chk_vaccine_dosage_order EXCLUDE USING GIST (
+    dosage WITH >,
+    vaccination_date with <=
+  );
 
 -- In subject_severity, start date must be not greater than end date
 ALTER TABLE subject_severity

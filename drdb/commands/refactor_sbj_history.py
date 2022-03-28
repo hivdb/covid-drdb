@@ -109,7 +109,7 @@ def pth_to_vaccine(row):
         'vaccination_date_cmp': row['event_date_cmp'],
         'vaccination_date': row['event_date'],
         'vaccine_name': row['vaccine_name'],
-        'nth_dose': int(row['event'][0]),
+        'dosage': int(row['event'][0]),
         'location': row['location'],
         'section': None
     }
@@ -259,7 +259,7 @@ def refactor_sbj_history_core(tables_dir, var_lookup):
                 'vaccination_date_cmp',
                 'vaccination_date',
                 'vaccine_name',
-                'nth_dose',
+                'dosage',
                 'location',
                 'section'
             ],
