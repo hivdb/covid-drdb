@@ -47,26 +47,6 @@ $$ LANGUAGE PLPGSQL IMMUTABLE;
 ALTER TABLE rx_potency
   ADD CONSTRAINT chk_potency_nonzero CHECK (check_potency_nonzero(potency, ref_name, rx_name, iso_name, potency_type::text, potency_lower_limit, potency_upper_limit));
 
--- In subject_history, vaccine_name must be empty when event is not doses
-ALTER TABLE subject_history
-  ADD CONSTRAINT chk_vaccine_name CHECK (
-    event IN ('1st dose', '2nd dose', '3rd dose') OR
-    vaccine_name IS NULL
-  );
-
--- severity should only be presented when event is infection
-ALTER TABLE subject_history
-  ADD CONSTRAINT chk_severity CHECK (
-    event = 'infection' OR
-    severity IS NULL
-  );
-
--- iso_name must not be NULL for infection event
-ALTER TABLE subject_history
-  ADD CONSTRAINT chk_infection_iso_name CHECK (
-    event != 'infection' OR
-    iso_name IS NOT NULL
-  );
 
 ALTER TABLE rx_potency
   ADD CONSTRAINT chk_potency_limit_and_unit CHECK (
@@ -88,4 +68,26 @@ ALTER TABLE rx_potency
       potency_lower_limit IS NOT NULL AND
       potency_unit IS NOT NULL
     )
+  );
+
+
+-- In subject_severity, start date must be not greater than end date
+ALTER TABLE subject_severity
+  ADD CONSTRAINT chk_severity_time_range CHECK (
+    start_date <= end_date
+  );
+
+-- In subject_severity, range of start_date and end_date must not overlaps
+-- See https://stackoverflow.com/a/46580467/2644759
+ALTER TABLE subject_severity
+  ADD CONSTRAINT chk_severity_time_range_overlapping EXCLUDE USING GIST (
+    ref_name WITH =,
+    subject_name WITH =,
+    TSTZRANGE(start_date, end_date) WITH &&
+  );
+
+-- In subject_treatments, start date must be not greater than end date
+ALTER TABLE subject_treatments
+  ADD CONSTRAINT chk_sbjrx_time_range CHECK (
+    start_date <= end_date
   );

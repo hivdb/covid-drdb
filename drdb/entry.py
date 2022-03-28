@@ -7,6 +7,7 @@ from .commands import extract_gisaid_mutations
 from .commands import gen_mutation_distance
 from .commands import fetch_iedb_epitopes
 from .commands import extract_sierra_mutations
+from .commands import refactor_sbj_history
 
 __all__ = [
     'cli',
@@ -17,7 +18,8 @@ __all__ = [
     'extract_gisaid_mutations',
     'extract_sierra_mutations',
     'gen_mutation_distance',
-    'fetch_iedb_epitopes'
+    'fetch_iedb_epitopes',
+    'refactor_sbj_history'
 ]
 
 

@@ -29,6 +29,13 @@ autofill: update-builder
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry autofill-payload payload/
 
+refactor-pth: update-builder
+	@docker run --rm -it \
+		--volume=$(shell pwd):/covid-drdb/ \
+		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
+   		hivdb/covid-drdb-builder:latest \
+		pipenv run python -m drdb.entry refactor-sbj-history payload/
+
 sync-refaa: update-builder
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \

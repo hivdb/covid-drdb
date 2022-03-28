@@ -115,6 +115,8 @@ Table rx_antibodies as RxMAb {
   }
 }
 
+Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+
 Enum severity_enum {
   "Asymptomatic"
   "Mild"
@@ -140,7 +142,7 @@ Enum immune_status_enum {
   "None"    // the subject is not immunosuppressed
 }
 
-Table subjects as Pt {
+Table subjects as Sbj {
   ref_name varchar [ref: > R.ref_name]
   subject_name varchar
   subject_species subject_species_enum
@@ -155,49 +157,123 @@ Table subjects as Pt {
   }
 }
 
-Enum event_enum {
-  "1st dose"
-  "1st dose isolation"
-  "2nd dose"
-  "2nd dose isolation"
-  "3rd dose"
-  "3rd dose isolation"
-  "infection"
-  "isolation"
-}
 
-// TODO: divide this table into several small ones:
-// subject_infections, subject_vaccinations,
-// subject_isolations (culture is one type of isolation),
-// and subject_treatments (already seprated)
-Table subject_history as PtH {
+Table subject_infections as SbjInf {
   ref_name varchar
   subject_name varchar
-  event event_enum
-  event_date_cmp numeric_cmp_enum [
+  infection_date_cmp numeric_cmp_enum [
     default: "=",
     note: '"=", ">", or "<"'
   ]
-  event_date date
-  location varchar [
-    note: "Location of where this event happens"
+  infection_date date
+  infected_var_name varchar [
+    not null,
+    ref: > VAR.var_name
   ]
+  location varchar [
+    note: "Location of where this person was infected"
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+
+  indexes {
+    (ref_name, subject_name, infection_date) [pk]
+    infection_date
+    infected_var_name
+  }
+}
+
+ref: SbjInf.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
+
+
+Table subject_isolates as SbjIso {
+  ref_name varchar
+  subject_name varchar
+  collection_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  collection_date date
   iso_name varchar [
+    not null,
     ref: > isolates.iso_name,
     note: "Infected isolate name"
   ]
+  iso_source varchar
+  iso_culture boolean
+  location varchar [
+    note: "Location of where this isolate was collected"
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+
+  indexes {
+    (ref_name, subject_name, collection_date, iso_source, iso_culture) [pk]
+    collection_date
+    iso_name
+  }
+}
+
+ref: SbjIso.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
+
+
+Table subject_vaccines as SbjVacc {
+  ref_name varchar
+  subject_name varchar
+  vaccination_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  vaccination_date date
   vaccine_name varchar [
     ref: > vaccines.vaccine_name,
     note: "Vaccine name"
   ]
-  severity severity_enum
+  nth_dose int [not null]
+  location varchar [
+    note: "Location of where this person was vaccinated"
+  ]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
 
   indexes {
-    (ref_name, subject_name, event, event_date) [pk]
+    (ref_name, subject_name, vaccination_date, vaccine_name) [pk]
+    vaccination_date
+    vaccine_name
   }
 }
 
-ref: PtH.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+ref: SbjVacc.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
+
+
+Table subject_severity as SbjSev {
+  ref_name varchar
+  subject_name varchar
+  start_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  start_date date
+  end_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  end_date date
+  severity severity_enum [not null]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
+
+  indexes {
+    (ref_name, subject_name, start_date, end_date) [pk]
+  }
+}
+
+ref: SbjSev.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
+
 
 Enum treatment_dosage_unit_enum {
   "mg/kg"
@@ -211,7 +287,7 @@ Table subject_treatments as PtRx {
   subject_name varchar [
     note: 'Subject who received the treatment (not the CP donor if rx_name is a CP)'
   ]
-  rx_name varchar
+  rx_name varchar [not null]
   start_date_cmp numeric_cmp_enum [
     default: "=",
     note: '"=", ">", or "<"'
@@ -226,6 +302,9 @@ Table subject_treatments as PtRx {
     note: 'dosage per day'
   ]
   dosage_unit treatment_dosage_unit_enum
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
 
   indexes {
     (ref_name, subject_name, rx_name, start_date, end_date) [pk]
@@ -233,27 +312,39 @@ Table subject_treatments as PtRx {
 }
 
 ref: PtRx.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-ref: PtRx.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+ref: PtRx.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
 
-Table rx_plasma as RxP {
+
+Table subject_plasma as SbjP {
   ref_name varchar
-  rx_name varchar
   subject_name varchar [
     note: 'Subject who is the CP/VP donor (not the subject received CP treatment)'
   ]
-  collection_date date
+  rx_name varchar
+  collection_date_cmp numeric_cmp_enum [
+    default: "=",
+    note: '"=", ">", or "<"'
+  ]
+  collection_date date [not null]
+  location varchar [
+    note: "Location of where this plasma was collected"
+  ]
+  // TODO: deprecate cumulative_group
   cumulative_group varchar [note: "Cumulative group for cumulating results"]
+  section varchar [
+    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
+  ]
 
   indexes {
     (ref_name, rx_name) [pk]
     (ref_name, subject_name)
+    collection_date
     rx_name
   }
 }
-ref: RxP.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+ref: SbjP.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
+Ref: SbjP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
-Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: RxP.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table antibodies as MAb {
   ab_name varchar [
@@ -687,7 +778,7 @@ Table ref_invivo as InVivo {
 }
 
 Ref: Susc.(ref_name, rx_name) > Rx.(ref_name, rx_name)
-Ref: InVivo.(ref_name, subject_name) > Pt.(ref_name, subject_name)
+Ref: InVivo.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
 Ref: Vitro.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
 Table ref_amino_acid as RefAA {

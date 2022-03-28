@@ -79,16 +79,29 @@ copy_csv payload/tables/subjects.csv subjects >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/ref_invivo | sort -h | while read filepath; do
     copy_csv payload/tables/ref_invivo/$filepath ref_invivo >> $TARGET_DIR/02_data_tables.sql
 done
-ls payload/tables/rx_plasma | sort -h | while read filepath; do
-    copy_csv payload/tables/rx_plasma/$filepath rx_plasma >> $TARGET_DIR/02_data_tables.sql
+
+ls payload/tables/subject_infections | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_infections/$filepath subject_infections >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/subject_history | sort -h | while read filepath; do
-    copy_csv payload/tables/subject_history/$filepath subject_history >> $TARGET_DIR/02_data_tables.sql
+ls payload/tables/subject_isolates | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_isolates/$filepath subject_isolates >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/subject_plasma | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_plasma/$filepath subject_plasma >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/subject_severity | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_severity/$filepath subject_severity >> $TARGET_DIR/02_data_tables.sql
 done
 
 ls payload/tables/subject_treatments | sort -h | while read filepath; do
     copy_csv payload/tables/subject_treatments/$filepath subject_treatments >> $TARGET_DIR/02_data_tables.sql
+done
+
+ls payload/tables/subject_vaccines | sort -h | while read filepath; do
+    copy_csv payload/tables/subject_vaccines/$filepath subject_vaccines >> $TARGET_DIR/02_data_tables.sql
 done
 
 ls payload/tables/rx_fold | sort -h | while read filepath; do
@@ -103,23 +116,6 @@ ls payload/tables/ref_isolate_pairs | sort -h | while read filepath; do
     copy_csv payload/tables/ref_isolate_pairs/$filepath ref_isolate_pairs >> $TARGET_DIR/02_data_tables.sql
 done
 copy_csv payload/tables/ref_unpaired_isolates.csv ref_unpaired_isolates >> $TARGET_DIR/02_data_tables.sql
-
-
-# ## Excluded results
-# copy_csv payload/excluded/treatments.csv treatments >> $TARGET_DIR/02_data_tables.sql
-# # ls payload/excluded/invitro_selection_results | sort -h | while read filepath; do
-# #     copy_csv payload/excluded/invitro_selection_results/$filepath invitro_selection_results >> $TARGET_DIR/02_data_tables.sql
-# # done
-# ls payload/excluded/invivo_selection_results | sort -h | while read filepath; do
-#     copy_csv payload/excluded/invivo_selection_results/$filepath invivo_selection_results >> $TARGET_DIR/02_data_tables.sql
-# done
-# ls payload/excluded/rx_antibodies | sort -h | while read filepath; do
-#     copy_csv payload/excluded/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
-# done
-# ls payload/excluded/rx_plasma | sort -h | while read filepath; do
-#     copy_csv payload/excluded/rx_plasma/$filepath rx_plasma >> $TARGET_DIR/02_data_tables.sql
-# done
-# ## End of Excluded results
 
 copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET_DIR/02_data_tables.sql

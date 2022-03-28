@@ -294,6 +294,10 @@ def autofill_sub_history(tables_dir: Path) -> None:
         for row in rows:
             if not row.get('iso_name'):
                 row['iso_name'] = None
+            if not row.get('cycle_threshold_cmp'):
+                row['cycle_threshold_cmp'] = None
+            if not row.get('cycle_threshold'):
+                row['cycle_threshold'] = None
             if not row.get('severity'):
                 row['severity'] = None
             if not row.get('vaccine_name'):
@@ -314,6 +318,8 @@ def autofill_sub_history(tables_dir: Path) -> None:
                 'event_date',
                 'location',
                 'iso_name',
+                'cycle_threshold_cmp',
+                'cycle_threshold',
                 'vaccine_name',
                 'severity',
             ],
