@@ -188,6 +188,12 @@ Table subject_infections as SbjInf {
 ref: SbjInf.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
 
 
+Enum isolate_source_enum {
+  "Nasal Swab"
+  "Pending"
+}
+
+
 Table subject_isolates as SbjIso {
   ref_name varchar
   subject_name varchar
@@ -201,7 +207,7 @@ Table subject_isolates as SbjIso {
     ref: > isolates.iso_name,
     note: "Collected isolate name"
   ]
-  iso_source varchar
+  iso_source isolate_source_enum
   iso_culture boolean
   location varchar [
     note: "Location of where this isolate was collected"
@@ -211,8 +217,7 @@ Table subject_isolates as SbjIso {
   ]
 
   indexes {
-    // TODO: iso_source and iso_culture should be add to pk once they are not null
-    (ref_name, subject_name, collection_date) [pk]
+    (ref_name, subject_name, collection_date, iso_source, iso_culture) [pk]
     collection_date
     iso_name
   }

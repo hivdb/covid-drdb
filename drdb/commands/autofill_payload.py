@@ -343,9 +343,9 @@ def autofill_sbj_isolates(tables_dir: Path) -> None:
             if not row.get('collection_date_cmp'):
                 row['collection_date_cmp'] = '='
             if not row.get('iso_source'):
-                row['iso_source'] = None
+                row['iso_source'] = 'Pending'
             if not row.get('iso_culture'):
-                row['iso_culture'] = None
+                row['iso_culture'] = 'FALSE'
             if not row.get('location'):
                 row['location'] = None
             if not row.get('section'):
