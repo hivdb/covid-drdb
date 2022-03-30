@@ -205,8 +205,8 @@ def autofill_subjects(tables_dir: Path) -> None:
 
     sbj_plasma: List[CSVReaderRow] = load_multiple_csvs(
         tables_dir / 'subject_plasma')
-    ref_invivo: List[CSVReaderRow] = load_multiple_csvs(
-        tables_dir / 'ref_invivo')
+    sbj_isolates: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'subject_isolates')
 
     subjects: List[CSVWriterRow] = sorted(
         unique_everseen([
@@ -233,7 +233,7 @@ def autofill_subjects(tables_dir: Path) -> None:
                  .get('num_subjects') or 1
              ),
              }
-            for rx in sbj_plasma + ref_invivo
+            for rx in sbj_plasma + sbj_isolates
             if rx['ref_name'] is not None and
             rx['subject_name'] is not None
 

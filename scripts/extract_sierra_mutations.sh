@@ -19,11 +19,11 @@ if [ -z "$output" ]; then
   exit 1
 fi
 
-if [ -e "$output" ]; then
-  echo "<OUTPUT_CSV> $output already exists, refuse to overwrite" 1>&2
-  echo $USAGE 1>&2
-  exit 1
-fi
+# if [ -e "$output" ]; then
+#   echo "<OUTPUT_CSV> $output already exists, refuse to overwrite" 1>&2
+#   echo $USAGE 1>&2
+#   exit 1
+# fi
 
 # $output should be a file
 touch $output

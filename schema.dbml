@@ -190,7 +190,9 @@ ref: SbjInf.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
 
 Enum isolate_source_enum {
   NP [note: 'Nasopharyngeal Swab']
+  ETA [note: 'Endotracheal aspirate']
   Plasma
+  Unknown
   Pending
 }
 
