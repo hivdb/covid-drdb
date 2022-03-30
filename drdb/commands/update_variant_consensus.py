@@ -16,11 +16,11 @@ PANGO_LINEAGE_PATTERN: re.Pattern = re.compile(r"""
     (?P<pango>[A-Z]+(?:\.\d+)*)
     (?:
         /
-        (?P<withmuts>[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+
+        (?P<withmuts>(?:[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+)
     )?
     (?:
         \sw/o\s
-        (?P<womuts>[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+
+        (?P<womuts>(?:[A-Z]\d+(?:[A-Z]|ins|del|stop)\+?)+)
     )?
     $
 """, re.VERBOSE)
