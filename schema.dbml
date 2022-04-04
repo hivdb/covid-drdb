@@ -193,6 +193,7 @@ Enum isolate_source_enum {
   ETA [note: 'Endotracheal aspirate']
   BAL [note: 'Bronchoalveolar lavage']
   Plasma
+  Saliva
   Unknown
   Pending
 }
