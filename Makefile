@@ -43,6 +43,9 @@ new-selection-study: update-builder
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry new-selection-study payload/
 
+import-sierra-mutations: update-builder
+	@bash scripts/import_sierra_mutations.sh
+
 sync-refaa: update-builder
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
@@ -143,4 +146,4 @@ psql-devdb:
 psql-devdb-no-docker:
 	@psql -U postgres -h localhost -p 6543
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder new-selection-study import-sierra-mutations

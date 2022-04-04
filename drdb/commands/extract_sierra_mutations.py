@@ -74,4 +74,3 @@ def extract_sierra_mutations(
                     'count': 'NULL',
                     'total': 'NULL'
                 })
-    click.echo('Create {}'.format(output_mutations_csv.name))
