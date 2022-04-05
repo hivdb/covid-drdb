@@ -358,7 +358,7 @@ def autofill_isolates(tables_dir: Path) -> None:
             if gisaid and gisaid.startswith('EPI_ISL_'):
                 row['gisaid_id'] = gisaid[8:]
             genbank = row.get('genbank_accn')
-            sra = None
+            sra = row.get('sra_accn')
             if genbank and re.search(r'^[CES]RR|^SAMN', genbank):
                 sra = genbank
                 genbank = None
