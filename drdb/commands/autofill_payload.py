@@ -1,3 +1,4 @@
+import re
 import click
 from pathlib import Path
 from more_itertools import unique_everseen
@@ -329,6 +330,56 @@ def autofill_sbj_infections(tables_dir: Path) -> None:
         )
 
 
+def autofill_isolates(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    iso: Path
+    iso_list: Path = tables_dir / 'isolates.d'
+    for iso in [tables_dir / 'isolates.csv', *iso_list.iterdir()]:
+        if iso.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(iso))
+            continue
+        rows = load_csv(iso)
+        for row in rows:
+            if not row.get('var_name'):
+                row['var_name'] = None
+            if row.get('site_directed') != 'TRUE':
+                row['site_directed'] = 'FALSE'
+            if not row.get('gisaid_id'):
+                row['gisaid_id'] = None
+            if not row.get('genbank_accn'):
+                row['genbank_accn'] = None
+            if not row.get('sra_accn'):
+                row['sra_accn'] = None
+            if row.get('expandable') != 'FALSE':
+                row['expandable'] = 'TRUE'
+
+            gisaid = row.get('gisaid_id')
+            if gisaid and gisaid.startswith('EPI_ISL_'):
+                row['gisaid_id'] = gisaid[8:]
+            genbank = row.get('genbank_accn')
+            sra = None
+            if genbank and re.search(r'^[CES]RR|^SAMN', genbank):
+                sra = genbank
+                genbank = None
+            row['genbank_accn'] = genbank
+            row['sra_accn'] = sra
+        dump_csv(
+            iso,
+            records=rows,
+            headers=[
+                'iso_name',
+                'var_name',
+                'site_directed',
+                'gisaid_id',
+                'genbank_accn',
+                'sra_accn',
+                'expandable'
+            ],
+            BOM=True
+        )
+
+
 def autofill_sbj_isolates(tables_dir: Path) -> None:
     row: CSVReaderRow
     rows: List[CSVReaderRow]
@@ -599,6 +650,7 @@ def autofill_payload(payload_dir: str) -> None:
     autofill_dms(tables_dir)
     autofill_rx_fold(tables_dir)
     autofill_rx_potency(tables_dir)
+    autofill_isolates(tables_dir)
 
     autofill_subjects(tables_dir)
     autofill_sbj_infections(tables_dir)

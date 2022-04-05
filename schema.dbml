@@ -541,6 +541,9 @@ Table isolates as I {
   genbank_accn varchar [
     note: 'Genbank accession number'
   ]
+  sra_accn varchar [
+    note: 'SRA accession number'
+  ]
   expandable boolean [
     not null,
     note: 'Expand spike mutations or not'
