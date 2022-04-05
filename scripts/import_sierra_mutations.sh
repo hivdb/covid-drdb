@@ -84,6 +84,11 @@ if [ ! -f "$sierra_summary" ]; then
   exit 7
 fi
 
+pango_idx='$9'
+if head -1 $sierra_summary | \grep 'Median Read Depth' > /dev/null; then
+  # NGS report
+  pango_idx='$10'
+fi
 
 lower_ref_name=$(echo $ref_name | tr '[:upper:]' '[:lower:]')
 
@@ -105,12 +110,12 @@ echo "iso_name,var_name,site_directed,gisaid_id,genbank_accn,expandable" > "$iso
 cat "$sierra_summary" |
   tail -n +2 |
   sort |
-  gawk -vFPAT='[^,]*|"[^"]*"' '{
-    name=$1
-    pango=$9
-    split(name, nameArr, "|")
-    printf("%s,%s,FALSE,%s,NULL,TRUE\n", nameArr[1], pango, nameArr[2])
-  }' >> "$iso_file"
+  gawk -vFPAT='[^,]*|"[^"]*"' "{
+    name=\$1
+    pango=${pango_idx}
+    split(name, nameArr, \"|\")
+    printf(\"%s,%s,FALSE,%s,NULL,TRUE\n\", nameArr[1], pango, nameArr[2])
+  }" >> "$iso_file"
 # remove EPI_ISL_ initial from gisaid_id since they should be integers
 sed -i '' 's/,EPI_ISL_/,/g' "$iso_file"
 num_iso=$(wc -l "$iso_file" | awk '{print $1}')
@@ -143,7 +148,7 @@ for (( ; ; )); do
         sort |
         gawk -vFPAT='[^,]*|"[^"]*"' "{
           name=\$1
-          pango=\$9
+          pango=${pango_idx}
           split(name, nameArr, \"|\")
           printf(\"${ref_name},%s,=,%s,%s,NP,FALSE,NULL,NULL\n\", pango, nameArr[3], nameArr[1])
         }" >> /tmp/sbjiso.csv
