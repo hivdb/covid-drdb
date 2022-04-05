@@ -19,6 +19,7 @@ HEADER: List[str] = [
 
 def remove_mixtures(rows: Iterable[Dict[str, str]]) -> List[Dict[str, str]]:
     results: List[Dict[str, str]] = []
+    has_percent = any('Percent' in r for r in rows)
     for (gene, pos), part in groupby(
         rows, lambda r: (r['Gene'], r['Position'])
     ):
@@ -26,7 +27,9 @@ def remove_mixtures(rows: Iterable[Dict[str, str]]) -> List[Dict[str, str]]:
             r for r in part
             if r['RefAA'] != r['MutAA'] and
             r['MutAA'] != 'X']
-        if len(partlst) > 1:
+        if has_percent:
+            partlst = [r for r in partlst if float(r['Percent']) > 20]
+        elif len(partlst) > 1:
             continue
         results.extend(partlst)
     return results
