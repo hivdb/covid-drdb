@@ -96,7 +96,7 @@ fi
 
 pango_idx='$9'
 is_ngs=0
-if head -1 $sierra_summary | \grep 'Median Read Depth' > /dev/null; then
+if head -1 "$sierra_summary" | \grep 'Median Read Depth' > /dev/null; then
   # NGS report
   is_ngs=1
   pango_idx='$10'
