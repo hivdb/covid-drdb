@@ -15,6 +15,8 @@ ISO_SOURCE_MAP: Dict[str, str] = {
     'nasopharyngeal swab': 'NP',
     'endotracheal aspirate': 'ETA',
     'bronchoalveolar lavage': 'BAL',
+    'oropharyngeal': 'OP',
+    'oropharyngeal swab': 'OP',
     'plasma': 'Plasma',
     'saliva': 'Saliva',
     'stool': 'Stool'
