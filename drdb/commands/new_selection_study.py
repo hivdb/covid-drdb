@@ -20,8 +20,8 @@ def abort_if_ref_name_used(
     for a in articles:
         if a['ref_name'] == value:
             raise click.BadParameter(
-                'Specified --ref-name {} is already used by article {}'
-                .format(a['ref_name'], a['doi'] or a['url']),
+                'Specified {} {} is already used by article {}'
+                .format(param.opts[-1], a['ref_name'], a['doi'] or a['url']),
                 ctx,
                 param
             )
@@ -36,8 +36,8 @@ def abort_if_ref_name_unused(
     articles: List[Dict] = load_articles(Path(ctx.params['payload_dir']))
     if not any(a['ref_name'] == value for a in articles):
         raise click.BadParameter(
-            'Specified --example-ref-name {} does not exist'
-            .format(value),
+            'Specified {} {} does not exist'
+            .format(param.opts[-1], value),
             ctx,
             param
         )
@@ -110,10 +110,10 @@ def save_xx_tpl(
     '--doi', prompt="Enter new study's DOI/URL",
     help='DOI of article to be entered')
 @click.option(
-    '--first_author', prompt="Enter new study's first author (ex. Harari, S)",
+    '--first_author', prompt="Enter new study's first author (e.g. Harari, S)",
     help='DOI of article to be entered')
 @click.option(
-    '--year', prompt="Enter new study's publication year (ex. 2022)",
+    '--year', prompt="Enter new study's publication year (e.g. 2022)",
     help='Publication year of article to be entered')
 @click.option(
     '--example-ref-name',

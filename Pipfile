@@ -16,6 +16,7 @@ requests = "*"
 lxml = "*"
 psycopg2-binary = "*"
 tqdm = "*"
+biopython = "*"
 
 [requires]
 python_version = "3.9"

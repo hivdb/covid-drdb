@@ -59,6 +59,16 @@ if [ -z "$ref_name" ]; then
   read ref_name
 fi
 
+test_sierra_report="$HOME/Downloads/$ref_name/analysis-reports"
+if [ -d "$test_sierra_report" ]; then
+  default_sierra_report="$test_sierra_report"
+fi
+
+test_sierra_report="$HOME/Downloads/$ref_name/NGS-analysis-reports"
+if [ -d "$test_sierra_report" ]; then
+  default_sierra_report="$test_sierra_report"
+fi
+
 while [ ! -d "$sierra_report" ]; do
   if [ -d "$default_sierra_report" ]; then
     echo -ne "Sierra-SARS2 report dir at ${BOLD}${default_sierra_report}${NORM} [Enter/type in]: "
@@ -85,8 +95,10 @@ if [ ! -f "$sierra_summary" ]; then
 fi
 
 pango_idx='$9'
+is_ngs=0
 if head -1 $sierra_summary | \grep 'Median Read Depth' > /dev/null; then
   # NGS report
+  is_ngs=1
   pango_idx='$10'
 fi
 
@@ -103,19 +115,38 @@ docker run --rm -it \
 	--volume="$(realpath "$isomut_file"):/output/isomuts.csv" \
  		hivdb/covid-drdb-builder:latest \
 	pipenv run python -m drdb.entry extract-sierra-mutations /sierra-mutlist "/output/isomuts.csv"
+
+if [ $is_ngs -eq 1 ]; then
+  sed -i '' 's/\.codfreq[^,]*//g' "$isomut_file"
+else
+  sed -i '' 's/|[^,]*//g' "$isomut_file"
+fi
+
 echo -e "Create ${BOLD}${isomut_file}${NORM}"
 
 iso_file="payload/tables/isolates.d/${lower_ref_name}-iso.csv"
 echo "iso_name,var_name,site_directed,gisaid_id,genbank_accn,expandable" > "$iso_file"
-cat "$sierra_summary" |
-  tail -n +2 |
-  sort |
-  gawk -vFPAT='[^,]*|"[^"]*"' "{
-    name=\$1
-    pango=${pango_idx}
-    split(name, nameArr, \"|\")
-    printf(\"%s,%s,FALSE,%s,NULL,TRUE\n\", nameArr[1], pango, nameArr[2])
-  }" >> "$iso_file"
+if [ $is_ngs -eq 1 ]; then
+  cat "$sierra_summary" |
+    tail -n +2 |
+    sort |
+    gawk -vFPAT='[^,]*|"[^"]*"' "{
+      name=\$1
+      pango=${pango_idx}
+      split(name, nameArr, \".codfreq\")
+      printf(\"%s,%s,FALSE,NULL,%s,TRUE\n\", nameArr[1], pango, nameArr[1])
+    }" >> "$iso_file"
+else
+  cat "$sierra_summary" |
+    tail -n +2 |
+    sort |
+    gawk -vFPAT='[^,]*|"[^"]*"' "{
+      name=\$1
+      pango=${pango_idx}
+      split(name, nameArr, \"|\")
+      printf(\"%s,%s,FALSE,%s,NULL,TRUE\n\", nameArr[1], pango, nameArr[2])
+    }" >> "$iso_file"
+fi
 # remove EPI_ISL_ initial from gisaid_id since they should be integers
 sed -i '' 's/,EPI_ISL_/,/g' "$iso_file"
 num_iso=$(wc -l "$iso_file" | awk '{print $1}')
@@ -143,15 +174,27 @@ for (( ; ; )); do
 
       sbjiso_file="payload/tables/subject_isolates/${lower_ref_name}-sbjiso.csv"
       echo "ref_name,subject_name,collection_date_cmp,collection_date,iso_name,iso_source,iso_culture,location,section" > "$sbjiso_file"
-      cat "$sierra_summary" |
-        tail -n +2 |
-        sort |
-        gawk -vFPAT='[^,]*|"[^"]*"' "{
-          name=\$1
-          pango=${pango_idx}
-          split(name, nameArr, \"|\")
-          printf(\"${ref_name},%s,=,%s,%s,NP,FALSE,NULL,NULL\n\", pango, nameArr[3], nameArr[1])
-        }" >> /tmp/sbjiso.csv
+      if [ $is_ngs -eq 1 ]; then
+        cat "$sierra_summary" |
+          tail -n +2 |
+          sort |
+          gawk -vFPAT='[^,]*|"[^"]*"' "{
+            name=\$1
+            pango=${pango_idx}
+            split(name, nameArr, \".codfreq\")
+            printf(\"${ref_name},%s,=,NULL,%s,NP,FALSE,NULL,NULL\n\", pango, nameArr[1])
+          }" >> /tmp/sbjiso.csv
+      else
+        cat "$sierra_summary" |
+          tail -n +2 |
+          sort |
+          gawk -vFPAT='[^,]*|"[^"]*"' "{
+            name=\$1
+            pango=${pango_idx}
+            split(name, nameArr, \"|\")
+            printf(\"${ref_name},%s,=,%s,%s,NP,FALSE,NULL,NULL\n\", pango, nameArr[3], nameArr[1])
+          }" >> /tmp/sbjiso.csv
+      fi
       cat /tmp/sbjiso.csv | sort >> $sbjiso_file
       rm /tmp/sbjiso.csv
       echo -e "Create ${BOLD}${sbjiso_file}${NORM}"
@@ -180,6 +223,3 @@ for (( ; ; )); do
     break
   fi
 done
-
-# The accession and date are no longer needed and should be removed
-sed -i '' 's/|[^,]*//g' "$isomut_file"

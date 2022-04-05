@@ -194,6 +194,7 @@ Enum isolate_source_enum {
   BAL [note: 'Bronchoalveolar lavage']
   Plasma
   Saliva
+  Stool
   Unknown
   Pending
 }
