@@ -125,7 +125,7 @@ fi
 echo -e "Create ${BOLD}${isomut_file}${NORM}"
 
 iso_file="payload/tables/isolates.d/${lower_ref_name}-iso.csv"
-echo "iso_name,var_name,site_directed,gisaid_id,genbank_accn,expandable" > "$iso_file"
+echo "iso_name,var_name,site_directed,gisaid_id,genbank_accn,sra_accn,expandable" > "$iso_file"
 if [ $is_ngs -eq 1 ]; then
   cat "$sierra_summary" |
     tail -n +2 |
@@ -134,7 +134,7 @@ if [ $is_ngs -eq 1 ]; then
       name=\$1
       pango=${pango_idx}
       split(name, nameArr, \".codfreq\")
-      printf(\"%s,%s,FALSE,NULL,%s,TRUE\n\", nameArr[1], pango, nameArr[1])
+      printf(\"%s,%s,FALSE,NULL,NULL,%s,TRUE\n\", nameArr[1], pango, nameArr[1])
     }" >> "$iso_file"
 else
   cat "$sierra_summary" |
@@ -144,7 +144,7 @@ else
       name=\$1
       pango=${pango_idx}
       split(name, nameArr, \"|\")
-      printf(\"%s,%s,FALSE,%s,NULL,TRUE\n\", nameArr[1], pango, nameArr[2])
+      printf(\"%s,%s,FALSE,%s,NULL,NULL,TRUE\n\", nameArr[1], pango, nameArr[2])
     }" >> "$iso_file"
 fi
 # remove EPI_ISL_ initial from gisaid_id since they should be integers
