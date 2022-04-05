@@ -17,6 +17,7 @@ CREATE INDEX ON dup_subject_isolates (comparable_collection_date);
 
 INSERT INTO invivo_selection_results
   SELECT
+    DISTINCT
     SbjIso.ref_name,
     SbjIso.subject_name,
     SbjInf.infected_var_name,
