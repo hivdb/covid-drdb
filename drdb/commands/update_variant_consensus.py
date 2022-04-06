@@ -7,6 +7,7 @@ from typing import List, Tuple, Optional, Dict, Any, Generator
 
 from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv
+from ..utils.gene_position import translate_gene_position
 
 OUTBREAK_TOKEN: str = (
     '0ed52bbfb6c79d1fd8e9c6f267f9b6311c885a4c4c6f037d6ab7b3a40d586ad0'
@@ -66,44 +67,6 @@ def mutation_sort_key(mut: Tuple[str, int, str]) -> Tuple[int, int, str]:
     gene, pos, aa = mut
     gene_idx = ORDERED_GENES.index(gene)
     return (gene_idx, pos, aa)
-
-
-def translate_gene_position(gene: str, pos: int) -> Tuple[str, int]:
-    if gene == 'ORF1a':
-        if pos <= 180:
-            return 'nsp1', pos
-        elif pos <= 818:
-            return 'nsp2', pos - 180
-        elif pos <= 2763:
-            return 'PLpro', pos - 818
-        elif pos <= 3263:
-            return 'nsp4', pos - 2763
-        elif pos <= 3569:
-            return '_3CLpro', pos - 3263
-        elif pos <= 3859:
-            return 'nsp6', pos - 3569
-        elif pos <= 3942:
-            return 'nsp7', pos - 3859
-        elif pos <= 4140:
-            return 'nsp8', pos - 3942
-        elif pos <= 4253:
-            return 'nsp9', pos - 4140
-        elif pos <= 4392:
-            return 'nsp10', pos - 4253
-        else:
-            return 'RdRP', pos - 4392
-    elif gene == 'ORF1b':
-        if pos <= 923:
-            return 'RdRP', pos + 9
-        elif pos <= 1524:
-            return 'nsp13', pos - 923
-        elif pos <= 2051:
-            return 'nsp14', pos - 1524
-        elif pos <= 2397:
-            return 'nsp15', pos - 2051
-        else:
-            return 'nsp16', pos - 2397
-    return gene, pos
 
 
 def read_outbreak_mutations(

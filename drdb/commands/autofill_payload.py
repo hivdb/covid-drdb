@@ -6,6 +6,7 @@ from operator import itemgetter
 from typing import List, Dict, Optional, Tuple
 
 from ..cli import cli
+from ..utils.gene_position import translate_gene_position
 from ..utils.csvv import (
     load_csv,
     dump_csv,
@@ -380,6 +381,52 @@ def autofill_isolates(tables_dir: Path) -> None:
         )
 
 
+def autofill_isomuts(tables_dir: Path) -> None:
+    row: CSVReaderRow
+    rows: List[CSVReaderRow]
+    isomuts: Path
+    isomuts_list: Path = tables_dir / 'isolate_mutations.d'
+    for isomuts in [
+        tables_dir / 'isolate_mutations.csv',
+        *isomuts_list.iterdir()
+    ]:
+        if isomuts.suffix.lower() != '.csv':
+            click.echo('Skip {}'.format(isomuts))
+            continue
+        rows = load_csv(isomuts)
+        for row in rows:
+            gene: Optional[str] = row['gene']
+            pos_text: Optional[str] = row['position']
+            if not gene or not pos_text:
+                continue
+            gene, pos = translate_gene_position(gene, int(pos_text))
+            aa: Optional[str] = row['amino_acid']
+            if not aa:
+                continue
+            if aa == '-':
+                aa = 'del'
+            elif aa == '_' or '_' in aa:
+                aa = 'ins'
+            elif aa == '*':
+                aa = 'stop'
+            row['gene'] = gene
+            row['position'] = str(pos)
+            row['amino_acid'] = aa
+        dump_csv(
+            isomuts,
+            records=rows,
+            headers=[
+                'iso_name',
+                'gene',
+                'position',
+                'amino_acid',
+                'count',
+                'total'
+            ],
+            BOM=True
+        )
+
+
 def autofill_sbj_isolates(tables_dir: Path) -> None:
     row: CSVReaderRow
     rows: List[CSVReaderRow]
@@ -651,6 +698,7 @@ def autofill_payload(payload_dir: str) -> None:
     autofill_rx_fold(tables_dir)
     autofill_rx_potency(tables_dir)
     autofill_isolates(tables_dir)
+    autofill_isomuts(tables_dir)
 
     autofill_subjects(tables_dir)
     autofill_sbj_infections(tables_dir)
