@@ -90,21 +90,6 @@ $$ LANGUAGE SQL;
 ALTER TABLE subject_vaccines
   ADD CONSTRAINT chk_vaccine_dosage_order CHECK (checkVaccineDosageOrder(ref_name, subject_name, dosage, vaccination_date));
 
--- In subject_severity, start date must be not greater than end date
-ALTER TABLE subject_severity
-  ADD CONSTRAINT chk_severity_time_range CHECK (
-    start_date <= end_date
-  );
-
--- In subject_severity, range of start_date and end_date must not overlaps
--- See https://stackoverflow.com/a/46580467/2644759
-ALTER TABLE subject_severity
-  ADD CONSTRAINT chk_severity_time_range_overlapping EXCLUDE USING GIST (
-    ref_name WITH =,
-    subject_name WITH =,
-    TSRANGE(start_date, end_date) WITH &&
-  );
-
 -- In subject_treatments, start date must be not greater than end date
 ALTER TABLE subject_treatments
   ADD CONSTRAINT chk_sbjrx_time_range CHECK (

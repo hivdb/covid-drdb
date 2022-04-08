@@ -7,7 +7,6 @@ from .commands import extract_gisaid_mutations
 from .commands import gen_mutation_distance
 from .commands import fetch_iedb_epitopes
 from .commands import extract_sierra_mutations
-from .commands import refactor_sbj_history
 from .commands import new_selection_study
 from .commands import import_sra_info
 
@@ -21,7 +20,6 @@ __all__ = [
     'extract_sierra_mutations',
     'gen_mutation_distance',
     'fetch_iedb_epitopes',
-    'refactor_sbj_history',
     'new_selection_study',
     'import_sra_info'
 ]

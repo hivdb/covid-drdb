@@ -101,10 +101,6 @@ ls payload/tables/subject_plasma | sort -h | while read filepath; do
     copy_csv payload/tables/subject_plasma/$filepath subject_plasma >> $TARGET_DIR/02_data_tables.sql
 done
 
-ls payload/tables/subject_severity | sort -h | while read filepath; do
-    copy_csv payload/tables/subject_severity/$filepath subject_severity >> $TARGET_DIR/02_data_tables.sql
-done
-
 ls payload/tables/subject_treatments | sort -h | while read filepath; do
     copy_csv payload/tables/subject_treatments/$filepath subject_treatments >> $TARGET_DIR/02_data_tables.sql
 done

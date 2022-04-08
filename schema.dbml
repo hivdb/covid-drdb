@@ -136,8 +136,9 @@ Enum subject_species_enum {
 }
 
 Enum immune_status_enum {
-  "HIV"
-  "Medical" // The subject received medical that could suppress their immuno system
+  "HIV"     // The subject is affected by acquired immunodeficiency by infecting with HIV
+  "Primary" // The subject is affected by primary immunodeficiency
+  "Medical" // This subject is iatrogenic immunocompromised, i.e. received medical that could suppress their immuno system
   "Unknown" // The immune status is not indicated by the study
   "None"    // the subject is not immunosuppressed
 }
@@ -147,7 +148,6 @@ Table subjects as Sbj {
   subject_name varchar
   subject_species subject_species_enum
   birth_year numeric(4)
-  immune_status immune_status_enum
   num_subjects int [
     note: "Indicates if this record is for an individual subject (=1) or a group of subjects (>1)."
   ]
@@ -174,6 +174,8 @@ Table subject_infections as SbjInf {
   location varchar [
     note: "Location of where this person was infected"
   ]
+  immune_status immune_status_enum
+  severity severity_enum
   section varchar [
     note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
   ]
@@ -262,32 +264,6 @@ Table subject_vaccines as SbjVacc {
 }
 
 ref: SbjVacc.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
-
-
-Table subject_severity as SbjSev {
-  ref_name varchar
-  subject_name varchar
-  start_date_cmp numeric_cmp_enum [
-    default: "=",
-    note: '"=", ">", or "<"'
-  ]
-  start_date date
-  end_date_cmp numeric_cmp_enum [
-    default: "=",
-    note: '"=", ">", or "<"'
-  ]
-  end_date date
-  severity severity_enum [not null]
-  section varchar [
-    note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
-  ]
-
-  indexes {
-    (ref_name, subject_name, start_date, end_date) [pk]
-  }
-}
-
-ref: SbjSev.(ref_name, subject_name) > Sbj.(ref_name, subject_name)
 
 
 Enum treatment_dosage_unit_enum {

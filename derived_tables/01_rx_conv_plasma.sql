@@ -6,7 +6,7 @@ INSERT INTO rx_conv_plasma
     SbjInf.infected_var_name,
     SbjP.location,
     GREATEST(ROUND((SbjP.collection_date - SbjInf.infection_date) / 30.), 1) AS timing,
-    SbjSev.severity,
+    SbjInf.severity,
     SbjP.collection_date,
     SbjP.cumulative_group
   FROM
@@ -15,10 +15,6 @@ INSERT INTO rx_conv_plasma
     SbjInf.ref_name = SbjP.ref_name AND
     SbjInf.subject_name = SbjP.subject_name AND
     SbjInf.infection_date <= SbjP.collection_date
-  LEFT JOIN subject_severity SbjSev ON
-    SbjP.ref_name = SbjSev.ref_name AND
-    SbjP.subject_name = SbjSev.subject_name AND
-    SbjP.collection_date BETWEEN SbjSev.start_date AND SbjSev.end_date
   WHERE
     NOT EXISTS (
       SELECT 1 FROM subject_infections SbjInfNext
