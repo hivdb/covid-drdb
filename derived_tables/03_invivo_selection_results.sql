@@ -28,6 +28,7 @@ INSERT INTO invivo_selection_results
     CASE WHEN IsoMuts.total IS NULL THEN 1 ELSE IsoMuts.total END,
     SbjInf.infection_date,
     SbjIso.collection_date AS appearance_date,
+    SbjInf.immune_status,
     SbjInf.severity
   FROM dup_subject_isolates SbjIso
   JOIN isolate_mutations IsoMuts ON

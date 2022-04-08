@@ -1237,6 +1237,7 @@ Table invivo_selection_results {
   total int
   infection_date date
   appearance_date date
+  immune_status immune_status_enum
   severity severity_enum
   // section varchar [
   //   note: 'The cited section in the reference; e.g. Figure 1, table 1 or page 1, para 4'
