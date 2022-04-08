@@ -37,8 +37,8 @@ for i in $(seq 0 $((num_releases - 1))); do
     if ! find_and_pop_s3_file "$name"; then
       echo "download: $name"
       # remote file doesn't exist
-      real_url=$(curl -sSL -H "Authorization: $GITHUB_TOKEN" $url | jq -r ".browser_download_url")
-      curl -sSL -H "Authorization: $GITHUB_TOKEN" $real_url -o $name
+      real_url=$(curl -sSL -u "$GITHUB_AUTH_USER:$GITHUB_TOKEN" $url | jq -r ".browser_download_url")
+      curl -sSL $real_url -o $name
       echo "compress: $name"
       pigz -9 $name
       mv $name.gz $name
