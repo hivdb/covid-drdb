@@ -224,11 +224,6 @@ def autofill_subjects(tables_dir: Path) -> None:
                  .get((rx['ref_name'], rx['subject_name']), {})
                  .get('birth_year') or 'NULL'
              ),
-             'immune_status': (
-                 known_subjects
-                 .get((rx['ref_name'], rx['subject_name']), {})
-                 .get('immune_status') or 'NULL'
-             ),
              'num_subjects': (
                  known_subjects
                  .get((rx['ref_name'], rx['subject_name']), {})
@@ -251,7 +246,6 @@ def autofill_subjects(tables_dir: Path) -> None:
             'subject_name',
             'subject_species',
             'birth_year',
-            'immune_status',
             'num_subjects'
         ],
         BOM=True
@@ -314,6 +308,10 @@ def autofill_sbj_infections(tables_dir: Path) -> None:
                 row['location'] = None
             if not row.get('section'):
                 row['section'] = None
+            if not row.get('immune_status'):
+                row['immune_status'] = None
+            if not row.get('severity'):
+                row['severity'] = None
         click.echo('Write to {}'.format(pth))
         dump_csv(
             pth,
@@ -325,6 +323,8 @@ def autofill_sbj_infections(tables_dir: Path) -> None:
                 'infection_date',
                 'infected_var_name',
                 'location',
+                'immune_status',
+                'severity',
                 'section'
             ],
             BOM=True
@@ -502,87 +502,6 @@ def autofill_sbj_vaccines(tables_dir: Path) -> None:
         )
 
 
-def autofill_sbj_severity(tables_dir: Path) -> None:
-    row: CSVReaderRow
-    rows: List[CSVReaderRow]
-    pth: Path
-    pth_list: Path = tables_dir / 'subject_severity'
-    for pth in pth_list.iterdir():
-        if pth.suffix.lower() != '.csv':
-            click.echo('Skip {}'.format(pth))
-            continue
-        rows = load_csv(pth)
-        for row in rows:
-            if not row.get('start_date_cmp'):
-                row['start_date_cmp'] = '='
-            if not row.get('end_date_cmp'):
-                row['end_date_cmp'] = '='
-            if not row.get('section'):
-                row['section'] = None
-        click.echo('Write to {}'.format(pth))
-        dump_csv(
-            pth,
-            records=rows,
-            headers=[
-                'ref_name',
-                'subject_name',
-                'start_date_cmp',
-                'start_date',
-                'end_date_cmp',
-                'end_date',
-                'severity',
-                'section'
-            ],
-            BOM=True
-        )
-
-
-def autofill_sub_history(tables_dir: Path) -> None:
-    row: CSVReaderRow
-    rows: List[CSVReaderRow]
-    pth: Path
-    pth_list: Path = tables_dir / 'subject_history'
-    for pth in pth_list.iterdir():
-        if pth.suffix.lower() != '.csv':
-            click.echo('Skip {}'.format(pth))
-            continue
-        rows = load_csv(pth)
-        for row in rows:
-            if not row.get('iso_name'):
-                row['iso_name'] = None
-            if not row.get('cycle_threshold_cmp'):
-                row['cycle_threshold_cmp'] = None
-            if not row.get('cycle_threshold'):
-                row['cycle_threshold'] = None
-            if not row.get('severity'):
-                row['severity'] = None
-            if not row.get('vaccine_name'):
-                row['vaccine_name'] = None
-            if row['event'] not in ('1st dose', '2nd dose', '3rd dose'):
-                row['vaccine_name'] = None
-            if not row.get('event_date_cmp'):
-                row['event_date_cmp'] = '='
-        click.echo('Write to {}'.format(pth))
-        dump_csv(
-            pth,
-            records=rows,
-            headers=[
-                'ref_name',
-                'subject_name',
-                'event',
-                'event_date_cmp',
-                'event_date',
-                'location',
-                'iso_name',
-                'cycle_threshold_cmp',
-                'cycle_threshold',
-                'vaccine_name',
-                'severity',
-            ],
-            BOM=True
-        )
-
-
 def autofill_rx_potency(tables_dir: Path) -> None:
     row: CSVReaderRow
     rows: List[CSVReaderRow]
@@ -705,7 +624,6 @@ def autofill_payload(payload_dir: str) -> None:
     autofill_sbj_isolates(tables_dir)
     autofill_sbj_vaccines(tables_dir)
     autofill_sbj_treatments(tables_dir)
-    autofill_sbj_severity(tables_dir)
 
     sort_csv(antibodies, 'ab_name')
     sort_csv(antibody_targets, 'ab_name')
