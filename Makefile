@@ -146,4 +146,4 @@ psql-devdb:
 psql-devdb-no-docker:
 	@psql -U postgres -h localhost -p 6543
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder new-selection-study import-*
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder new-study import-*
