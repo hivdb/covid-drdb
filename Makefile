@@ -29,12 +29,12 @@ autofill: update-builder
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry autofill-payload payload/
 
-new-selection-study: update-builder
+new-study: update-builder
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
    		hivdb/covid-drdb-builder:latest \
-		pipenv run python -m drdb.entry new-selection-study payload/
+		pipenv run python -m drdb.entry new-study payload/
 
 import-sierra-mutations: update-builder
 	@bash scripts/import_sierra_mutations.sh

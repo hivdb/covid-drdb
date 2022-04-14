@@ -17,6 +17,7 @@ lxml = "*"
 psycopg2-binary = "*"
 tqdm = "*"
 biopython = "*"
+questionary = "*"
 
 [requires]
 python_version = "3.9"

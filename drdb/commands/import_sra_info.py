@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 from ..cli import cli
 from ..utils.csvv import load_csv, dump_csv
-from .new_selection_study import abort_if_ref_name_unused
+from .new_study import abort_if_ref_name_unused
 
 Entrez.email = 'philiptz@stanford.edu'
 
