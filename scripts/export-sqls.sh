@@ -49,6 +49,9 @@ copy_csv payload/tables/antibody_epitopes.csv antibody_epitopes >> $TARGET_DIR/0
 copy_csv payload/tables/antibody_synonyms.csv antibody_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/antibody_articles.csv antibody_articles >> $TARGET_DIR/02_data_tables.sql
 
+copy_csv payload/tables/compounds.csv compounds >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/compound_synonyms.csv compound_synonyms >> $TARGET_DIR/02_data_tables.sql
+
 copy_csv payload/tables/genes.csv genes >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/gene_synonyms.csv gene_synonyms >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/variants.csv variants >> $TARGET_DIR/02_data_tables.sql
@@ -79,6 +82,9 @@ ls payload/tables/invitro_selection_results | sort -h | while read filepath; do
 done
 ls payload/tables/rx_antibodies | sort -h | while read filepath; do
     copy_csv payload/tables/rx_antibodies/$filepath rx_antibodies >> $TARGET_DIR/02_data_tables.sql
+done
+ls payload/tables/rx_compounds | sort -h | while read filepath; do
+    copy_csv payload/tables/rx_compounds/$filepath rx_compounds >> $TARGET_DIR/02_data_tables.sql
 done
 copy_csv payload/tables/subjects.csv subjects >> $TARGET_DIR/02_data_tables.sql
 ls payload/tables/ref_invivo | sort -h | while read filepath; do

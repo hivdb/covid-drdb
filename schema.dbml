@@ -117,6 +117,20 @@ Table rx_antibodies as RxMAb {
 
 Ref: RxMAb.(ref_name, rx_name) > Rx.(ref_name, rx_name)
 
+Table rx_compounds as RxDrug {
+  ref_name varchar
+  rx_name varchar
+  drug_name varchar [ref: > Drug.drug_name]
+
+  indexes {
+    (ref_name, rx_name, drug_name) [pk]
+    rx_name
+    drug_name
+  }
+}
+
+Ref: RxDrug.(ref_name, rx_name) > Rx.(ref_name, rx_name)
+
 Enum severity_enum {
   "Asymptomatic"
   "Mild"
@@ -430,6 +444,23 @@ Table antibody_epitopes as MAbEpi {
 
   indexes {
     (ab_name, position) [pk]
+  }
+}
+
+Table compounds as Drug {
+  drug_name varchar [
+    pk,
+    note: "Name of the compound"
+  ]
+  abbreviation_name varchar
+}
+
+Table compound_synonyms as DrugSyn {
+  drug_name varchar [ref: > Drug.drug_name]
+  synonym varchar [pk]
+
+  indexes {
+    drug_name
   }
 }
 

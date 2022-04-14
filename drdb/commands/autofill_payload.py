@@ -83,6 +83,9 @@ def autofill_rx(tables_dir: Path) -> None:
         Dict[str, Optional[str]]
     ] = load_multiple_csvs(tables_dir / 'subject_plasma')
 
+    rxdrugs: List[CSVReaderRow] = load_multiple_csvs(
+        tables_dir / 'rx_compounds')
+
     unclassified_rx: List[CSVReaderRow] = []
     file_path = tables_dir / 'unclassified-rx.csv'
     if file_path.exists():
@@ -95,7 +98,7 @@ def autofill_rx(tables_dir: Path) -> None:
     treatments: List[CSVWriterRow] = list(unique_everseen([
         {'ref_name': rx['ref_name'],
          'rx_name': rx['rx_name']}
-        for rx in rxmabs + rxps + unclassified_rx
+        for rx in rxmabs + rxps + rxdrugs + unclassified_rx
     ]))
     click.echo('Write to {}'.format(tables_dir / 'treatments.csv'))
     dump_csv(
