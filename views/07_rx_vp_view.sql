@@ -9,7 +9,7 @@ FROM
 LEFT JOIN
     isolate_variant_view iso
 ON
-    rx.infected_iso_name = iso.iso_name
+    rx.infected_var_name = iso.var_name
 ;
 
 
