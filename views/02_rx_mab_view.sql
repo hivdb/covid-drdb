@@ -31,7 +31,7 @@ SELECT
     rx_name,
     GROUP_CONCAT(ab_name, '/'),
     '' AS synonyms,
-    '' AS availability,
+    'mixed' AS availability,
     '' AS pdb_id,
     '' AS target,
     '' AS class,
