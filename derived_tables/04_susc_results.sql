@@ -644,6 +644,11 @@ UPDATE susc_results S SET
       S.rx_name = rxab.rx_name
     ) THEN 'antibody'
     WHEN EXISTS (
+      SELECT 1 FROM rx_compounds rxdrug WHERE
+      S.ref_name = rxdrug.ref_name AND
+      S.rx_name = rxdrug.rx_name
+    ) THEN 'compound'
+    WHEN EXISTS (
       SELECT 1 FROM rx_conv_plasma rxcp WHERE
       S.ref_name = rxcp.ref_name AND (
         S.rx_name = rxcp.rx_name OR

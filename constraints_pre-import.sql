@@ -58,7 +58,7 @@ ALTER TABLE rx_potency
     ) OR
     (
       -- case 2
-      potency_type IN ('IC50', 'IC80', 'IC90', 'IC100') AND
+      potency_type IN ('IC50', 'IC80', 'IC90', 'IC100', 'EC50') AND
       potency_upper_limit IS NOT NULL AND
       potency_unit IS NOT NULL
     ) OR

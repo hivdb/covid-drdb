@@ -637,14 +637,15 @@ Enum ineffective_enum {
 }
 
 Enum potency_type_enum {
-  "NT50"
+  "NT50" // NTxx are mainly for Plasma
   "NT80"
   "NT90"
   "NT100"
-  "IC50"
+  "IC50" // ICxx are mainly for MAbs
   "IC80"
   "IC90"
   "IC100"
+  "EC50" // ECxx are mainly for chemical drugs
   "NC20"
   "NC" // neutralization capacity
 }
@@ -933,6 +934,7 @@ Table last_update {
 
 Enum rx_type_enum {
   "antibody"
+  "compound"
   "conv-plasma"
   "vacc-plasma"
 }
