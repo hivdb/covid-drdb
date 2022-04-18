@@ -256,7 +256,7 @@ def new_study(
             'isolate_mutations',
             'ref_isolate_pairs',
             optional('subject_infections'),
-            optional('subject_vaccine'),
+            optional('subject_vaccines'),
             optional('subject_plasma'),
             optional('rx_antibodies'),
             optional('rx_compounds'),
@@ -268,7 +268,7 @@ def new_study(
             'isolate_mutations',
             'ref_isolate_pairs',
             optional('subject_infections'),
-            optional('subject_vaccine'),
+            optional('subject_vaccines'),
             'subject_plasma',
             optional('rx_potency'),
             optional('rx_fold'),
@@ -298,7 +298,7 @@ def new_study(
             optional('rx_antibodies'),
             optional('rx_compounds'),
             'subject_treatments',
-            optional('subject_vaccine'),
+            optional('subject_vaccines'),
         ]
     }
 
