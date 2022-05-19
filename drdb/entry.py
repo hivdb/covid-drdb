@@ -8,6 +8,7 @@ from .commands import gen_mutation_distance
 from .commands import fetch_iedb_epitopes
 from .commands import extract_sierra_mutations
 from .commands import new_study
+from .commands import add_patients
 from .commands import import_sra_info
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     'gen_mutation_distance',
     'fetch_iedb_epitopes',
     'new_study',
+    'add_patients',
     'import_sra_info'
 ]
 

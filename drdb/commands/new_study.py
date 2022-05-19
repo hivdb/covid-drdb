@@ -126,7 +126,8 @@ def save_xx_tpl(
         'mab-susceptibility',
         'drug-susceptibility',
         'susceptibility',
-        'selection'
+        'invivo-selection',
+        'invitro-selection'
     ], case_sensitive=False),
     cls=QuestionaryOption,
     help='Study type'
@@ -289,7 +290,7 @@ def new_study(
             optional('rx_potency'),
             optional('rx_fold'),
         ],
-        'selection': [
+        'invivo-selection': [
             'isolates',
             'isolate_mutations',
             'subject_isolates',
@@ -299,6 +300,9 @@ def new_study(
             optional('rx_compounds'),
             'subject_treatments',
             optional('subject_vaccines'),
+        ],
+        'invitro-selection': [
+            'invitro_selection_results'
         ]
     }
 
