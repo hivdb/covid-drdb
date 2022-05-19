@@ -154,12 +154,12 @@ num_iso=$((num_iso - 1))
 echo -e "Create ${BOLD}${iso_file}${NORM} with ${BOLD}${num_iso}${NORM} isolates"
 
 cat "$iso_file" |
-  awk -F, '{print $2}' |
+  gawk -vFPAT='[^,]*|"[^"]*"' '{print $2}' |
   tail -n +2 |
   sort |
   uniq |
   while read var_name; do
-    if [ -z "$(\grep -F $var_name, payload/tables/variants.csv)" ]; then
+    if [ -z "$(\grep -F "$var_name," payload/tables/variants.csv)" ]; then
       echo -e "  Missing ${BOLD}${var_name}${NORM}: manually add via editing payload/tables/variants.csv"
     fi
   done
@@ -204,12 +204,12 @@ for (( ; ; )); do
       echo "ref_name,subject_name,infection_date_cmp,infection_date,infected_var_name,location,immune_status,severity,section" > "$sbjinf_file"
       cat "$sbjiso_file" |
         tail -n +2 |
-        awk -F, '{print $2}' |
+        gawk -vFPAT='[^,]*|"[^"]*"' '{print $2}' |
         uniq > /tmp/sbjs.csv
       for sbj in $(cat /tmp/sbjs.csv); do
         \grep -F "$ref_name,$sbj," $sbjiso_file |
           head -1 |
-          awk -F, '{printf("%s,%s,<,%s,%s,NULL,NULL,NULL,NULL\n", $1, $2, $4, $2)}' >> "$sbjinf_file"
+          gawk -vFPAT='[^,]*|"[^"]*"' '{printf("%s,%s,<,%s,%s,NULL,NULL,NULL,NULL\n", $1, $2, $4, $2)}' >> "$sbjinf_file"
       done
       echo -e "Create ${BOLD}${sbjinf_file}${NORM}"
       echo "  Manually edit ${sbjinf_file} to update subject info"
