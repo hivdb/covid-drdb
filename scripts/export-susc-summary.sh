@@ -23,8 +23,8 @@ AGG_OPTIONS=(
 
 VERSION=$1
 cd /dev/shm
-curl -SLO https://github.com/hivdb/covid-drdb-payload/releases/download/$VERSION/covid-drdb-$VERSION-slim.db
-DBFILE=/dev/shm/covid-drdb-$VERSION-slim.db
+curl -SLO https://github.com/hivdb/covid-drdb-payload/releases/download/$VERSION/covid-drdb-$VERSION.db
+DBFILE=/dev/shm/covid-drdb-$VERSION.db
 
 TARGET_DIR=$2
 SHM_TARGET_DIR=/dev/shm/covid-drdb-cache
