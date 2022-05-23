@@ -134,13 +134,16 @@ _execute() {
     FROM ($(_join ' UNION ' "${subqueries[@]}")) AS subqueries
   "
 
-  sqlite3 "$DBFILE" "$sql" 2>/dev/shm/error
+  # TODO: find a better way for error handling
+  # The current way competes the resource of /dev/shm/error between
+  # processes.
+  sqlite3 "$DBFILE" "$sql" # 2>/dev/shm/error
 
-  if [ -s /dev/shm/error ]; then
-    echo $error 1>&2
-    echo -e $sql 1>&2
-    exit 1
-  fi
+  # if [ -s /dev/shm/error ]; then
+  #   echo $error 1>&2
+  #   echo -e $sql 1>&2
+  #   exit 1
+  # fi
 }
 
 _getval() {
