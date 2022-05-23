@@ -620,9 +620,9 @@ last_idx=$((${#PARAMS[@]}-1))
 for i in $(seq 0 $last_idx); do
   g1=${PARAM_GROUPS[$i]}
   for j in $(seq $((i+1)) $last_idx); do
-    g2=${PARAM_GROUPS[$2]}
+    g2=${PARAM_GROUPS[$j]}
     for k in $(seq $((j+1)) $last_idx); do
-      g3=${PARAM_GROUPS[$3]}
+      g3=${PARAM_GROUPS[$k]}
       if [[ "$g1" == "$g2" || "$g1" == "$g3" || "$g2" == "$g3" ]]; then
         continue
       fi
