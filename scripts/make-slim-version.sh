@@ -11,6 +11,7 @@ DELETE FROM ref_invivo;
 DELETE FROM ref_isolate_pairs;
 DELETE FROM ref_unpaired_isolates;
 DELETE FROM antibody_articles;
+DELETE FROM susc_summary;
 DELETE FROM dms_escape_results AS d WHERE NOT EXISTS (
   SELECT 1 FROM amino_acid_prevalence p
   WHERE
