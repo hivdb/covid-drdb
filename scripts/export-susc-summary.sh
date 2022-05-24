@@ -572,7 +572,7 @@ main() {
   
   # all
   echo -n "Create default file:"
-  create_file
+  create_file '[]'
   echo " done"
   
   # combination of one
