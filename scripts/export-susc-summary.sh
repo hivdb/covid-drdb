@@ -22,16 +22,11 @@ AGG_OPTIONS=(
 )
 
 VERSION=$1
-cd /dev/shm
-curl -SLO https://github.com/hivdb/covid-drdb-payload/releases/download/$VERSION/covid-drdb-$VERSION.db
-DBFILE=/dev/shm/covid-drdb-$VERSION.db
 
-trap "rm -f $DBFILE" EXIT
+DBFILE=/dev/shm/covid-drdb-$VERSION.db
 
 TARGET_DIR=$2
 SHM_TARGET_DIR=/dev/shm/covid-drdb-cache
-rm -rf $SHM_TARGET_DIR 2>/dev/null || true
-trap "rm -rf $SHM_TARGET_DIR" EXIT
 
 _escape() {
   echo $1 | sed "s/'/''/g"
@@ -471,16 +466,20 @@ query_all() {
 
 
 list_combinations() {
-  sqlite3 -separator '$$' $DBFILE "
-    SELECT DISTINCT $(_join ', ' "$@") FROM susc_summary
+  sqlite3 $DBFILE "
+    SELECT json_array($(_join ', ' "$@")) FROM susc_summary
     WHERE $(_join ' IS NOT NULL AND ' "$@") IS NOT NULL
+    GROUP BY $(_join ', ' "$@")
     ORDER BY $(_join ', ' "$@")
   "
 }
 
 
 create_file() {
-  local vals=($(_split '$$' "$1"))
+  SAVEIFS=$IFS
+  IFS=$'\n'
+  local vals=($(jq --arg row "$1" -ncr '$row | fromjson | .[]'))
+  IFS=$SAVEIFS
   shift || true
   local keys=("$@")
   local options=()
@@ -521,7 +520,10 @@ create_files() {
   echo "Create files for $(_join ', ' "$@"):"
   local keys=("$@")
   local idx=1
+  SAVEIFS=$IFS
+  IFS=$'\n'
   local rows=($(list_combinations "${keys[@]}"))
+  IFS=$SAVEIFS
   local processed=1
   local nrows=${#rows[@]}
   for row in "${rows[@]}"; do
@@ -539,57 +541,82 @@ create_files() {
   echo " done"
 }
 
+fetch_db() {
+  curl -SL -o $DBFILE https://github.com/hivdb/covid-drdb-payload/releases/download/$VERSION/covid-drdb-$VERSION.db
+  if [ -z "$1" ]; then
+    trap "rm -f $DBFILE" EXIT
+  fi
+}
 
-PARAMS=(
-  ref_name
-  antibody_names
-  infected_var_name
-  vaccine_name
-  var_name
-  iso_aggkey
-  position
-)
+init_shm_dir() {
+  rm -rf $SHM_TARGET_DIR 2>/dev/null || true
+  if [ -z "$1" ]; then
+    trap "rm -rf $SHM_TARGET_DIR" EXIT
+  fi
+}
 
-PARAM_GROUPS=(ref rx rx rx virus virus virus)
-
-# all
-echo -n "Create default file:"
-create_file
-echo " done"
-
-# combination of one
-for param in "${PARAMS[@]}"; do
-  create_files $param
-done
-
-# combination of two
-last_idx=$((${#PARAMS[@]}-1))
-for i in $(seq 0 $last_idx); do
-  g1=${PARAM_GROUPS[$i]}
-  for j in $(seq $((i+1)) $last_idx); do
-    g2=${PARAM_GROUPS[$j]}
-    if [[ "$g1" == "$g2" ]]; then
-      continue
-    fi
-    create_files ${PARAMS[$i]} ${PARAMS[$j]}
+main() {
+  fetch_db
+  init_shm_dir
+  local PARAMS=(
+    ref_name
+    antibody_names
+    infected_var_name
+    vaccine_name
+    var_name
+    iso_aggkey
+    position
+  )
+  
+  local PARAM_GROUPS=(ref rx rx rx virus virus virus)
+  
+  # all
+  echo -n "Create default file:"
+  create_file
+  echo " done"
+  
+  # combination of one
+  for param in "${PARAMS[@]}"; do
+    create_files $param
   done
-done
-
-# combination of three
-last_idx=$((${#PARAMS[@]}-1))
-for i in $(seq 0 $last_idx); do
-  g1=${PARAM_GROUPS[$i]}
-  for j in $(seq $((i+1)) $last_idx); do
-    g2=${PARAM_GROUPS[$j]}
-    for k in $(seq $((j+1)) $last_idx); do
-      g3=${PARAM_GROUPS[$k]}
-      if [[ "$g1" == "$g2" || "$g1" == "$g3" || "$g2" == "$g3" ]]; then
+  
+  # combination of two
+  last_idx=$((${#PARAMS[@]}-1))
+  for i in $(seq 0 $last_idx); do
+    g1=${PARAM_GROUPS[$i]}
+    for j in $(seq $((i+1)) $last_idx); do
+      g2=${PARAM_GROUPS[$j]}
+      if [[ "$g1" == "$g2" ]]; then
         continue
       fi
-      create_files ${PARAMS[$i]} ${PARAMS[$j]} ${PARAMS[$k]}
+      create_files ${PARAMS[$i]} ${PARAMS[$j]}
     done
   done
-done
+  
+  # combination of three
+  last_idx=$((${#PARAMS[@]}-1))
+  for i in $(seq 0 $last_idx); do
+    g1=${PARAM_GROUPS[$i]}
+    for j in $(seq $((i+1)) $last_idx); do
+      g2=${PARAM_GROUPS[$j]}
+      for k in $(seq $((j+1)) $last_idx); do
+        g3=${PARAM_GROUPS[$k]}
+        if [[ "$g1" == "$g2" || "$g1" == "$g3" || "$g2" == "$g3" ]]; then
+          continue
+        fi
+        create_files ${PARAMS[$i]} ${PARAMS[$j]} ${PARAMS[$k]}
+      done
+    done
+  done
+  
+  rsync --recursive --links --perms --group --owner --verbose --delete --checksum $SHM_TARGET_DIR/ $TARGET_DIR/
+  aws s3 sync --delete $TARGET_DIR/ s3://cms.hivdb.org/covid-drdb:susc-summary/
+}
 
-rsync --recursive --links --perms --group --owner --verbose --delete --checksum $SHM_TARGET_DIR/ $TARGET_DIR/
-aws s3 sync --delete $TARGET_DIR/ s3://cms.hivdb.org/covid-drdb:susc-summary/
+debug() {
+  fetch_db notrap
+  init_shm_dir notrap
+  create_files ref_name infected_var_name iso_aggkey
+}
+
+main
