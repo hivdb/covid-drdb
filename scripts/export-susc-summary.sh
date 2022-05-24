@@ -64,7 +64,7 @@ EOF
 }
 
 _camel() {
-  echo "$1" | gsed -r 's/_(\w)/\U\1/g'
+  echo "$1" | sed -r 's/_(\w)/\U\1/g'
 }
 
 _where() {
