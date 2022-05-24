@@ -460,9 +460,9 @@ query_all() {
     \"article\": ${article_numexp},
     \"antibody:any\": ${antibody_any_numexp},
     \"antibody\": ${antibody_numexp},
-    \"infected_variant\": ${infected_variant_numexp},
+    \"infectedVariant\": ${infected_variant_numexp},
     \"vaccine\": ${vaccine_numexp},
-    \"isolate_agg\": ${isolate_agg_numexp},
+    \"isolateAgg\": ${isolate_agg_numexp},
     \"variant\": ${variant_numexp},
     \"isolate\": ${isolate_numexp},
     \"position\": ${position_numexp}
