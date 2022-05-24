@@ -631,5 +631,5 @@ for i in $(seq 0 $last_idx); do
   done
 done
 
-rsync -av --delete --checksum $SHM_TARGET_DIR/ $TARGET_DIR/
+rsync --recursive --links --perms --group --owner --verbose --delete --checksum $SHM_TARGET_DIR/ $TARGET_DIR/
 aws s3 sync --delete $TARGET_DIR/ s3://cms.hivdb.org/covid-drdb:susc-summary/
