@@ -535,10 +535,11 @@ create_file() {
   local options=()
   local json_params='{}'
   for idx in $(seq 0 $((${#keys[@]}-1))); do
+    local camel_key="$(_camel "${keys[$idx]}")"
     json_params="$(
       json_params="$json_params" jq \
-        --arg "$(_camel ${keys[$idx]})" "${vals[$idx]}" \
-      -ncr "(env.json_params | fromjson) + {\$${keys[$idx]}}"
+      --arg "$camel_key" "${vals[$idx]}" \
+      -ncr "(env.json_params | fromjson) + {\$$camel_key}"
     )"
     options+=("${keys[$idx]}:${vals[$idx]}")
   done
