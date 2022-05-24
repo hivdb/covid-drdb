@@ -83,23 +83,6 @@ _groupby() {
   _join ',' "${ordered[@]}"
 }
 
-_orderby() {
-  local columns=()
-  for col in "$@"; do
-    case $col in
-      antibody_names)
-        columns+=('CAST(antibody_order AS INTEGER)')
-        ;;
-      vaccine_name)
-        columns+=('CAST(vaccine_order AS INTEGER)')
-        ;;
-      *)
-        columns+=($col)
-    esac
-  done
-  _join ', ' "${columns[@]}"
-}
-
 _execute() {
   local subqueries=()
   local idx=0
@@ -108,7 +91,7 @@ _execute() {
     local valcol="$2"
     local conds="$3"
     local aggkey="$4"
-    local ordercols="$5"
+    local sortkey="$5"
     shift 5
 
     if [ -z "$conds" ]; then
@@ -120,21 +103,24 @@ _execute() {
       aggcond="aggregate_by IS NULL"
     fi
 
-    if [ -n "ordercols" ]; then
-      orderby="ORDER BY $ordercols"
-    fi
-
     subqueries+=("
-    SELECT key, val FROM (
-      SELECT $keycol AS key, $valcol AS val FROM susc_summary
-      WHERE $aggcond AND $conds $orderby
-    ) AS subquery${idx}")
+      SELECT
+        $keycol AS key,
+        $valcol AS val,
+        $sortkey AS sortkey
+      FROM susc_summary
+      WHERE $aggcond AND $conds
+    ")
     let idx=idx+1
   done
 
   local sql="
-    SELECT json_group_array(json_object(key, val))
-    FROM ($(_join ' UNION ' "${subqueries[@]}")) AS subqueries
+    SELECT json_group_object(key, val)
+    FROM (
+      SELECT key, val
+      FROM ($(_join ' UNION ' "${subqueries[@]}")) AS sq1
+      ORDER BY sortkey, val
+    ) AS sq2
   "
 
   # TODO: find a better way for error handling
@@ -245,16 +231,17 @@ query_article() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby num_experiments)" \
+    "'!'" \
     \
     ref_name num_experiments \
     "$(_where "$(_notnull ref_name)" "${conds[@]}")" \
     "$(_groupby article "${aggregate_by[@]}")" \
-    "$(_orderby ref_name num_experiments)"
+    ref_name
 }
 
 query_antibody() {
-  local ab_aggregate_by=$(_getval ab_aggregate_by "$@")
+  local ab_aggregate_by=$1
+  shift
   local ref_name=$(_getval ref_name "$@")
   local var_name=$(_getval var_name "$@")
   local iso_aggkey=$(_getval iso_aggkey "$@")
@@ -272,17 +259,17 @@ query_antibody() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby num_experiments)" \
+    'CAST(-10 AS INTEGER)' \
     \
     "'ab-any'" num_experiments \
     "$(_where "$(_eq rx_type antibody)" "${conds[@]}")" \
     "$(_groupby rx_type "${aggregate_by[@]}")" \
-    "$(_orderby num_experiments)" \
+    'CAST(-5 AS INTEGER)' \
     \
     antibody_names num_experiments \
     "$(_where "$(_notnull antibody_names)" "${conds[@]}")" \
     "$(_groupby "$ab_aggregate_by" "${aggregate_by[@]}")" \
-    "$(_orderby antibody_names num_experiments)"
+    'CAST(antibody_order AS INTEGER)'
 }
 
 
@@ -304,17 +291,17 @@ query_infected_variant() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!1'" \
     \
     "'cp-any'" num_experiments \
     "$(_where "$(_eq rx_type 'conv-plasma')" "${conds[@]}")" \
     "$(_groupby 'rx_type' "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!2'" \
     \
     infected_var_name num_experiments \
     "$(_where "$(_notnull infected_var_name)" "${conds[@]}")" \
     "$(_groupby "infected_variant" "${aggregate_by[@]}")" \
-    "$(_orderby 'infected_var_name' 'num_experiments')"
+    infected_var_name
 }
 
 
@@ -336,17 +323,17 @@ query_vaccine() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    'CAST(-10 AS INTEGER)' \
     \
     "'vp-any'" num_experiments \
     "$(_where "$(_eq rx_type 'vacc-plasma')" "${conds[@]}")" \
     "$(_groupby 'rx_type' "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    'CAST(-5 AS INTEGER)' \
     \
     vaccine_name num_experiments \
     "$(_where "$(_notnull vaccine_name)" "${conds[@]}")" \
     "$(_groupby "vaccine" "${aggregate_by[@]}")" \
-    "$(_orderby 'vaccine_name' 'num_experiments')"
+    'CAST(vaccine_order AS INTEGER)'
 }
 
 
@@ -368,12 +355,12 @@ query_isolate_agg() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!'" \
     \
     iso_aggkey num_experiments \
     "$(_where "$(_notnull iso_aggkey)" "${conds[@]}")" \
-    "$(_groupby 'isolate_agg' "${aggregate_by[@]}")" \
-    "$(_orderby 'iso_aggkey' 'num_experiments')"
+    "$(_groupby isolate_agg "${aggregate_by[@]}")" \
+    iso_aggkey
 }
 
 
@@ -395,12 +382,12 @@ query_variant() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!'" \
     \
     var_name num_experiments \
     "$(_where "$(_notnull var_name)" "${conds[@]}")" \
-    "$(_groupby 'variant' "${aggregate_by[@]}")" \
-    "$(_orderby 'var_name' 'num_experiments')"
+    "$(_groupby variant "${aggregate_by[@]}")" \
+    var_name
 }
 
 
@@ -422,12 +409,12 @@ query_isolate() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!'" \
     \
     iso_name num_experiments \
     "$(_where "$(_notnull iso_name)" "${conds[@]}")" \
-    "$(_groupby 'isolate' "${aggregate_by[@]}")" \
-    "$(_orderby 'iso_name' 'num_experiments')"
+    "$(_groupby isolate "${aggregate_by[@]}")" \
+    iso_name
 }
 
 
@@ -449,46 +436,19 @@ query_position() {
     "'any'" num_experiments \
     "$(_where "${conds[@]}")" \
     "$(_groupby "${aggregate_by[@]}")" \
-    "$(_orderby 'num_experiments')" \
+    "'!'" \
     \
     position num_experiments \
     "$(_where "$(_notnull position)" "${conds[@]}")" \
-    "$(_groupby 'position' "${aggregate_by[@]}")" \
-    "$(_orderby 'position' 'num_experiments')"
+    "$(_groupby position "${aggregate_by[@]}")" \
+    position
 }
 
-# has_results() {
-#   local ref_name=$(_getval ref_name "$@")
-#   local ab_names=$(_getval antibody_names "$@")
-#   local vaccine_name=$(_getval vaccine_name "$@")
-#   local infected_var_name=$(_getval infected_var_name "$@")
-#   local var_name=$(_getval var_name "$@")
-#   local iso_aggkey=$(_getval iso_aggkey "$@")
-#   local gene_pos=$(_getval position "$@")
-# 
-#   aggregate_by=()
-#   conds=()
-# 
-#   _append_eq ref_name "$ref_name"
-#   _append_eq antibody_names "$ab_names"
-#   _append_eq vaccine_name "$vaccine_name"
-#   _append_eq infected_var_name "$infected_var_name"
-#   _append_eq var_name "$var_name"
-#   _append_eq iso_aggkey "$iso_aggkey"
-#   _append_eq position "$gene_pos"
-# 
-#   local ret=$(sqlite3 $DBFILE "
-#     SELECT NOT EXISTS (
-#       SELECT 1 FROM susc_summary WHERE
-#         $(_join ' AND ' "${conds[@]}")
-#     )
-#     ")
-#   return $ret
-# }
 
 query_all() {
   article_numexp=$(query_article "$@")
-  antibody_any_numexp=$(query_antibody "$@")
+  antibody_any_numexp=$(query_antibody antibody:any "$@")
+  antibody_numexp=$(query_antibody antibody "$@")
   infected_variant_numexp=$(query_infected_variant "$@")
   vaccine_numexp=$(query_vaccine "$@")
   isolate_agg_numexp=$(query_isolate_agg "$@")
@@ -499,6 +459,7 @@ query_all() {
   echo "{
     \"article\": ${article_numexp},
     \"antibody:any\": ${antibody_any_numexp},
+    \"antibody\": ${antibody_numexp},
     \"infected_variant\": ${infected_variant_numexp},
     \"vaccine\": ${vaccine_numexp},
     \"isolate_agg\": ${isolate_agg_numexp},
@@ -516,16 +477,6 @@ list_combinations() {
     ORDER BY $(_join ', ' "$@")
   "
 }
-
-# query_article 'antibody_names:157'
-# query_antibody "antibody:any" "Ai22" 
-# query_infected_variant "Cele22" 
-# query_vaccine "Cele22" 
-# query_isolate_agg "Cele22" 
-# query_variant "Cele22" 
-# query_isolate "Cele22" 
-# query_position "Li20h" 
-# query_all "Li20h" 
 
 
 create_file() {
