@@ -959,6 +959,18 @@ Table isolate_pairs as IPair {
   }
 }
 
+Table isolate_aggs as IAgg {
+  iso_aggkey varchar [pk]
+  iso_agg_display varchar
+  var_name varchar [ref: > VAR.var_name]
+  iso_type iso_type_enum
+
+  indexes {
+    var_name
+    iso_type
+  }
+}
+
 
 Table susc_summary as SSmry {
   aggregate_by varchar
