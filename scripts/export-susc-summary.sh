@@ -537,7 +537,7 @@ create_file() {
   for idx in $(seq 0 $((${#keys[@]}-1))); do
     json_params="$(
       json_params="$json_params" jq \
-      --arg "${keys[$idx]}" "${vals[$idx]}" \
+        --arg "$(_camel ${keys[$idx]})" "${vals[$idx]}" \
       -ncr "(env.json_params | fromjson) + {\$${keys[$idx]}}"
     )"
     options+=("${keys[$idx]}:${vals[$idx]}")
