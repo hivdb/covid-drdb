@@ -26,9 +26,12 @@ cd /dev/shm
 curl -SLO https://github.com/hivdb/covid-drdb-payload/releases/download/$VERSION/covid-drdb-$VERSION.db
 DBFILE=/dev/shm/covid-drdb-$VERSION.db
 
+trap "rm -f $DBFILE" EXIT
+
 TARGET_DIR=$2
 SHM_TARGET_DIR=/dev/shm/covid-drdb-cache
-rm -r $SHM_TARGET_DIR 2>/dev/null || true
+rm -rf $SHM_TARGET_DIR 2>/dev/null || true
+trap "rm -rf $SHM_TARGET_DIR" EXIT
 
 _escape() {
   echo $1 | sed "s/'/''/g"
