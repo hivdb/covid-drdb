@@ -530,7 +530,7 @@ list_combinations() {
 
 create_file() {
   local vals=($(_split '$$' "$1"))
-  shift
+  shift || true
   local keys=("$@")
   local options=()
   local json_params='{}'
@@ -600,6 +600,11 @@ PARAMS=(
 )
 
 PARAM_GROUPS=(ref rx rx rx virus virus virus)
+
+# all
+echo -n "Create default file:"
+create_file
+echo " done"
 
 # combination of one
 for param in "${PARAMS[@]}"; do
