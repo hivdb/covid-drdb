@@ -1066,29 +1066,6 @@ Table susc_summary as SSmry {
   }
 }
 
-
-Table article_stats as RStat {
-  ref_name varchar [ref: > R.ref_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (ref_name, stat_group) [pk]
-    count
-  }
-}
-
-Table vaccine_stats as VStat {
-  vaccine_name varchar [ref: > V.vaccine_name]
-  stat_group varchar
-  count int
-
-  indexes {
-    (vaccine_name, stat_group) [pk]
-  }
-}
-
 Table rx_conv_plasma as RxCP {
   // derived table from rx_conv_plasma and subject_history
   ref_name varchar
@@ -1106,15 +1083,6 @@ Table rx_conv_plasma as RxCP {
     (ref_name, subject_name)
     infected_var_name
     rx_name
-  }
-}
-
-Table conv_plasma_stats as CPStat {
-  stat_group varchar [pk]
-  count int
-
-  indexes {
-    count
   }
 }
 
@@ -1137,41 +1105,6 @@ Table rx_vacc_plasma as RxVP {
     infected_var_name
     vaccine_name
     rx_name
-  }
-}
-
-Table antibody_stats as MAbStat {
-  ab_name varchar [ref: > MAb.ab_name]
-  stat_group varchar
-  count int
-
-  indexes {
-    (ab_name, stat_group) [pk]
-    count
-  }
-}
-
-Table variant_stats as VARStat {
-  var_name varchar [ref: > VAR.var_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (var_name, stat_group) [pk]
-    count
-  }
-}
-
-Table isolate_stats as IStat {
-  iso_name varchar [ref: > I.iso_name]
-
-  stat_group varchar
-  count int
-
-  indexes {
-    (iso_name, stat_group) [pk]
-    count
   }
 }
 
