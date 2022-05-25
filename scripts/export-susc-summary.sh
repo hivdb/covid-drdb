@@ -238,8 +238,6 @@ query_antibody() {
   local ab_aggregate_by=$1
   shift
   local ref_name=$(_getval ref_name "$@")
-  local vaccine_name=$(_getval vaccine_name "$@")
-  local infected_var_name=$(_getval infected_var_name "$@")
   local var_name=$(_getval var_name "$@")
   local iso_aggkey=$(_getval iso_aggkey "$@")
   local gene_pos=$(_getval position "$@")
@@ -248,8 +246,6 @@ query_antibody() {
   conds=()
 
   _append_eq ref_name "$ref_name"
-  _append_eq vaccine_name "$vaccine_name"
-  _append_eq infected_var_name "$infected_var_name"
   _append_eq var_name "$var_name"
   _append_eq iso_aggkey "$iso_aggkey"
   _append_eq position "$gene_pos"
@@ -274,8 +270,6 @@ query_antibody() {
 
 query_infected_variant() {
   local ref_name=$(_getval ref_name "$@")
-  local ab_names=$(_getval antibody_names "$@")
-  local vaccine_name=$(_getval vaccine_name "$@")
   local var_name=$(_getval var_name "$@")
   local iso_aggkey=$(_getval iso_aggkey "$@")
   local gene_pos=$(_getval position "$@")
@@ -284,8 +278,6 @@ query_infected_variant() {
   conds=()
 
   _append_eq ref_name "$ref_name"
-  _append_eq antibody_names "$ab_names"
-  _append_eq vaccine_name "$vaccine_name"
   _append_eq var_name "$var_name"
   _append_eq iso_aggkey "$iso_aggkey"
   _append_eq position "$gene_pos"
@@ -310,8 +302,6 @@ query_infected_variant() {
 
 query_vaccine() {
   local ref_name=$(_getval ref_name "$@")
-  local ab_names=$(_getval antibody_names "$@")
-  local infected_var_name=$(_getval infected_var_name "$@")
   local var_name=$(_getval var_name "$@")
   local iso_aggkey=$(_getval iso_aggkey "$@")
   local gene_pos=$(_getval position "$@")
@@ -320,8 +310,6 @@ query_vaccine() {
   conds=()
 
   _append_eq ref_name "$ref_name"
-  _append_eq antibody_names "$ab_names"
-  _append_eq infected_var_name "$infected_var_name"
   _append_eq var_name "$var_name"
   _append_eq iso_aggkey "$iso_aggkey"
   _append_eq position "$gene_pos"
