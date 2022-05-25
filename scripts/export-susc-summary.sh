@@ -466,6 +466,32 @@ query_all() {
 
 
 list_combinations() {
+  local has_rxany=1
+  local rxany_keys=()
+  local rxany_selcols=()
+  for key in "$@"; do
+    if [[ "$key" == 'antibody_names' || "$key" == 'vaccine_name' || "$key" == 'infected_var_name' ]]; then
+      has_rxany=0
+      rxany_selcols+=("'any'")
+    else
+      rxany_selcols+=("$key")
+      rxany_keys+=("$key")
+    fi
+  done
+  if [ $has_rxany -eq 0 ]; then
+    if [ ${#rxany_keys[@]} -eq 0 ]; then
+      # no combination, just return any
+      echo '["any"]'
+    else
+      sqlite3 $DBFILE "
+        SELECT json_array($(_join ', ' "${rxany_selcols[@]}")) FROM susc_summary
+        WHERE $(_join ' IS NOT NULL AND ' "${rxany_keys[@]}") IS NOT NULL
+        GROUP BY $(_join ', ' "${rxany_keys[@]}")
+        ORDER BY $(_join ', ' "${rxany_keys[@]}")
+      "
+    fi
+  fi
+
   sqlite3 $DBFILE "
     SELECT json_array($(_join ', ' "$@")) FROM susc_summary
     WHERE $(_join ' IS NOT NULL AND ' "$@") IS NOT NULL
