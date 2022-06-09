@@ -120,3 +120,13 @@ ALTER TABLE subject_isolates
   ADD CONSTRAINT chk_previous_infection CHECK (
     hasPreviousInfection(ref_name, subject_name, collection_date)
   );
+
+ALTER TABLE isolates
+  ADD CONSTRAINT no_private_var_name CHECK (
+    var_name NOT LIKE '\_%'
+  );
+
+ALTER TABLE subject_infections
+  ADD CONSTRAINT no_private_infected_var_name CHECK (
+    infected_var_name NOT LIKE '\_%'
+  );

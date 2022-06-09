@@ -181,6 +181,7 @@ def update_variant_consensus(payload_dir: str) -> None:
         synonym_lookup[synonym['var_name']].append(synonym['synonym'])
     for variant in variants:
         var_name = variant['var_name']
+
         synonyms: List[str] = []
         if not var_name:
             click.echo(
@@ -188,6 +189,8 @@ def update_variant_consensus(payload_dir: str) -> None:
                 err=True
             )
             raise click.Abort()
+        var_name_no_voc = var_name.split('/', 1)[-1]
+
         for syn in synonym_lookup[var_name]:
             if not syn:
                 click.echo(
@@ -196,7 +199,7 @@ def update_variant_consensus(payload_dir: str) -> None:
                 )
                 raise click.Abort()
             synonyms.append(syn)
-        for name in [var_name] + synonyms:
+        for name in [var_name, var_name_no_voc] + synonyms:
             match = PANGO_LINEAGE_PATTERN.match(name)
             if not match:
                 continue

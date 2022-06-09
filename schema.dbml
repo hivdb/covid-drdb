@@ -523,9 +523,11 @@ Table variant_consensus as VCons {
 Table variant_synonyms as VARSYN {
   var_name varchar [ref: > VAR.var_name]
   synonym varchar
+  priority int [not null, note: 'Synonym priority']
 
   indexes {
     (var_name, synonym) [pk]
+    (var_name, synonym, priority) [unique]
   }
 }
 
