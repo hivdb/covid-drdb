@@ -520,12 +520,16 @@ create_file() {
     options+=("${keys[$idx]}:${vals[$idx]}")
   done
   hash=$(echo -n "$json_params" | sha256sum | awk '{print $1}')
-  filepath="$SHM_TARGET_DIR/${hash:0:2}/${hash:2:2}/${hash:4:60}.json"
+  local filepath="$SHM_TARGET_DIR/${hash:0:2}/${hash:2:2}/${hash:4:60}.json"
+  local resultpath="$SHM_TARGET_DIR/${hash:0:2}/${hash:2:2}/${hash:4:60}.tmp.json"
   mkdir -p $(dirname "$filepath")
 
-  result="$(query_all "${options[@]}")" params="$json_params" jq \
-    -ncr '{params: (env.params | fromjson)} + (env.result | fromjson)' > $filepath
-  
+  query_all "${options[@]}" > $resultpath
+
+  params="$json_params" jq \
+    --slurpfile result $resultpath \
+    -ncr '{params: (env.params | fromjson)} + $result[0]' > $filepath
+
   # echo $filepath
 }
 
