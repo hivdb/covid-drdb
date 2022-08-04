@@ -530,6 +530,7 @@ create_file() {
     --slurpfile result $resultpath \
     -ncr '{params: (env.params | fromjson)} + $result[0]' > $filepath
 
+  rm $resultpath
   # echo $filepath
 }
 
