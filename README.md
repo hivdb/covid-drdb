@@ -40,6 +40,23 @@ SQLite dump files.
    page](https://github.com/hivdb/covid-drdb-payload/releases), and s3
    repository s3://cms.hivdb.org/covid-drdb.
 
+## How it works?
+
+The Covid-DRDB is a SQL database built from CSV files stored in [a Git
+repository hosted on GitHub](https://github.com/hivdb/covid-drdb-payload). The
+rationale of storing CSV files in Git repository is to utilize Git's abilities
+such as version control and [author/date
+tracking](https://git-scm.com/docs/git-blame).
+
+[The latest database
+schema](https://github.com/hivdb/covid-drdb/blob/master/schema.dbml) is
+maintained in this repository using the format of [DBML](https://www.dbml.org). 
+This allows us to visualize the schema from the same source. This repository
+also includes necessary scripts for creating, generating, and validating tables.
+
+![Pipeline](pipeline.svg)
+
+
 ## Contribute to DRDB
 
 Any contributions are welcome here. Currently, we accept feature requests, new
