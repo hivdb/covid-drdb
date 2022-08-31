@@ -53,6 +53,11 @@ schema](https://github.com/hivdb/covid-drdb/blob/master/schema.dbml) is
 maintained in this repository using the format of [DBML](https://www.dbml.org). 
 This allows us to visualize the schema from the same source. This repository
 also includes necessary scripts for creating, generating, and validating tables.
+All these scripts are automated into an easy-to-use Makefile [described
+above](#create--release-db-files). The first half of this pipeline is also
+automatically [running on GitHub
+CI](https://github.com/hivdb/covid-drdb-payload/actions/workflows/build.yml) as
+our continuous integration.
 
 ![Pipeline](pipeline.svg)
 
