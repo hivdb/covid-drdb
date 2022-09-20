@@ -107,10 +107,16 @@ if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
   exit 2
 fi
 
+if [ ! -f "build/covid-drdb-$VERSION-variants.db" ]; then
+  echo "Release abort: file 'build/covid-drdb-$VERSION-variants.db' is not found. Something wrong, please contact Philip." 1>&2
+  exit 2
+fi
+
 echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
 sleep 10
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
+github-release upload --tag $VERSION --name "covid-drdb-$VERSION-variants.db" --file "build/covid-drdb-$VERSION-variants.db"
 
 if [[ "PRE_RELEASE" == "--pre-release" ]]; then
   echo "Pre-release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"

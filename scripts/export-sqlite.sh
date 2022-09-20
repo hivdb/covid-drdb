@@ -17,5 +17,9 @@ cp /dev/shm/covid-drdb-$VERSION.db /dev/shm/covid-drdb-$VERSION-slim.db
 sqlite3 /dev/shm/covid-drdb-$VERSION-slim.db < drop_views.sql
 echo "Written build/covid-drdb-$VERSION-slim.db"
 
+cp /dev/shm/covid-drdb-$VERSION.db /dev/shm/covid-drdb-$VERSION-variants.db
+./scripts/make-variants-slim.sh /dev/shm/covid-drdb-$VERSION-variants.db
+echo "Written build/covid-drdb-$VERSION-variants.db"
+
 mkdir -p build/
 mv /dev/shm/*.db build/
