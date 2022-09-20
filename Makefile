@@ -69,7 +69,7 @@ sync-glue: update-builder
 
 local-release: update-builder network docker-envfile
 	@docker run --rm -it \
-		--shm-size=1536m \
+		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--network=covid-drdb-network \
@@ -80,7 +80,7 @@ local-release: update-builder network docker-envfile
 
 release: update-builder network docker-envfile
 	@docker run --rm -it \
-		--shm-size=1536m \
+		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--network=covid-drdb-network \
@@ -91,7 +91,7 @@ release: update-builder network docker-envfile
 
 pre-release: update-builder network docker-envfile
 	@docker run --rm -it \
-		--shm-size=1536m \
+		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--network=covid-drdb-network \
