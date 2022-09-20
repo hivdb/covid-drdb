@@ -130,3 +130,8 @@ ALTER TABLE subject_infections
   ADD CONSTRAINT no_private_infected_var_name CHECK (
     infected_var_name NOT LIKE '\_%'
   );
+
+ALTER TABLE dms_escape_results
+  ADD CONSTRAINT max_escape_score_is_one CHECK (
+    escape_score <= 1
+  )
