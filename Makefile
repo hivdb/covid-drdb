@@ -69,6 +69,7 @@ sync-glue: update-builder
 
 local-release: update-builder network docker-envfile
 	@docker run --rm -it \
+		--shm-size=1536m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--network=covid-drdb-network \
@@ -98,17 +99,6 @@ pre-release: update-builder network docker-envfile
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
 		scripts/github-release.sh --pre-release
-
-debug-export-sqlite: update-builder network docker-envfile
-	@docker run --rm -it \
-		--shm-size=1536m \
-		--volume=$(shell pwd):/covid-drdb/ \
-		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
-		--network=covid-drdb-network \
-		--volume ~/.aws:/root/.aws:ro \
-		--env-file ./docker-envfile \
-   		hivdb/covid-drdb-builder:latest \
-		scripts/export-sqlite.sh debug
 
 sync-to-s3: update-builder docker-envfile
 	@docker run --rm -it \
