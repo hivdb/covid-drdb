@@ -189,6 +189,7 @@ def autofill_dms(tables_dir: Path) -> None:
             'position',
             'amino_acid',
             'escape_score',
+            'method',
         ],
         BOM=True,
     )

@@ -898,11 +898,17 @@ Table dms_escape_results as DMSEscape {
     note: 'Amino acid of this mutation'
   ]
   escape_score numeric(10,3)
+  method dms_method_enum
 
   indexes {
     (ref_name, rx_name, gene, position, amino_acid) [pk]
     (gene, position, amino_acid)
   }
+}
+
+Enum dms_method_enum {
+  "FACS" // fluorescence-activated cell sorting
+  "MACS" // magnetic-activated cell sorting
 }
 
 Ref: DMSEscape.(ref_name, rx_name) > Rx.(ref_name, rx_name)
