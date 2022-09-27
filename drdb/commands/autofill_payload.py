@@ -148,25 +148,37 @@ def autofill_sbj_plasma(tables_dir: Path) -> None:
 def autofill_dms(tables_dir: Path) -> None:
     row: CSVReaderRow
     ace2_binding: Path = tables_dir / 'dms' / 'dms_ace2_binding.csv'
+    ace2_contact: Path = tables_dir / 'dms' / 'dms_ace2_contact.csv'
     rows: List[CSVReaderRow] = load_csv(ace2_binding)
+
+    pos_ace2_contact = [
+        int(rec['position'])
+        for rec in load_csv(ace2_contact)
+        if rec['ace2_contact']
+    ]
 
     for row in rows:
         if not row['ace2_binding']:
             row['ace2_binding'] = None
         if not row['expression']:
             row['expression'] = None
+        row['ace2_contact'] = (
+            'TRUE' if int(row['position']) in pos_ace2_contact else 'FALSE')
 
     click.echo('Write to {}'.format(ace2_binding))
     dump_csv(
         ace2_binding,
         records=rows,
         headers=[
+            'ref_name',
             'gene',
             'position',
             'amino_acid',
             'ace2_binding',
             'expression',
             'ace2_contact',
+            'ace2_assay',
+            'rbd_bg',
         ],
         BOM=True,
     )
@@ -190,6 +202,7 @@ def autofill_dms(tables_dir: Path) -> None:
             'amino_acid',
             'escape_score',
             'method',
+            'rbd_bg',
         ],
         BOM=True,
     )

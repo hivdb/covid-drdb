@@ -866,6 +866,7 @@ Table amino_acid_prevalence as AAPcnt {
 }
 
 Table dms_ace2_binding as Binding {
+  ref_name varchar [ref: > R.ref_name]
   gene varchar [
     ref: > G.gene,
     note: 'Mutation gene'
@@ -879,10 +880,17 @@ Table dms_ace2_binding as Binding {
   ace2_binding numeric(10,2)
   expression numeric(10,2)
   ace2_contact boolean
+  ace2_assay ace2_assay_type
+  rbd_bg varchar  // RBD background
 
   indexes {
-    (gene, position, amino_acid) [pk]
+    (ref_name, gene, position, amino_acid, rbd_bg) [pk]
   }
+}
+
+Enum ace2_assay_type {
+  "monomeric"
+  "dimeric"
 }
 
 Table dms_escape_results as DMSEscape {
@@ -899,9 +907,10 @@ Table dms_escape_results as DMSEscape {
   ]
   escape_score numeric(10,3)
   method dms_method_enum
+  rbd_bg varchar  // RBD background
 
   indexes {
-    (ref_name, rx_name, gene, position, amino_acid) [pk]
+    (ref_name, rx_name, gene, position, amino_acid, rbd_bg) [pk]
     (gene, position, amino_acid)
   }
 }
