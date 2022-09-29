@@ -178,7 +178,7 @@ def autofill_dms(tables_dir: Path) -> None:
             'expression',
             'ace2_contact',
             'ace2_assay',
-            'rbd_bg',
+            'backbone',
         ],
         BOM=True,
     )
@@ -202,7 +202,7 @@ def autofill_dms(tables_dir: Path) -> None:
             'amino_acid',
             'escape_score',
             'method',
-            'rbd_bg',
+            'backbone',
         ],
         BOM=True,
     )

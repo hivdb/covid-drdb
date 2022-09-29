@@ -881,10 +881,10 @@ Table dms_ace2_binding as Binding {
   expression numeric(10,2)
   ace2_contact boolean
   ace2_assay ace2_assay_type
-  rbd_bg varchar  // RBD background
+  backbone varchar  // RBD background
 
   indexes {
-    (ref_name, gene, position, amino_acid, rbd_bg) [pk]
+    (ref_name, gene, position, amino_acid, backbone) [pk]
   }
 }
 
@@ -907,10 +907,10 @@ Table dms_escape_results as DMSEscape {
   ]
   escape_score numeric(10,3)
   method dms_method_enum
-  rbd_bg varchar  // RBD background
+  backbone varchar  // RBD backbone
 
   indexes {
-    (ref_name, rx_name, gene, position, amino_acid, rbd_bg) [pk]
+    (ref_name, rx_name, gene, position, amino_acid, backbone) [pk]
     (gene, position, amino_acid)
   }
 }
