@@ -238,7 +238,8 @@ SELECT
     iso.iso_name,
     iso.var_name,
     '' domain,
-    GROUP_CONCAT(muts.single_mut_name, '+') pattern
+    GROUP_CONCAT(muts.single_mut_name, '+') pattern,
+    COUNT(muts.single_mut_name) num_muts
 FROM
     _isolate_mutations_combo_s_mut_view muts,
     isolates iso
