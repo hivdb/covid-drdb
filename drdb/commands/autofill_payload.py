@@ -170,15 +170,15 @@ def autofill_dms(tables_dir: Path) -> None:
         ace2_binding,
         records=rows,
         headers=[
-            'ref_name',
+            # 'ref_name',
             'gene',
             'position',
             'amino_acid',
             'ace2_binding',
             'expression',
             'ace2_contact',
-            'ace2_assay',
-            'backbone',
+            # 'ace2_assay',
+            # 'backbone',
         ],
         BOM=True,
     )
@@ -202,7 +202,7 @@ def autofill_dms(tables_dir: Path) -> None:
             'amino_acid',
             'escape_score',
             'method',
-            'backbone',
+            # 'backbone',
         ],
         BOM=True,
     )
