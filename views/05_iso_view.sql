@@ -286,6 +286,33 @@ WHERE
     iso.var_name IS NULL
 ;
 
+CREATE VIEW IF NOT EXISTS isolate_omicron_view
+AS
+SELECT
+    iso.*
+FROM
+    isolates iso,
+    variants var
+WHERE
+    iso.var_name = var.var_name
+    AND
+    var.var_name LIKE 'Omicron/%'
+;
+
+
+CREATE VIEW IF NOT EXISTS isolate_omicron_ba2_view
+AS
+SELECT
+    iso.*
+FROM
+    isolates iso,
+    variants var
+WHERE
+    iso.var_name = var.var_name
+    AND
+    var.var_name = 'Omicron/BA.2'
+;
+
 
 CREATE VIEW IF NOT EXISTS isolate_variant_view
 AS
