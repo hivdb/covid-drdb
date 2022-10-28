@@ -209,6 +209,7 @@ Enum isolate_source_enum {
   ETA [note: 'Endotracheal aspirate']
   BAL [note: 'Bronchoalveolar lavage']
   OP [note: 'Oropharyngeal']
+  LT [note: 'Lung Tissue']
   Plasma
   Saliva
   Stool
