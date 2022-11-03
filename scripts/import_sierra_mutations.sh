@@ -94,12 +94,12 @@ if [ ! -f "$sierra_summary" ]; then
   exit 7
 fi
 
-pango_idx='$9'
+pango_idx='$14'
 is_ngs=0
 if head -1 "$sierra_summary" | \grep 'Median Read Depth' > /dev/null; then
   # NGS report
   is_ngs=1
-  pango_idx='$10'
+  pango_idx='$15'
 fi
 
 lower_ref_name=$(echo $ref_name | tr '[:upper:]' '[:lower:]')
