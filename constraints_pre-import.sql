@@ -58,15 +58,29 @@ ALTER TABLE rx_potency
     ) OR
     (
       -- case 2
-      potency_type IN ('IC50', 'IC80', 'IC90', 'IC100', 'EC50', 'Ki', 'Kcat/Km') AND
+      potency_type IN ('IC50', 'IC80', 'IC90', 'IC100', 'EC50') AND
       potency_upper_limit IS NOT NULL AND
-      potency_unit IS NOT NULL
+      potency_unit IN ('ng/ml', 'µM', 'pM', 'nM', 'IU/ml')
     ) OR
     (
       -- case 3
       potency_type IN ('NC20', 'NC') AND
       potency_lower_limit IS NOT NULL AND
-      potency_unit IS NOT NULL
+      potency_unit = 'percent'
+    ) OR
+    (
+      -- case 4
+      potency_type = 'Ki' AND
+      potency_lower_limit IS NULL AND
+      potency_upper_limit IS NULL AND
+      potency_unit IN ('ng/ml', 'µM', 'pM', 'nM', 'IU/ml')
+    ) OR
+    (
+      -- case 5
+      potency_type = 'Kcat/Km' AND
+      potency_lower_limit IS NULL AND
+      potency_upper_limit IS NULL AND
+      potency_unit IN ('s⁻¹µM⁻¹')
     )
   );
 
