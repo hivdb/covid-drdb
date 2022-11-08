@@ -80,7 +80,7 @@ ALTER TABLE rx_potency
       potency_type = 'Kcat/Km' AND
       potency_lower_limit IS NULL AND
       potency_upper_limit IS NULL AND
-      potency_unit IN ('s⁻¹µM⁻¹')
+      potency_unit IN ('s⁻¹µM⁻¹', 's⁻¹M⁻¹')
     )
   );
 

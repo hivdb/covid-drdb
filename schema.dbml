@@ -663,6 +663,7 @@ Enum potency_unit_enum {
   "percent"
   "IU/ml"
   "s⁻¹µM⁻¹"
+  "s⁻¹M⁻¹"
 }
 
 Enum virus_type_enum {
