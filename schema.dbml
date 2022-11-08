@@ -651,6 +651,7 @@ Enum potency_type_enum {
   "EC50" // ECxx are mainly for chemical drugs
   "NC20"
   "NC" // neutralization capacity
+  "Ki" // enzyme inhibition constant
 }
 
 Enum potency_unit_enum {
@@ -669,7 +670,7 @@ Enum virus_type_enum {
   "surrogate"
   "binding"
   "VLP"
-  "enzyme"
+  "enzyme" // for enzyme inhibition
 }
 
 Table assays as A {
