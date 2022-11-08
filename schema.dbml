@@ -669,6 +669,7 @@ Enum virus_type_enum {
   "surrogate"
   "binding"
   "VLP"
+  "enzyme"
 }
 
 Table assays as A {
