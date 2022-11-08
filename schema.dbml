@@ -650,8 +650,9 @@ Enum potency_type_enum {
   "IC100"
   "EC50" // ECxx are mainly for chemical drugs
   "NC20"
-  "NC" // neutralization capacity
-  "Ki" // enzyme inhibition constant
+  "NC" [note: "Neutralization capacity"]
+  "Ki" [note: "Enzyme inhibition constant"]
+  "Kcat/Km" [note: "Michaelis-Menten kinetics"]
 }
 
 Enum potency_unit_enum {
@@ -661,6 +662,7 @@ Enum potency_unit_enum {
   "nM"
   "percent"
   "IU/ml"
+  "s⁻¹µM⁻¹"
 }
 
 Enum virus_type_enum {
