@@ -674,6 +674,7 @@ Enum virus_type_enum {
   "binding"
   "VLP"
   "enzyme" // for enzyme inhibition
+  "reporter-cell"
 }
 
 Table assays as A {
