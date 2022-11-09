@@ -649,6 +649,7 @@ Enum potency_type_enum {
   "IC90"
   "IC100"
   "EC50" // ECxx are mainly for chemical drugs
+  "RC50" // RCxx are relative concentration
   "NC20"
   "NC" [note: "Neutralization capacity"]
   "Ki" [note: "Enzyme inhibition constant"]
