@@ -71,8 +71,6 @@ ALTER TABLE rx_potency
     (
       -- case 4
       potency_type = 'Ki' AND
-      potency_lower_limit IS NULL AND
-      potency_upper_limit IS NULL AND
       potency_unit IN ('ng/ml', 'µM', 'pM', 'nM', 'IU/ml')
     ) OR
     (
