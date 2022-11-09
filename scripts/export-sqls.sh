@@ -10,11 +10,11 @@ set -e
 cd $(dirname $0)/..
 
 function copy_csv() {
-    source_csv=$1
-    target_table=$2
-    cat <<EOF
+  source_csv=$1
+  target_table=$2
+  cat <<EOF
 COPY "$target_table" FROM STDIN WITH DELIMITER ',' CSV HEADER NULL 'NULL';
-$(cat $source_csv | dos2unix)
+$(cat $source_csv)
 \.
 
 EOF
@@ -126,8 +126,8 @@ copy_csv payload/tables/ref_unpaired_isolates.csv ref_unpaired_isolates >> $TARG
 
 copy_csv payload/tables/dms/dms_ace2_binding.csv dms_ace2_binding >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/ignore_mutations.csv ignore_mutations >>  $TARGET_DIR/02_data_tables.sql
-copy_csv payload/tables/known_deletion_ranges.csv known_deletion_ranges >>  $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/ignore_mutations.csv ignore_mutations >> $TARGET_DIR/02_data_tables.sql
+copy_csv payload/tables/known_deletion_ranges.csv known_deletion_ranges >> $TARGET_DIR/02_data_tables.sql
 
 pushd payload/
 if [ -z "$(git status -s .)" ]
@@ -142,6 +142,7 @@ export TZ=0
 last_update=$(date -d @${mtime} +%FT%TZ)
 popd
 echo "INSERT INTO last_update (scope, last_update) VALUES ('global', '${last_update}');" >> $TARGET_DIR/02_data_tables.sql
+dos2unix $TARGET_DIR/02_data_tables.sql
 
 echo "Written to $TARGET_DIR/02_data_tables.sql"
 
