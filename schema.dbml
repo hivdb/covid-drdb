@@ -963,6 +963,7 @@ Enum rx_type_enum {
   "compound"
   "conv-plasma"
   "vacc-plasma"
+  "enzyme-kinetics"
 }
 
 Enum iso_type_enum {

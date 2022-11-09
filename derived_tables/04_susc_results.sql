@@ -676,6 +676,12 @@ UPDATE susc_results S SET
         )
       )
     ) THEN 'vacc-plasma'
+    WHEN S.potency_type = 'Kcat/Km' AND EXISTS (
+      SELECT 1 FROM assays A WHERE
+        S.assay_name = A.assay_name AND
+        A.virus_type = 'enzyme'
+    ) THEN 'enzyme-kinetics'
+
   END::rx_type_enum;
 
 
