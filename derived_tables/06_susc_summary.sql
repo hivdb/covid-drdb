@@ -4,13 +4,6 @@
 -- SET auto_explain.log_nested_statements = ON;
 
 
-CREATE TYPE mutation_type AS (
-  gene VARCHAR,
-  pos INTEGER,
-  aa amino_acid_enum
-);
-
-
 CREATE FUNCTION get_mutation_display(_mutobjs mutation_type[]) RETURNS VARCHAR[] AS $$
 DECLARE
   _prev_del_gene VARCHAR;
@@ -102,117 +95,12 @@ END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
 
 
-CREATE FUNCTION get_countable_mutations(_mutobjs mutation_type[]) RETURNS VARCHAR[] AS $$
-DECLARE
-  _prev_gene varchar;
-  _gene varchar;
-  _gene_order integer;
-  _pos integer;
-  _pos_end integer;
-  _aa amino_acid_enum;
-  _mut varchar;
-  _mutations varchar[];
-BEGIN
-  FOR _gene, _gene_order, _pos, _pos_end, _aa IN
-    SELECT
-      DISTINCT
-      mut.gene,
-      g.gene_order,
-      CASE WHEN
-        mut.aa = 'del' AND
-        position_start IS NOT NULL
-      THEN
-        position_start
-      ELSE
-        mut.pos
-      END AS pos_start,
-      position_end AS pos_end,
-      mut.aa
-    FROM UNNEST(_mutobjs) mut
-      JOIN genes AS g ON g.gene = mut.gene
-      LEFT JOIN known_deletion_ranges dr ON
-        dr.gene = mut.gene AND
-        mut.pos BETWEEN position_start AND position_end
-    WHERE
-      NOT EXISTS (
-        SELECT 1 FROM ignore_mutations igm
-        WHERE
-          igm.gene = mut.gene AND
-          igm.position = mut.pos AND
-          igm.amino_acid = mut.aa
-      )
-    ORDER BY g.gene_order, pos_start
-  LOOP
-    IF _aa = 'del' AND _pos_end IS NOT NULL THEN
-      _mut := _pos::VARCHAR || '-' || _pos_end::VARCHAR || _aa::VARCHAR;
-    ELSE
-      _mut := _pos::VARCHAR || _aa::VARCHAR;
-    END IF;
-    IF _prev_gene IS NULL OR _prev_gene != _gene THEN
-      _mut := _gene || ':' || _mut;
-    END IF;
-    _prev_gene := _gene;
-    _mutations := array_append(_mutations, _mut);
-  END LOOP;
-  RETURN _mutations;
-END
-$$ LANGUAGE PLPGSQL IMMUTABLE;
-
-
-CREATE FUNCTION get_isolate_aggkey(my_iso_name VARCHAR, my_control_iso_name VARCHAR) RETURNS VARCHAR AS $$
-DECLARE
-  _mutobjs mutation_type[];
-  _mutations varchar[];
-BEGIN
-  IF my_control_iso_name IS NULL THEN
-    my_control_iso_name := 'Wuhan-Hu-1';
-  END IF;
-  _mutobjs := (
-    SELECT ARRAY_AGG(
-      (
-        mut.gene,
-        mut.position,
-        mut.amino_acid
-      )::mutation_type
-    )
-    FROM isolate_mutations mut
-    WHERE
-      mut.gene = 'S' AND
-      mut.iso_name = my_iso_name/* AND
-      NOT EXISTS (
-        SELECT 1 FROM isolate_mutations ctl_mut
-        WHERE
-          ctl_mut.iso_name = my_control_iso_name AND
-          ctl_mut.gene = mut.gene AND
-          ctl_mut.position = mut.position AND
-          ctl_mut.amino_acid = mut.amino_acid
-      ) */
-  );
-  _mutations := get_countable_mutations(_mutobjs);
-  RETURN ARRAY_TO_STRING(_mutations, '+');
-END
-$$ LANGUAGE PLPGSQL IMMUTABLE;
-
-CREATE FUNCTION get_isolate_mutobjs(_iso_name VARCHAR) RETURNS mutation_type[] AS $$
-  SELECT ARRAY_AGG(
-    (
-      mut.gene,
-      mut.position,
-      mut.amino_acid
-    )::mutation_type
-  )
-  FROM isolate_mutations mut
-  WHERE
-    mut.gene = 'S' AND
-    mut.iso_name = _iso_name
-$$ LANGUAGE SQL IMMUTABLE;
-
 CREATE FUNCTION get_isolate_display(_iso_name VARCHAR) RETURNS VARCHAR AS $$
 DECLARE
   _mutobjs mutation_type[];
   _mutations VARCHAR[];
 BEGIN
-  _mutobjs := get_isolate_mutobjs(_iso_name);
+  _mutobjs := get_isolate_mutobjs('S', _iso_name);
   _mutations := get_mutation_display(_mutobjs);
   IF _mutations IS NULL OR array_length(_mutations, 1) = 0 THEN
     RETURN 'Wildtype';
@@ -222,22 +110,6 @@ BEGIN
 END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
 
-INSERT INTO isolate_pairs (
-  control_iso_name,
-  iso_name,
-  iso_aggkey,
-  num_mutations
-) SELECT DISTINCT
-  control_iso_name,
-  iso_name,
-  get_isolate_aggkey(iso_name, control_iso_name) AS iso_aggkey,
-  ARRAY_LENGTH(
-    get_countable_mutations(
-      get_isolate_mutobjs(iso_name)
-    ),
-    1
-  ) AS num_mutations
-FROM susc_results;
 
 SELECT
   iso_name,
@@ -253,7 +125,7 @@ CREATE FUNCTION get_isolate_agg_var_name(_iso_aggkey VARCHAR) RETURNS VARCHAR AS
   FROM isolates iso
   WHERE var_name IS NOT NULL AND EXISTS(
     SELECT 1 FROM isolate_pairs pair
-    WHERE pair.iso_name = iso.iso_name AND pair.iso_aggkey = _iso_aggkey
+    WHERE pair.gene = 'S' AND pair.iso_name = iso.iso_name AND pair.iso_aggkey = _iso_aggkey
   )
   LIMIT 1
 $$ LANGUAGE SQL IMMUTABLE;
@@ -272,6 +144,7 @@ CREATE FUNCTION get_isolate_agg_mutobjs(_iso_aggkey VARCHAR) RETURNS mutation_ty
     isolate_pairs pair
   WHERE
     mut.gene = 'S' AND
+    pair.gene = 'S' AND
     pair.iso_aggkey = _iso_aggkey AND
     mut.iso_name = pair.iso_name AND
     /*NOT EXISTS (
@@ -318,7 +191,8 @@ SELECT DISTINCT
   get_isolate_agg_display(iso_aggkey) AS iso_agg_display,
   get_isolate_agg_var_name(iso_aggkey) AS var_name
 INTO TABLE isolate_aggkeys
-FROM isolate_pairs;
+FROM isolate_pairs
+WHERE gene = 'S';
 
 CREATE INDEX ON isolate_aggkeys (iso_aggkey);
 
@@ -707,6 +581,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN isolate_pairs pair ON
+          pair.gene = 'S' AND
           S.control_iso_name = pair.control_iso_name AND
           S.iso_name = pair.iso_name
         JOIN isolate_aggkeys isoagg ON
@@ -773,6 +648,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       $X$);
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN isolate_pairs pair ON
+          pair.gene = 'S' AND
           S.iso_name = pair.iso_name AND
           S.control_iso_name = pair.control_iso_name
         LEFT JOIN isolate_aggkeys isoagg ON
@@ -804,6 +680,7 @@ CREATE FUNCTION summarize_susc_results(_agg_by susc_summary_agg_key[]) RETURNS V
       _ext_col_values := ARRAY_APPEND(_ext_col_values, 'isoagg.position');
       _ext_joins := ARRAY_APPEND(_ext_joins, $X$
         JOIN isolate_pairs pair ON
+          pair.gene = 'S' AND
           S.control_iso_name = pair.control_iso_name AND
           S.iso_name = pair.iso_name
         JOIN isolate_aggkeys isoagg ON
@@ -1052,7 +929,6 @@ DROP TABLE isolate_aggkeys;
 DROP TABLE tmp_antibody_names;
 DROP TABLE rx_antibody_names_any;
 DROP TABLE rx_antibody_names_all;
-DROP FUNCTION get_isolate_aggkey;
 DROP FUNCTION get_isolate_mutobjs;
 DROP FUNCTION get_indiv_mut_position;
 DROP FUNCTION get_isolate_agg_var_name;

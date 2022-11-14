@@ -1,5 +1,6 @@
 INSERT INTO isolate_aggs
   SELECT
+    'S' as gene,
     iso_aggkey,
     iso_agg_display,
     var_name,

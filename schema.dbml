@@ -867,7 +867,7 @@ Table amino_acid_prevalence as AAPcnt {
   position int
   amino_acid amino_acid_enum
   count int
-  proportion numeric(7,6)
+  proportion numeric(8,7)
   date_updated date
 
   indexes {
@@ -975,28 +975,29 @@ Enum iso_type_enum {
   "combo-muts"
 }
 
-
 Table isolate_pairs as IPair {
-
+  gene varchar [ref: > G.gene]
   control_iso_name varchar [ref: > I.iso_name]
   iso_name varchar [ref: > I.iso_name]
   iso_aggkey varchar
   num_mutations integer
 
   indexes {
-    (control_iso_name, iso_name) [pk]
-    iso_aggkey
+    (gene, control_iso_name, iso_name) [pk]
+    (gene, iso_aggkey)
     num_mutations
   }
 }
 
 Table isolate_aggs as IAgg {
-  iso_aggkey varchar [pk]
+  gene varchar [ref: > G.gene]
+  iso_aggkey varchar
   iso_agg_display varchar
   var_name varchar [ref: > VAR.var_name]
   iso_type iso_type_enum
 
   indexes {
+    (gene, iso_aggkey) [pk]
     var_name
     iso_type
   }
@@ -1256,5 +1257,45 @@ Table invivo_selection_results {
 
   indexes {
     (ref_name, subject_name, infected_var_name, gene, position, amino_acid) [pk]
+  }
+}
+
+Table resistance_mutation_attributes {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  col_name varchar [
+    note: 'Attribute key of this DRM'
+  ]
+  col_value varchar [
+    note: 'Attribute value of this DRM'
+  ]
+
+  indexes {
+    (gene, position, amino_acid, col_name) [pk]
+  }
+}
+
+Table resistance_mutations {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+
+  indexes {
+    (gene, position, amino_acid) [pk]
   }
 }
