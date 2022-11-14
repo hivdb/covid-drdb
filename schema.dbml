@@ -780,6 +780,7 @@ Table ref_unpaired_isolates as RxIsoUnpair {
 Table invitro_selection_results as Vitro {
   ref_name varchar
   rx_name varchar
+  backbone varchar [ref: > I.iso_name]
   gene varchar [
     note: 'Mutation gene'
   ]

@@ -32,6 +32,7 @@ def autofill_invitros(tables_dir: Path) -> None:
             headers=[
                 'ref_name',
                 'rx_name',
+                'backbone',
                 'gene',
                 'position',
                 'amino_acid',
