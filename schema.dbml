@@ -467,6 +467,22 @@ Table compound_synonyms as DrugSyn {
   }
 }
 
+Table compound_binding_pockets as Pocket {
+  ref_name varchar [ref: > R.ref_name]
+  drug_name varchar [ref: > Drug.drug_name]
+  gene varchar [
+    ref: > G.gene,
+    note: 'Gene name'
+  ]
+  position int [
+    note: 'Position of compound binding pocket'
+  ]
+
+  indexes {
+    (ref_name, drug_name, gene, position) [pk]
+  }
+}
+
 Table variants as VAR {
   var_name varchar [pk]
   as_wildtype bool [
@@ -655,7 +671,7 @@ Enum potency_type_enum {
   "NC20"
   "NC" [note: "Neutralization capacity"]
   "Ki" [note: "Enzyme inhibition constant"]
-  "Kcat/Km" [note: "Michaelis-Menten kinetics"]
+  "Kcat/Km" [note: "Michaelis-Menten kinetics, for enzymatic activity"]
 }
 
 Enum potency_unit_enum {

@@ -129,6 +129,10 @@ copy_csv payload/tables/dms/dms_escape_results.csv dms_escape_results >> $TARGET
 copy_csv payload/tables/ignore_mutations.csv ignore_mutations >> $TARGET_DIR/02_data_tables.sql
 copy_csv payload/tables/known_deletion_ranges.csv known_deletion_ranges >> $TARGET_DIR/02_data_tables.sql
 
+ls payload/tables/compound_binding_pockets | sort -h | while read filepath; do
+    copy_csv payload/tables/compound_binding_pockets/$filepath compound_binding_pockets >> $TARGET_DIR/02_data_tables.sql
+done
+
 pushd payload/
 if [ -z "$(git status -s .)" ]
 then
