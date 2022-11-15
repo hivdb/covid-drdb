@@ -98,17 +98,22 @@ fi
 scripts/export-sqlite.sh $VERSION
 
 if [ ! -f "build/covid-drdb-$VERSION.db" ]; then
-  echo "Release abort: file 'build/covid-drdb-$VERSION.db' is not found. Something wrong, please contact Philip." 1>&2
+  echo "Release abort: file 'build/covid-drdb-$VERSION.db' is not found. Something is wrong, please contact Philip." 1>&2
   exit 2
 fi
 
 if [ ! -f "build/covid-drdb-$VERSION-slim.db" ]; then
-  echo "Release abort: file 'build/covid-drdb-$VERSION-slim.db' is not found. Something wrong, please contact Philip." 1>&2
+  echo "Release abort: file 'build/covid-drdb-$VERSION-slim.db' is not found. Something is wrong, please contact Philip." 1>&2
   exit 2
 fi
 
 if [ ! -f "build/covid-drdb-$VERSION-variants.db" ]; then
-  echo "Release abort: file 'build/covid-drdb-$VERSION-variants.db' is not found. Something wrong, please contact Philip." 1>&2
+  echo "Release abort: file 'build/covid-drdb-$VERSION-variants.db' is not found. Something is wrong, please contact Philip." 1>&2
+  exit 2
+fi
+
+if [ ! -f "build/covid-drdb-$VERSION-drms.db" ]; then
+  echo "Release abort: file 'build/covid-drdb-$VERSION-drms.db' is not found. Something is wrong, please contact Philip." 1>&2
   exit 2
 fi
 
@@ -117,6 +122,7 @@ sleep 10
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
 github-release upload --tag $VERSION --name "covid-drdb-$VERSION-variants.db" --file "build/covid-drdb-$VERSION-variants.db"
+github-release upload --tag $VERSION --name "covid-drdb-$VERSION-drms.db" --file "build/covid-drdb-$VERSION-drms.db"
 
 if [[ "PRE_RELEASE" == "--pre-release" ]]; then
   echo "Pre-release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
