@@ -53,7 +53,7 @@ SELECT
       rxab.ab_name = ab.ab_name
   WHERE
     gene = 'S' AND
-	  escape_score >= 0.1 AND
+    escape_score >= 0.1 AND
     (SELECT COUNT(*)
       FROM rx_antibodies rxab2
       WHERE
@@ -94,21 +94,29 @@ SELECT
 
 INSERT INTO resistance_mutations
 SELECT
-	gene, position, amino_acid
-FROM resistance_mutation_attributes
-	WHERE
+  gene, position, amino_acid
+FROM resistance_mutation_attributes rma
+  WHERE
     gene = 'S' AND (
-  		(col_name LIKE 'FOLD:%' AND
-	  	 col_value::DECIMAL >= 5) OR
+      (col_name LIKE 'FOLD:%' AND
+       col_value::DECIMAL >= 5) OR
       col_name LIKE 'DMS:%'
+    ) AND
+    NOT EXISTS (
+      SELECT 1
+      FROM ignore_mutations igm
+      WHERE
+        igm.gene = rma.gene AND
+        igm.position = rma.position AND
+        igm.amino_acid = rma.amino_acid
     )
-	GROUP BY gene, position, amino_acid;
+  GROUP BY gene, position, amino_acid;
 
 DELETE FROM resistance_mutation_attributes rma
   WHERE
     gene = 'S' AND
     NOT EXISTS (
-			SELECT 1 FROM resistance_mutations rm
+      SELECT 1 FROM resistance_mutations rm
       WHERE
         rm.gene = rma.gene AND
         rm.position = rma.position AND

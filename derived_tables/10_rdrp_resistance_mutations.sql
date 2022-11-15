@@ -66,14 +66,22 @@ SELECT
 
 INSERT INTO resistance_mutations
 SELECT
-	gene, position, amino_acid
-FROM resistance_mutation_attributes
-	WHERE
+  gene, position, amino_acid
+FROM resistance_mutation_attributes rma
+  WHERE
     gene = 'RdRP' AND (
       (col_name LIKE 'FOLD:%' AND
        col_value::DECIMAL >= 2.5) OR
       (col_name IN ('INVIVO', 'INVITRO') AND
        col_value::DECIMAL > 1)
+    ) AND
+    NOT EXISTS (
+      SELECT 1
+      FROM ignore_mutations igm
+      WHERE
+        igm.gene = rma.gene AND
+        igm.position = rma.position AND
+        igm.amino_acid = rma.amino_acid
     )
   GROUP BY gene, position, amino_acid;
 
@@ -81,7 +89,7 @@ DELETE FROM resistance_mutation_attributes rma
   WHERE
     gene = 'RdRP' AND
     NOT EXISTS (
-			SELECT 1 FROM resistance_mutations rm
+      SELECT 1 FROM resistance_mutations rm
       WHERE
         rm.gene = rma.gene AND
         rm.position = rma.position AND
