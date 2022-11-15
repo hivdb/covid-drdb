@@ -210,6 +210,7 @@ Enum isolate_source_enum {
   BAL [note: 'Bronchoalveolar lavage']
   OP [note: 'Oropharyngeal']
   LT [note: 'Lung Tissue']
+  AN [note: 'Anterior Nasal']
   Respiratory
   Plasma
   Saliva
