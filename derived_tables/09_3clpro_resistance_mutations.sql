@@ -9,7 +9,7 @@ SELECT
   position,
   amino_acid,
   'FOLD:' || drug.drug_name AS col_name,
-  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fold) AS col_value
+  ROUND(CAST(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fold) AS NUMERIC), 1) AS col_value
   FROM isolate_mutations im
     JOIN susc_results s ON
       im.iso_name = s.iso_name
@@ -41,7 +41,7 @@ SELECT
   position,
   amino_acid,
   'FITNESS' AS col_name,
-  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fold) AS col_value
+  ROUND(CAST(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fold) AS NUMERIC), 1) AS col_value
   FROM isolate_mutations im
     JOIN susc_results s ON
       im.iso_name = s.iso_name

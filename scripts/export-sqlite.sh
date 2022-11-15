@@ -21,5 +21,9 @@ cp /dev/shm/covid-drdb-$VERSION.db /dev/shm/covid-drdb-$VERSION-variants.db
 ./scripts/make-variants-slim.sh /dev/shm/covid-drdb-$VERSION-variants.db
 echo "Written build/covid-drdb-$VERSION-variants.db"
 
+cp /dev/shm/covid-drdb-$VERSION.db /dev/shm/covid-drdb-$VERSION-drms.db
+./scripts/make-drms-slim.sh /dev/shm/covid-drdb-$VERSION-drms.db
+echo "Written build/covid-drdb-$VERSION-drms.db"
+
 mkdir -p build/
 mv /dev/shm/*.db build/
