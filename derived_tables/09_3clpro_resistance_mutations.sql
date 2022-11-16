@@ -97,7 +97,7 @@ FROM resistance_mutation_attributes rma
       (col_name = 'INVITRO' AND
        col_value::DECIMAL >= 1) OR
       (col_name = 'INVIVO' AND
-       col_value::DECIMAL > 1)
+       col_value::DECIMAL >= 1)
     ) AND
     NOT EXISTS (
       SELECT 1
@@ -124,6 +124,26 @@ SELECT
   GROUP BY p.gene, p.position, rm.amino_acid, col_name, col_value
   ORDER BY p.gene, p.position, rm.amino_acid, col_name, col_value;
 
+INSERT INTO resistance_mutation_attributes
+SELECT
+  vc.gene, vc.position, vc.amino_acid,
+  'VARCONS' AS col_name,
+  '1' AS col_value
+  FROM variant_consensus vc
+    JOIN resistance_mutations rm ON
+      vc.gene = rm.gene AND
+      vc.position = rm.position AND
+      vc.amino_acid = rm.amino_acid
+  WHERE
+    vc.gene = '_3CLpro' AND
+    vc.var_name IN (
+      'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon',
+      'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa',
+      'Lambda', 'Mu', 'Omicron/BA.1', 'Omicron/BA.2', 'Omicron/BA.3',
+      'Omicron/BA.4', 'Omicron/BA.5'
+    )
+  GROUP BY vc.gene, vc.position, vc.amino_acid, col_name, col_value
+  ORDER BY vc.gene, vc.position, vc.amino_acid, col_name, col_value;
 
 DELETE FROM resistance_mutation_attributes rma
   WHERE
