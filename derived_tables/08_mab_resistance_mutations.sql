@@ -69,7 +69,7 @@ SELECT
   'INVIVO' AS col_name,
   SUM(count) AS col_value
   FROM invivo_selection_results
-  WHERE gene = 'S'
+  WHERE gene = 'S' AND amino_acid != 'stop'
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
@@ -79,7 +79,7 @@ SELECT
   'INVITRO' AS col_name,
   COUNT(*) AS col_value
   FROM invitro_selection_results
-  WHERE gene = 'S'
+  WHERE gene = 'S' AND amino_acid != 'stop'
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
