@@ -72,8 +72,10 @@ FROM resistance_mutation_attributes rma
     gene = 'RdRP' AND (
       (col_name LIKE 'FOLD:%' AND
        col_value::DECIMAL >= 2.5) OR
-      (col_name IN ('INVIVO', 'INVITRO') AND
-       col_value::DECIMAL > 1)
+      (col_name = 'INVITRO' AND
+       col_value::DECIMAL >= 1) OR
+      (col_name = 'INVIVO' AND
+       col_value::DECIMAL >= 1)
     ) AND
     NOT EXISTS (
       SELECT 1
