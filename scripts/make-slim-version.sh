@@ -90,6 +90,6 @@ DELETE FROM antibodies AS A
   );
 
 DELETE FROM susc_summary;
-DELETE FROM resistance_mutation_attibutes;
+DELETE FROM resistance_mutation_attributes;
 VACUUM
 EOF
