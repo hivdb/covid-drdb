@@ -62,8 +62,22 @@ SELECT
   gene, position, amino_acid,
   'INVIVO' AS col_name,
   SUM(count) AS col_value
-  FROM invivo_selection_results
-  WHERE gene = '_3CLpro' AND amino_acid != 'stop'
+  FROM invivo_selection_results sel
+  WHERE
+    gene = '_3CLpro' AND
+    amino_acid != 'stop' AND
+    EXISTS (
+      SELECT 1 FROM subject_treatments sbjrx
+        JOIN rx_compounds rxdrug ON
+          sbjrx.ref_name = rxdrug.ref_name AND
+          sbjrx.rx_name = rxdrug.rx_name
+        JOIN approved_drugs drug ON
+          rxdrug.drug_name = drug.drug_name
+      WHERE
+        sbjrx.ref_name = sel.ref_name AND
+        sbjrx.subject_name = sel.subject_name AND
+        sbjrx.start_date < sel.appearance_date
+    )
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
@@ -95,9 +109,9 @@ FROM resistance_mutation_attributes rma
       (col_name LIKE 'FOLD:%' AND
        col_value::DECIMAL >= 2.5) OR
       (col_name = 'INVITRO' AND
-       col_value::DECIMAL >= 1) OR
+       col_value::DECIMAL > 1) OR
       (col_name = 'INVIVO' AND
-       col_value::DECIMAL >= 1)
+       col_value::DECIMAL > 1)
     ) AND
     NOT EXISTS (
       SELECT 1

@@ -68,8 +68,22 @@ SELECT
   gene, position, amino_acid,
   'INVIVO' AS col_name,
   SUM(count) AS col_value
-  FROM invivo_selection_results
-  WHERE gene = 'S' AND amino_acid != 'stop'
+  FROM invivo_selection_results sel
+  WHERE
+    gene = 'S' AND
+    amino_acid != 'stop' AND
+    EXISTS (
+      SELECT 1 FROM subject_treatments sbjrx
+        JOIN rx_antibodies rxab ON
+          sbjrx.ref_name = rxab.ref_name AND
+          sbjrx.rx_name = rxab.rx_name
+        JOIN approved_mabs ab ON
+          rxab.ab_name = ab.ab_name
+      WHERE
+        sbjrx.ref_name = sel.ref_name AND
+        sbjrx.subject_name = sel.subject_name AND
+        sbjrx.start_date < sel.appearance_date
+    )
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
