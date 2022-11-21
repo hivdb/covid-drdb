@@ -40,6 +40,34 @@ SELECT
   GROUP BY im.gene, position, amino_acid, col_name, priority
   ORDER BY im.gene, position, amino_acid, priority;
 
+SELECT
+  im.gene, position, amino_acid, s.ref_name
+  INTO _drm_articles
+  FROM isolate_mutations im
+    JOIN susc_results s ON
+      im.iso_name = s.iso_name
+    JOIN isolates iso ON
+      im.iso_name = iso.iso_name
+    JOIN isolate_pairs ip ON
+      ip.gene = 'S' AND
+      s.control_iso_name = ip.control_iso_name AND
+      s.iso_name = ip.iso_name
+    JOIN rx_antibodies rxab ON
+      s.ref_name=rxab.ref_name AND
+      s.rx_name=rxab.rx_name
+    JOIN approved_mabs ab ON
+      rxab.ab_name = ab.ab_name
+    WHERE
+      im.gene = 'S' AND
+      ip.num_mutations = 1 AND
+      (SELECT COUNT(*)
+        FROM rx_antibodies rxab2
+        WHERE
+          s.ref_name=rxab2.ref_name AND
+          s.rx_name=rxab2.rx_name
+      ) = 1
+  GROUP BY im.gene, position, amino_acid, s.ref_name;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
@@ -63,6 +91,27 @@ SELECT
   GROUP BY gene, position, amino_acid, col_name, priority
   ORDER BY gene, position, amino_acid, priority;
 
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, dms.ref_name
+  FROM dms_escape_results dms
+    JOIN rx_antibodies rxab ON
+      dms.ref_name=rxab.ref_name AND
+      dms.rx_name=rxab.rx_name
+    JOIN approved_mabs ab ON
+      rxab.ab_name = ab.ab_name
+  WHERE
+    gene = 'S' AND
+    escape_score >= 0.1 AND
+    (SELECT COUNT(*)
+      FROM rx_antibodies rxab2
+      WHERE
+        dms.ref_name=rxab2.ref_name AND
+        dms.rx_name=rxab2.rx_name
+    ) = 1
+  GROUP BY gene, position, amino_acid, dms.ref_name
+ON CONFLICT DO NOTHING;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
@@ -71,21 +120,19 @@ SELECT
   FROM invivo_selection_results sel
   WHERE
     gene = 'S' AND
-    amino_acid != 'stop' AND
-    EXISTS (
-      SELECT 1 FROM subject_treatments sbjrx
-        JOIN rx_antibodies rxab ON
-          sbjrx.ref_name = rxab.ref_name AND
-          sbjrx.rx_name = rxab.rx_name
-        JOIN approved_mabs ab ON
-          rxab.ab_name = ab.ab_name
-      WHERE
-        sbjrx.ref_name = sel.ref_name AND
-        sbjrx.subject_name = sel.subject_name AND
-        sbjrx.start_date < sel.appearance_date
-    )
+    amino_acid != 'stop'
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
+
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM invivo_selection_results sel
+  WHERE
+    gene = 'S' AND
+    amino_acid != 'stop'
+  GROUP BY gene, position, amino_acid, ref_name
+ON CONFLICT DO NOTHING;
 
 INSERT INTO resistance_mutation_attributes
 SELECT
@@ -97,6 +144,14 @@ SELECT
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM invitro_selection_results
+  WHERE gene = 'S' AND amino_acid != 'stop'
+  GROUP BY gene, position, amino_acid, ref_name
+ON CONFLICT DO NOTHING;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
@@ -105,6 +160,13 @@ SELECT
   FROM amino_acid_prevalence
   WHERE gene = 'S' AND ref_name = 'Martin21'
   ORDER BY gene, position, amino_acid;
+
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM amino_acid_prevalence
+  WHERE gene = 'S' AND ref_name = 'Martin21'
+ON CONFLICT DO NOTHING;
 
 INSERT INTO resistance_mutations
 SELECT
@@ -158,4 +220,19 @@ DELETE FROM resistance_mutation_attributes rma
         rm.amino_acid = rma.amino_acid
     );
 
+DELETE FROM _drm_articles a
+  WHERE
+    NOT EXISTS (
+      SELECT 1 FROM resistance_mutations rm
+      WHERE
+        rm.gene = a.gene AND
+        rm.position = a.position AND
+        rm.amino_acid = a.amino_acid
+    );
+
+INSERT INTO resistance_mutation_articles
+  SELECT gene, ref_name FROM _drm_articles
+  GROUP BY gene, ref_name;
+
 DROP TABLE approved_mabs;
+DROP TABLE _drm_articles;

@@ -33,7 +33,36 @@ SELECT
           s.ref_name=rxdrug2.ref_name AND
           s.rx_name=rxdrug2.rx_name
       ) = 1
-  GROUP BY im.gene, position, amino_acid, col_name;
+  GROUP BY im.gene, position, amino_acid, col_name
+  ORDER BY im.gene, position, amino_acid;
+
+SELECT
+  im.gene, position, amino_acid, s.ref_name
+  INTO _drm_articles
+  FROM isolate_mutations im
+    JOIN susc_results s ON
+      im.iso_name = s.iso_name
+    JOIN isolates iso ON
+      im.iso_name = iso.iso_name
+    JOIN isolate_pairs ip ON
+      ip.gene = '_3CLpro' AND
+      s.control_iso_name = ip.control_iso_name AND
+      s.iso_name = ip.iso_name
+    JOIN rx_compounds rxdrug ON
+      s.ref_name=rxdrug.ref_name AND
+      s.rx_name=rxdrug.rx_name
+    JOIN approved_drugs drug ON
+      rxdrug.drug_name = drug.drug_name
+    WHERE
+      im.gene = '_3CLpro' AND
+      ip.num_mutations = 1 AND
+      (SELECT COUNT(*)
+        FROM rx_compounds rxdrug2
+        WHERE
+          s.ref_name=rxdrug2.ref_name AND
+          s.rx_name=rxdrug2.rx_name
+      ) = 1
+  GROUP BY im.gene, position, amino_acid, s.ref_name;
 
 INSERT INTO resistance_mutation_attributes
 SELECT
@@ -55,7 +84,30 @@ SELECT
       s.rx_type = 'enzyme-kinetics' AND
       im.gene = '_3CLpro' AND
       ip.num_mutations = 1
-  GROUP BY im.gene, position, amino_acid, col_name;
+  GROUP BY im.gene, position, amino_acid, col_name
+  ORDER BY im.gene, position, amino_acid;
+
+INSERT INTO _drm_articles
+SELECT
+  im.gene,
+  position,
+  amino_acid,
+  s.ref_name
+  FROM isolate_mutations im
+    JOIN susc_results s ON
+      im.iso_name = s.iso_name
+    JOIN isolates iso ON
+      im.iso_name = iso.iso_name
+    JOIN isolate_pairs ip ON
+      ip.gene = '_3CLpro' AND
+      s.control_iso_name = ip.control_iso_name AND
+      s.iso_name = ip.iso_name
+    WHERE
+      s.rx_type = 'enzyme-kinetics' AND
+      im.gene = '_3CLpro' AND
+      ip.num_mutations = 1
+  GROUP BY im.gene, position, amino_acid, s.ref_name
+ON CONFLICT DO NOTHING;
 
 INSERT INTO resistance_mutation_attributes
 SELECT
@@ -81,6 +133,28 @@ SELECT
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM invivo_selection_results sel
+  WHERE
+    gene = '_3CLpro' AND
+    amino_acid != 'stop' AND
+    EXISTS (
+      SELECT 1 FROM subject_treatments sbjrx
+        JOIN rx_compounds rxdrug ON
+          sbjrx.ref_name = rxdrug.ref_name AND
+          sbjrx.rx_name = rxdrug.rx_name
+        JOIN approved_drugs drug ON
+          rxdrug.drug_name = drug.drug_name
+      WHERE
+        sbjrx.ref_name = sel.ref_name AND
+        sbjrx.subject_name = sel.subject_name AND
+        sbjrx.start_date < sel.appearance_date
+    )
+  GROUP BY gene, position, amino_acid, ref_name
+ON CONFLICT DO NOTHING;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
@@ -91,6 +165,14 @@ SELECT
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM invitro_selection_results
+  WHERE gene = '_3CLpro' AND amino_acid != 'stop'
+  GROUP BY gene, position, amino_acid, ref_name
+ON CONFLICT DO NOTHING;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
@@ -99,6 +181,13 @@ SELECT
   FROM amino_acid_prevalence
   WHERE gene = '_3CLpro' AND ref_name = 'Martin21'
   ORDER BY gene, position, amino_acid;
+
+INSERT INTO _drm_articles
+SELECT
+  gene, position, amino_acid, ref_name
+  FROM amino_acid_prevalence
+  WHERE gene = '_3CLpro' AND ref_name = 'Martin21'
+ON CONFLICT DO NOTHING;
 
 INSERT INTO resistance_mutations
 SELECT
@@ -138,6 +227,19 @@ SELECT
   GROUP BY p.gene, p.position, rm.amino_acid, col_name, col_value
   ORDER BY p.gene, p.position, rm.amino_acid, col_name, col_value;
 
+INSERT INTO _drm_articles
+SELECT
+  p.gene, p.position, rm.amino_acid, p.ref_name
+  FROM compound_binding_pockets p
+    JOIN resistance_mutations rm ON
+      p.gene = rm.gene AND
+      p.position = rm.position
+    JOIN approved_drugs drug ON
+      p.drug_name = drug.drug_name
+  WHERE p.gene = '_3CLpro'
+  GROUP BY p.gene, p.position, rm.amino_acid, p.ref_name
+ON CONFLICT DO NOTHING;
+
 INSERT INTO resistance_mutation_attributes
 SELECT
   vc.gene, vc.position, vc.amino_acid,
@@ -170,4 +272,19 @@ DELETE FROM resistance_mutation_attributes rma
         rm.amino_acid = rma.amino_acid
     );
 
+DELETE FROM _drm_articles a
+  WHERE
+    NOT EXISTS (
+      SELECT 1 FROM resistance_mutations rm
+      WHERE
+        rm.gene = a.gene AND
+        rm.position = a.position AND
+        rm.amino_acid = a.amino_acid
+    );
+
+INSERT INTO resistance_mutation_articles
+  SELECT gene, ref_name FROM _drm_articles
+  GROUP BY gene, ref_name;
+
 DROP TABLE approved_drugs;
+DROP TABLE _drm_articles;

@@ -1299,6 +1299,15 @@ Table resistance_mutation_attributes {
   }
 }
 
+Table resistance_mutation_articles {
+  gene varchar [ref: > G.gene]
+  ref_name varchar [ref: > R.ref_name]
+
+  indexes {
+    (gene, ref_name) [pk]
+  }
+}
+
 Table resistance_mutations {
   gene varchar [
     ref: > G.gene,
