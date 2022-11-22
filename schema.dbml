@@ -211,6 +211,7 @@ Enum isolate_source_enum {
   OP [note: 'Oropharyngeal']
   LT [note: 'Lung Tissue']
   AN [note: 'Anterior Nasal']
+  CNTS [note: 'combined nose and throat swab']
   Respiratory
   Plasma
   Saliva
