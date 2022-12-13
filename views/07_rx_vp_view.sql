@@ -13,15 +13,15 @@ ON
 ;
 
 
-CREATE VIEW IF NOT EXISTS rx_vacc_plasma_full_dosage_view
-AS
-SELECT
-    rx.*
-FROM
-    rx_vacc_plasma rx,
-    vaccines vac
-WHERE
-    rx.vaccine_name = vac.vaccine_name
-    AND
-    rx.dosage = vac.st_shot
-;
+-- CREATE VIEW IF NOT EXISTS rx_vacc_plasma_full_dosage_view
+-- AS
+-- SELECT
+--     rx.*
+-- FROM
+--     rx_vacc_plasma rx,
+--     vaccines vac
+-- WHERE
+--     rx.vaccine_name = vac.vaccine_name
+--     AND
+--     rx.dosage = vac.st_shot
+-- ;
