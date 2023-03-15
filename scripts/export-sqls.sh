@@ -133,6 +133,8 @@ ls payload/tables/compound_binding_pockets | sort -h | while read filepath; do
     copy_csv payload/tables/compound_binding_pockets/$filepath compound_binding_pockets >> $TARGET_DIR/02_data_tables.sql
 done
 
+git config --global --add safe.directory /covid-drdb-payload
+
 pushd payload/
 if [ -z "$(git status -s .)" ]
 then
