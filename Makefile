@@ -10,7 +10,7 @@ docker-envfile:
 update-builder:
 	@docker pull hivdb/covid-drdb-builder:latest > /dev/null
 
-inspect-builder: update-builder network docker-envfile
+inspect-builder: network docker-envfile
 	@docker run --rm -it \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -23,7 +23,7 @@ release-builder:
 	@docker push hivdb/covid-drdb-builder:latest
 
 autofill: update-builder
-	@docker run --rm -it \
+	@docker run --rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
    		hivdb/covid-drdb-builder:latest \
@@ -47,28 +47,28 @@ import-sra-info: update-builder
 		pipenv run python -m drdb.entry import-sra-info payload/
 
 sync-refaa: update-builder
-	@docker run --rm -it \
+	@docker run --rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-ref-amino-acid payload/
 
 sync-varcons: update-builder
-	@docker run --rm -it \
+	@docker run --rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-variant-consensus payload/
 
 sync-glue: update-builder
-	@docker run --rm -it \
+	@docker run --rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-glue-prevalence payload/
 
 local-release: update-builder network docker-envfile
-	@docker run --rm -it \
+	@docker run --rm \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -79,7 +79,7 @@ local-release: update-builder network docker-envfile
 		scripts/export-sqlite.sh local
 
 release: update-builder network docker-envfile
-	@docker run --rm -it \
+	@docker run --rm \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -90,7 +90,7 @@ release: update-builder network docker-envfile
 		scripts/github-release.sh
 
 pre-release: update-builder network docker-envfile
-	@docker run --rm -it \
+	@docker run --rm \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -101,7 +101,7 @@ pre-release: update-builder network docker-envfile
 		scripts/github-release.sh --pre-release
 
 sync-to-s3: update-builder docker-envfile
-	@docker run --rm -it \
+	@docker run --rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--volume ~/.aws:/root/.aws:ro \
@@ -111,7 +111,7 @@ sync-to-s3: update-builder docker-envfile
 
 devdb: update-builder network
 	@docker run \
-		--rm -it \
+		--rm \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		hivdb/covid-drdb-builder:latest \
