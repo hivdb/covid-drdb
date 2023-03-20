@@ -4,21 +4,37 @@ set -e
 export TZ=America/Los_Angeles
 
 PRE_RELEASE=
+VERSION=
 
 while (($#)); do
   if [[ "$1" == "--pre-release" ]]; then
     PRE_RELEASE=$1
+  else
+    VERSION=$1
   fi
   shift
 done
 
-if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
-  VERSION=$(date +"%Y%m%d-%H%M%S")
-  TODAY=$(date +"%Y-%m-%d %H:%M:%S %Z")
-else
-  VERSION=$(date +"%Y%m%d")
-  TODAY=$(date +"%Y-%m-%d")
+if [ -z "$VERSION" ]; then
+  if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
+    VERSION=$(date +"%Y%m%d-%H%M%S")
+  else
+    VERSION=$(date +"%Y%m%d")
+  fi
 fi
+
+if [[ "$VERSION" =~ ^[0-9]{8}-[0-9]{6}$ ]]; then
+  PRE_RELEASE="--pre-release"
+  TODAY=$(echo "$VERSION $(date +%Z)" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3 \4:\5:\6/g')
+elif [[ "$VERSION" =~ ^[0-9]{8}$ ]]; then
+  PRE_RELEASE=
+  TODAY=$(echo "$VERSION" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})/\1-\2-\3/g')
+else
+  echo "Release abort: invalid version format. Please use YYYYMMDD or YYYYMMDD-HHMMSS." 1>&2
+  exit 1
+fi
+echo $PRE_RELEASE $VERSION $TODAY
+exit 1
 
 GIT="git -C payload/"
 export GITHUB_USER=hivdb
