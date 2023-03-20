@@ -9,6 +9,7 @@ git config --global --add safe.directory /covid-drdb-payload
 PRE_RELEASE=
 VERSION=
 DRYRUN=
+REPO=hivdb/covid-drdb-payload
 
 while (($#)); do
   if [[ "$1" == "--prerelease" ]]; then
@@ -42,7 +43,7 @@ fi
 
 GIT="git -C payload/"
 
-if gh release view --repo hivdb/covid-drdb-payload $VERSION > /dev/null 2>&1; then
+if gh release view --repo $REPO $VERSION > /dev/null 2>&1; then
   echo "Release abort: version $VERSION is already released." 1>&2
   if [[ "$PRE_RELEASE" != "--prerelease" ]]; then
     echo "You may want to 'make pre-release' for deploy a testing version." 1>&2
@@ -89,7 +90,7 @@ else
     exit 1
   fi
 
-  prev_tag=$(gh release list --exclude-pre-releases --repo hivdb/covid-drdb-payload -L 1 | cut -d$'\t' -f3)
+  prev_tag=$(gh release list --exclude-pre-releases --repo $REPO -L 1 | cut -d$'\t' -f3)
   prev_commit=$($GIT rev-list -n 1 $prev_tag)
 
   title="COVID-DRDB $VERSION"
@@ -142,10 +143,10 @@ if [ ! -f "build/covid-drdb-$VERSION-drms.db" ]; then
   exit 2
 fi
 
-echo -e $description | gh release create --title "$title" $PRE_RELEASE --notes-file - $VERSION build/covid-drdb-$VERSION.db build/covid-drdb-$VERSION-*.db
+echo -e $description | gh release create --repo $REPO --title "$title" $PRE_RELEASE --notes-file - $VERSION build/covid-drdb-$VERSION.db build/covid-drdb-$VERSION-*.db
 
 if [[ "PRE_RELEASE" == "--prerelease" ]]; then
-  echo "Pre-release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
+  echo "Pre-release $VERSION created: https://github.com/$REPO/releases/tag/$VERSION"
 else
-  echo "Release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
+  echo "Release $VERSION created: https://github.com/$REPO/releases/tag/$VERSION"
 fi
