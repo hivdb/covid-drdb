@@ -5,10 +5,13 @@ export TZ=America/Los_Angeles
 
 PRE_RELEASE=
 VERSION=
+DRYRUN=
 
 while (($#)); do
-  if [[ "$1" == "--pre-release" ]]; then
+  if [[ "$1" == "--prerelease" ]]; then
     PRE_RELEASE=$1
+  elif [[ "$1" == "--dryrun" ]]; then
+    DRYRUN=$1
   else
     VERSION=$1
   fi
@@ -16,7 +19,7 @@ while (($#)); do
 done
 
 if [ -z "$VERSION" ]; then
-  if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
+  if [[ "$PRE_RELEASE" == "--prerelease" ]]; then
     VERSION=$(date +"%Y%m%d-%H%M%S")
   else
     VERSION=$(date +"%Y%m%d")
@@ -24,7 +27,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 if [[ "$VERSION" =~ ^[0-9]{8}-[0-9]{6}$ ]]; then
-  PRE_RELEASE="--pre-release"
+  PRE_RELEASE="--prerelease"
   TODAY=$(echo "$VERSION $(date +%Z)" | sed -E 's/^([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})/\1-\2-\3 \4:\5:\6/g')
 elif [[ "$VERSION" =~ ^[0-9]{8}$ ]]; then
   PRE_RELEASE=
@@ -33,25 +36,19 @@ else
   echo "Release abort: invalid version format. Please use YYYYMMDD or YYYYMMDD-HHMMSS." 1>&2
   exit 1
 fi
-echo $PRE_RELEASE $VERSION $TODAY
-exit 1
 
 GIT="git -C payload/"
-export GITHUB_USER=hivdb
-export GITHUB_REPO=covid-drdb-payload
 
-info=$(github-release info --json)
-known_tag=$(echo "$info" | jq -r ".Releases | map(select(.tag_name == \"$VERSION\")) | .[0].tag_name")
-if [[ "$known_tag" == "$VERSION" ]]; then
-  echo "Release abort: today's version $VERSION is already released." 1>&2
-  if [[ "$PRE_RELEASE" != "--pre-release" ]]; then
+if gh release view --repo hivdb/covid-drdb-payload $VERSION > /dev/null 2>&1; then
+  echo "Release abort: version $VERSION is already released." 1>&2
+  if [[ "$PRE_RELEASE" != "--prerelease" ]]; then
     echo "You may want to 'make pre-release' for deploy a testing version." 1>&2
   fi
   exit 3
 fi
 builder_local_commit=$(git rev-parse HEAD)
 
-if [[ "$PRE_RELEASE" == "--pre-release" ]]; then
+if [[ "$PRE_RELEASE" == "--prerelease" ]]; then
   title="Pre-release $VERSION"
   description="Pre-release date: $TODAY\n\n
 Usage of the \`.db\` files:\n\n
@@ -89,8 +86,8 @@ else
     exit 1
   fi
 
-  prev_tag=$(echo "$info" | jq -r '.Releases | map(select(.prerelease == false)) | .[0].tag_name')
-  prev_commit=$(echo "$info" | jq -r ".Tags | map(select(.name == \"$prev_tag\")) | .[0].commit.sha")
+  prev_tag=$(gh release list --exclude-pre-releases --repo hivdb/covid-drdb-payload -L 1 | cut -d$'\t' -f3)
+  prev_commit=$($GIT rev-list -n 1 $prev_tag)
 
   title="COVID-DRDB $VERSION"
   description="Release date: $TODAY"
@@ -109,6 +106,15 @@ You can also use any SQLite viewer to open the database, e.g.:\n\n
 - https://sqlitebrowser.org/\n\n
 Built with hivdb/covid-drdb@${builder_local_commit}\n"
   fi
+fi
+
+if [[ "$DRYRUN" == "--dryrun" ]]; then
+  echo "Dry run: will not create a release."
+  echo
+  echo "Title: $title"
+  echo "Tag: $VERSION"
+  echo -e "Description:\n$description"
+  exit 0
 fi
 
 scripts/export-sqlite.sh $VERSION
@@ -133,17 +139,10 @@ if [ ! -f "build/covid-drdb-$VERSION-drms.db" ]; then
   exit 2
 fi
 
-echo -e $description | github-release release --tag $VERSION --name "$title" $PRE_RELEASE --description -
-sleep 10
-github-release upload --tag $VERSION --name "covid-drdb-$VERSION.db" --file "build/covid-drdb-$VERSION.db"
-github-release upload --tag $VERSION --name "covid-drdb-$VERSION-slim.db" --file "build/covid-drdb-$VERSION-slim.db"
-github-release upload --tag $VERSION --name "covid-drdb-$VERSION-variants.db" --file "build/covid-drdb-$VERSION-variants.db"
-github-release upload --tag $VERSION --name "covid-drdb-$VERSION-drms.db" --file "build/covid-drdb-$VERSION-drms.db"
+echo -e $description | gh release create --title "$title" $PRE_RELEASE --notes-file - $VERSION build/covid-drdb-$VERSION.db build/covid-drdb-$VERSION-*.db
 
-if [[ "PRE_RELEASE" == "--pre-release" ]]; then
+if [[ "PRE_RELEASE" == "--prerelease" ]]; then
   echo "Pre-release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
 else
   echo "Release $VERSION created: https://github.com/hivdb/covid-drdb-payload/releases/tag/$VERSION"
 fi
-
-scripts/sync-to-s3.sh

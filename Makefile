@@ -67,6 +67,9 @@ sync-glue: update-builder
    		hivdb/covid-drdb-builder:latest \
 		pipenv run python -m drdb.entry update-glue-prevalence payload/
 
+fetch-payload-origin:
+	@git -C payload/ fetch origin
+
 local-release: update-builder network docker-envfile
 	@docker run --rm \
 		--shm-size=2048m \
@@ -78,7 +81,7 @@ local-release: update-builder network docker-envfile
    		hivdb/covid-drdb-builder:latest \
 		scripts/export-sqlite.sh local
 
-release: update-builder network docker-envfile
+release: update-builder network docker-envfile fetch-payload-origin
 	@docker run --rm \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
@@ -88,8 +91,9 @@ release: update-builder network docker-envfile
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
 		scripts/github-release.sh
+	@make sync-to-s3
 
-pre-release: update-builder network docker-envfile
+pre-release: update-builder network docker-envfile fetch-payload-origin
 	@docker run --rm \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
@@ -98,7 +102,8 @@ pre-release: update-builder network docker-envfile
 		--volume ~/.aws:/root/.aws:ro \
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
-		scripts/github-release.sh --pre-release
+		scripts/github-release.sh --prerelease
+	@make sync-to-s3
 
 sync-to-s3: update-builder docker-envfile
 	@docker run --rm \
@@ -139,4 +144,4 @@ psql-devdb:
 psql-devdb-no-docker:
 	@psql -U postgres -h localhost -p 6543
 
-.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder new-study import-*
+.PHONY: autofill network devdb *-devdb builder *-builder *-sqlite release pre-release debug-* sync-* update-builder new-study import-* fetch-*
