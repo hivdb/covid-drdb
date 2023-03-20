@@ -3,6 +3,9 @@
 set -e
 export TZ=America/Los_Angeles
 
+git config --global --add safe.directory /covid-drdb
+git config --global --add safe.directory /covid-drdb-payload
+
 PRE_RELEASE=
 VERSION=
 DRYRUN=
