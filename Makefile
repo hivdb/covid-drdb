@@ -82,26 +82,30 @@ local-release: update-builder network docker-envfile
 		scripts/export-sqlite.sh local
 
 release: update-builder network docker-envfile fetch-payload-origin
-	@docker run --rm -it \
-		--shm-size=2048m \
-		--volume=$(shell pwd):/covid-drdb/ \
-		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
-		--network=covid-drdb-network \
-		--volume ~/.aws:/root/.aws:ro \
+	@set -e ; \
+	version=$$(docker run --rm -it --volume=$$(pwd):/covid-drdb/ --volume=$$(dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload --network=covid-drdb-network --volume ~/.aws:/root/.aws:ro --env-file ./docker-envfile hivdb/covid-drdb-builder:latest scripts/create-tag.sh) ; \
+	git -C payload/ tag $${version} ; \
+	git -C payload/ push origin $${version} ; \
+	docker run \
+		--rm -it \
+		--volume=$$(pwd):/covid-drdb/ \
+		--volume=$$(dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--env-file ./docker-envfile \
-   		hivdb/covid-drdb-builder:latest \
-		scripts/create-tag.sh
+		hivdb/covid-drdb-builder:latest \
+		scripts/watch-release.sh $${version}
 
 pre-release: update-builder network docker-envfile fetch-payload-origin
-	@docker run --rm -it \
-		--shm-size=2048m \
-		--volume=$(shell pwd):/covid-drdb/ \
-		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
-		--network=covid-drdb-network \
-		--volume ~/.aws:/root/.aws:ro \
+	@set -e ; \
+	version=$$(docker run --rm -it --volume=$$(pwd):/covid-drdb/ --volume=$$(dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload --network=covid-drdb-network --volume ~/.aws:/root/.aws:ro --env-file ./docker-envfile hivdb/covid-drdb-builder:latest scripts/create-tag.sh --prerelease) ; \
+	git -C payload/ tag $${version} ; \
+	git -C payload/ push origin $${version} ; \
+	docker run \
+		--rm -it \
+		--volume=$$(pwd):/covid-drdb/ \
+		--volume=$$(dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
 		--env-file ./docker-envfile \
-   		hivdb/covid-drdb-builder:latest \
-		scripts/create-tag.sh --prerelease
+		hivdb/covid-drdb-builder:latest \
+		scripts/watch-release.sh $${version}
 
 devdb: update-builder network
 	@docker run \

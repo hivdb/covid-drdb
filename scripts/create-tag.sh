@@ -60,14 +60,8 @@ if [ -z "$PRE_RELEASE" ]; then
 fi
 
 if [[ "$DRYRUN" == "--dryrun" ]]; then
-  echo "Dry run: skip creating tag $VERSION"
-  exit 0
+  echo "Dry run: skip creating tag $VERSION" 1>&2
+  exit 1
 fi
 
-$GIT tag $VERSION
-$GIT push origin $VERSION
-
-sleep 15
-echo 'Waiting for the release workflow to start...'
-
-gh run wtach --repo hivdb/covid-drdb-payload $(gh run list --repo hivdb/covid-drdb-payload --json headBranch,databaseId,workflowName -L 4 --jq ".[] | select( .headBranch == \"$VERSION\" and .workflowName == \"Release & pre-release\").databaseId")
+echo -n $VERSION
