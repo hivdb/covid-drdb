@@ -144,7 +144,7 @@ if [ ! -f "build/covid-drdb-$VERSION-drms.db" ]; then
 fi
 
 echo -e $description | gh release create --repo $REPO --title "$title" $PRE_RELEASE --notes-file - $VERSION
-ls -1 build/*.db | while read name; do
+ls -1 build/${VERSION}*.db | while read name; do
   gh release upload --repo $REPO $VERSION $name
 done
 
