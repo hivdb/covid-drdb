@@ -82,7 +82,7 @@ local-release: update-builder network docker-envfile
 		scripts/export-sqlite.sh local
 
 release: update-builder network docker-envfile fetch-payload-origin
-	@docker run --rm \
+	@docker run --rm -it \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -90,11 +90,10 @@ release: update-builder network docker-envfile fetch-payload-origin
 		--volume ~/.aws:/root/.aws:ro \
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
-		scripts/github-release.sh
-	@make sync-to-s3
+		scripts/create-tag.sh
 
 pre-release: update-builder network docker-envfile fetch-payload-origin
-	@docker run --rm \
+	@docker run --rm -it \
 		--shm-size=2048m \
 		--volume=$(shell pwd):/covid-drdb/ \
 		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
@@ -102,17 +101,7 @@ pre-release: update-builder network docker-envfile fetch-payload-origin
 		--volume ~/.aws:/root/.aws:ro \
 		--env-file ./docker-envfile \
    		hivdb/covid-drdb-builder:latest \
-		scripts/github-release.sh --prerelease
-	@make sync-to-s3
-
-sync-to-s3: update-builder docker-envfile
-	@docker run --rm \
-		--volume=$(shell pwd):/covid-drdb/ \
-		--volume=$(shell dirname $$(pwd))/covid-drdb-payload:/covid-drdb/payload \
-		--volume ~/.aws:/root/.aws:ro \
-		--env-file ./docker-envfile \
-   		hivdb/covid-drdb-builder:latest \
-		scripts/sync-to-s3.sh
+		scripts/create-tag.sh --prerelease
 
 devdb: update-builder network
 	@docker run \
