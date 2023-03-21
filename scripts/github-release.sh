@@ -143,7 +143,10 @@ if [ ! -f "build/covid-drdb-$VERSION-drms.db" ]; then
   exit 2
 fi
 
-echo -e $description | gh release create --repo $REPO --title "$title" $PRE_RELEASE --notes-file - $VERSION build/covid-drdb-$VERSION.db build/covid-drdb-$VERSION-*.db
+echo -e $description | gh release create --repo $REPO --title "$title" $PRE_RELEASE --notes-file - $VERSION
+ls -1 build/*.db | while read name; do
+  gh release upload --repo $REPO $VERSION $name
+done
 
 if [[ "PRE_RELEASE" == "--prerelease" ]]; then
   echo "Pre-release $VERSION created: https://github.com/$REPO/releases/tag/$VERSION"
