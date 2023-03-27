@@ -681,6 +681,7 @@ Enum potency_unit_enum {
   "IU/ml"
   "s⁻¹µM⁻¹"
   "s⁻¹M⁻¹"
+  "min⁻¹µM⁻¹"
 }
 
 Enum virus_type_enum {
@@ -692,6 +693,7 @@ Enum virus_type_enum {
   "VLP"
   "enzyme" // for enzyme inhibition
   "reporter-cell"
+  "protein expression"
 }
 
 Table assays as A {
