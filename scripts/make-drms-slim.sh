@@ -7,5 +7,7 @@ DELETE FROM articles AS ref WHERE NOT EXISTS (SELECT 1 FROM resistance_mutation_
 PRAGMA writable_schema = 1;
 DELETE FROM sqlite_master WHERE name NOT LIKE '%resistance_mutation%' AND name NOT LIKE '%ref_amino_acid%' AND name NOT IN ('antibodies', 'compounds', 'articles');
 PRAGMA writable_schema = 0;
+DELETE FROM candidate_resistance_mutation_attributes;
+DELETE FROM candidate_resistance_mutation_articles;
 VACUUM;
 EOF

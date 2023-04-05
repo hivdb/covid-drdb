@@ -1277,6 +1277,31 @@ Table invivo_selection_results {
   }
 }
 
+Table candidate_resistance_mutation_attributes {
+  gene varchar [
+    ref: > G.gene,
+    note: 'Mutation gene'
+  ]
+  position int [
+    note: 'Position of this mutation'
+  ]
+  amino_acid amino_acid_enum [
+    note: 'Amino acid of this mutation'
+  ]
+  col_name varchar [
+    note: 'Attribute key of this DRM'
+  ]
+  col_value varchar [
+    note: 'Attribute value of this DRM'
+  ]
+
+  indexes {
+    (gene, position, amino_acid, col_name) [pk]
+  }
+
+  Note: 'Stores all attributes of all candidate resistance mutations'
+}
+
 Table resistance_mutation_attributes {
   gene varchar [
     ref: > G.gene,
@@ -1298,15 +1323,46 @@ Table resistance_mutation_attributes {
   indexes {
     (gene, position, amino_acid, col_name) [pk]
   }
+
+  Note: 'Stores all attributes of all resistance mutations'
+}
+
+Enum col_type_enum {
+  FOLD
+  FITNESS
+  INVIVO
+  INVITRO
+  PREVALENCE
+  POCKET
+  DMS
+}
+
+Table candidate_resistance_mutation_articles {
+  gene varchar [ref: > G.gene]
+  position int
+  amino_acid amino_acid_enum
+  ref_name varchar [ref: > R.ref_name]
+  col_type col_type_enum
+
+  indexes {
+    (gene, position, amino_acid, ref_name, col_type) [pk]
+  }
+
+  Note: 'Stores all references of all candidate resistance mutations'
 }
 
 Table resistance_mutation_articles {
   gene varchar [ref: > G.gene]
+  position int
+  amino_acid amino_acid_enum
   ref_name varchar [ref: > R.ref_name]
+  col_type col_type_enum
 
   indexes {
-    (gene, ref_name) [pk]
+    (gene, position, amino_acid, ref_name, col_type) [pk]
   }
+
+  Note: 'Stores all references of all resistance mutations'
 }
 
 Table resistance_mutations {

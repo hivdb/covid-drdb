@@ -638,6 +638,11 @@ UPDATE susc_results SET
 
 UPDATE susc_results S SET
   rx_type = CASE
+    WHEN S.potency_type = 'Kcat/Km' AND EXISTS (
+      SELECT 1 FROM assays A WHERE
+        S.assay_name = A.assay_name AND
+        A.virus_type = 'enzyme'
+    ) THEN 'enzyme-kinetics'
     WHEN EXISTS (
       SELECT 1 FROM rx_antibodies rxab WHERE
       S.ref_name = rxab.ref_name AND
@@ -676,11 +681,6 @@ UPDATE susc_results S SET
         )
       )
     ) THEN 'vacc-plasma'
-    WHEN S.potency_type = 'Kcat/Km' AND EXISTS (
-      SELECT 1 FROM assays A WHERE
-        S.assay_name = A.assay_name AND
-        A.virus_type = 'enzyme'
-    ) THEN 'enzyme-kinetics'
 
   END::rx_type_enum;
 

@@ -91,6 +91,8 @@ else
   fi
 
   prev_tag=$(gh release list --exclude-pre-releases --repo $REPO -L 1 | cut -d$'\t' -f3)
+  $GIT fetch --tags
+  $GIT fetch --shallow-since=$($GIT log --pretty=format:'%aI' $prev_tag -1)
   prev_commit=$($GIT rev-list -n 1 $prev_tag)
 
   title="COVID-DRDB $VERSION"

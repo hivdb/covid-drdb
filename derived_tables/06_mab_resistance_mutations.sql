@@ -7,7 +7,7 @@ SELECT ab_name, priority
     'AMU', 'ROM', 'ADI'
   ) OR ab_name IN ('C135', 'C144');
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   im.gene,
   position,
@@ -29,6 +29,7 @@ SELECT
     JOIN approved_mabs ab ON
       rxab.ab_name = ab.ab_name
     WHERE
+      s.rx_type = 'antibody' AND
       im.gene = 'S' AND
       ip.num_mutations = 1 AND
       (SELECT COUNT(*)
@@ -40,9 +41,9 @@ SELECT
   GROUP BY im.gene, position, amino_acid, col_name, priority
   ORDER BY im.gene, position, amino_acid, priority;
 
+INSERT INTO candidate_resistance_mutation_articles
 SELECT
-  im.gene, position, amino_acid, s.ref_name
-  INTO _drm_articles
+  im.gene, position, amino_acid, s.ref_name, 'FOLD'
   FROM isolate_mutations im
     JOIN susc_results s ON
       im.iso_name = s.iso_name
@@ -68,7 +69,7 @@ SELECT
       ) = 1
   GROUP BY im.gene, position, amino_acid, s.ref_name;
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
   'DMS:' || ab.ab_name AS col_name,
@@ -91,9 +92,9 @@ SELECT
   GROUP BY gene, position, amino_acid, col_name, priority
   ORDER BY gene, position, amino_acid, priority;
 
-INSERT INTO _drm_articles
+INSERT INTO candidate_resistance_mutation_articles
 SELECT
-  gene, position, amino_acid, dms.ref_name
+  gene, position, amino_acid, dms.ref_name, 'DMS'
   FROM dms_escape_results dms
     JOIN rx_antibodies rxab ON
       dms.ref_name=rxab.ref_name AND
@@ -112,7 +113,7 @@ SELECT
   GROUP BY gene, position, amino_acid, dms.ref_name
 ON CONFLICT DO NOTHING;
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
   'INVIVO' AS col_name,
@@ -124,9 +125,9 @@ SELECT
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
-INSERT INTO _drm_articles
+INSERT INTO candidate_resistance_mutation_articles
 SELECT
-  gene, position, amino_acid, ref_name
+  gene, position, amino_acid, ref_name, 'INVIVO'
   FROM invivo_selection_results sel
   WHERE
     gene = 'S' AND
@@ -134,7 +135,7 @@ SELECT
   GROUP BY gene, position, amino_acid, ref_name
 ON CONFLICT DO NOTHING;
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
   'INVITRO' AS col_name,
@@ -144,15 +145,15 @@ SELECT
   GROUP BY gene, position, amino_acid
   ORDER BY gene, position, amino_acid;
 
-INSERT INTO _drm_articles
+INSERT INTO candidate_resistance_mutation_articles
 SELECT
-  gene, position, amino_acid, ref_name
+  gene, position, amino_acid, ref_name, 'INVITRO'
   FROM invitro_selection_results
   WHERE gene = 'S' AND amino_acid != 'stop'
   GROUP BY gene, position, amino_acid, ref_name
 ON CONFLICT DO NOTHING;
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   gene, position, amino_acid,
   'PREVALENCE' AS col_name,
@@ -161,9 +162,9 @@ SELECT
   WHERE gene = 'S' AND ref_name = 'Martin21'
   ORDER BY gene, position, amino_acid;
 
-INSERT INTO _drm_articles
+INSERT INTO candidate_resistance_mutation_articles
 SELECT
-  gene, position, amino_acid, ref_name
+  gene, position, amino_acid, ref_name, 'PREVALENCE'
   FROM amino_acid_prevalence
   WHERE gene = 'S' AND ref_name = 'Martin21'
 ON CONFLICT DO NOTHING;
@@ -171,7 +172,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO resistance_mutations
 SELECT
   gene, position, amino_acid
-FROM resistance_mutation_attributes rma
+FROM candidate_resistance_mutation_attributes rma
   WHERE
     gene = 'S' AND (
       (col_name LIKE 'FOLD:%' AND
@@ -188,7 +189,7 @@ FROM resistance_mutation_attributes rma
     )
   GROUP BY gene, position, amino_acid;
 
-INSERT INTO resistance_mutation_attributes
+INSERT INTO candidate_resistance_mutation_attributes
 SELECT
   vc.gene, vc.position, vc.amino_acid,
   'VARCONS' AS col_name,
@@ -209,30 +210,4 @@ SELECT
   GROUP BY vc.gene, vc.position, vc.amino_acid, col_name, col_value
   ORDER BY vc.gene, vc.position, vc.amino_acid, col_name, col_value;
 
-DELETE FROM resistance_mutation_attributes rma
-  WHERE
-    gene = 'S' AND
-    NOT EXISTS (
-      SELECT 1 FROM resistance_mutations rm
-      WHERE
-        rm.gene = rma.gene AND
-        rm.position = rma.position AND
-        rm.amino_acid = rma.amino_acid
-    );
-
-DELETE FROM _drm_articles a
-  WHERE
-    NOT EXISTS (
-      SELECT 1 FROM resistance_mutations rm
-      WHERE
-        rm.gene = a.gene AND
-        rm.position = a.position AND
-        rm.amino_acid = a.amino_acid
-    );
-
-INSERT INTO resistance_mutation_articles
-  SELECT gene, ref_name FROM _drm_articles
-  GROUP BY gene, ref_name;
-
 DROP TABLE approved_mabs;
-DROP TABLE _drm_articles;
