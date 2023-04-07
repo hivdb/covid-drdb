@@ -213,6 +213,9 @@ Enum isolate_source_enum {
   Plasma
   Saliva
   Stool
+  Sputum
+  Throat
+  Urine
   Unknown
   Pending
 }
