@@ -6,3 +6,4 @@ local/
 build/
 docker-envfile
 .DS_Store
+__pycache__
