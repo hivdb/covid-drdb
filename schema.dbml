@@ -818,7 +818,7 @@ Table invitro_selection_results as Vitro {
   date_added date [not null]
 
   indexes {
-    (ref_name, rx_name, gene, position, amino_acid) [pk]
+    (ref_name, rx_name, backbone, gene, position, amino_acid) [pk]
   }
 }
 
