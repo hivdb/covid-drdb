@@ -182,14 +182,14 @@ SELECT
   'PREVALENCE' AS col_name,
   proportion AS col_value
   FROM amino_acid_prevalence
-  WHERE gene = '_3CLpro' AND ref_name = 'Martin21'
+  WHERE gene = '_3CLpro' AND ref_name = 'MproPrevalence'
   ORDER BY gene, position, amino_acid;
 
 INSERT INTO candidate_resistance_mutation_articles
 SELECT
   gene, position, amino_acid, ref_name, 'PREVALENCE'
   FROM amino_acid_prevalence
-  WHERE gene = '_3CLpro' AND ref_name = 'Martin21'
+  WHERE gene = '_3CLpro' AND ref_name = 'MproPrevalence'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO resistance_mutations
