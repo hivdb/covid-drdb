@@ -677,7 +677,6 @@ Enum potency_type_enum {
 }
 
 Enum potency_unit_enum {
-  "µg/ml"
   "ng/ml"
   "µM"
   "pM"
