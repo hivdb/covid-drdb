@@ -22,6 +22,9 @@ DO $$
   END
 $$;
 
+SELECT * FROM susc_results WHERE rx_type IS NULL;
+
+
 -- rx_type must not be NULL
 ALTER TABLE susc_results ALTER COLUMN rx_type SET NOT NULL;
 
